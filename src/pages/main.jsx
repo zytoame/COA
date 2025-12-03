@@ -3,7 +3,14 @@ import React, { useState, useRef } from 'react';
 // @ts-ignore;
 import { Button, Input, Card, CardContent, CardHeader, CardTitle, Badge, Table, TableBody, TableCell, TableHead, TableHeader, TableRow, Pagination, PaginationContent, PaginationEllipsis, PaginationItem, PaginationLink, PaginationNext, PaginationPrevious, Select, SelectContent, SelectItem, SelectTrigger, SelectValue, useToast } from '@/components/ui';
 // @ts-ignore;
-import { Search, Edit, RefreshCw, Download, Eye, Filter, FileText, AlertTriangle, CheckCircle, Clock, Shield, User, Calendar, PenTool, Loader2, X, Save, Calculator } from 'lucide-react';
+import { Search, Edit, RefreshCw, Download, Eye, Filter, FileText, AlertTriangle, CheckCircle, Clock, Shield, User, Calendar, PenTool, Loader2, X, Save, Calculator, ChevronDown, ChevronUp, Thermometer, Gauge, Timer, Activity, Package, XCircle, ExternalLink } from 'lucide-react';
+
+// 引入抽离的组件
+import { EditModal } from '@/components/EditModal';
+import { DetectionDataCard } from '@/components/DetectionDataCard';
+import { DetailModal } from '@/components/DetailModal';
+import { BatchAuditSection } from '@/components/BatchAuditSection';
+import { SignaturePad } from '@/components/SignaturePad';
 
 // 模拟合格报告数据（只有合格的层析柱才会生成报告）
 const mockQualifiedReports = [{
@@ -192,12 +199,12 @@ const mockUnqualifiedReports = [{
   finalConclusion: 'unqualified'
 }];
 
-// 模拟待审核层析柱数据（管理员专用）
+// 模拟待审核层析柱数据（从batch-audit迁移）
 const mockPendingColumns = [{
   id: 'COL-001',
-  workOrder: 'WO202501006',
-  columnSerial: 'COL-2025-006',
-  orderNumber: 'ORD-202501006',
+  workOrder: 'WO202501001',
+  columnSerial: 'COL-2025-001',
+  orderNumber: 'ORD-202501001',
   instrumentSerial: 'INST-001',
   columnName: 'Protein A Column',
   testType: '纯度检测',
@@ -206,253 +213,270 @@ const mockPendingColumns = [{
   不合格原因: '纯度低于标准值',
   operator: '张三',
   submitTime: '2025-01-15 14:30:00',
-  priority: 'high'
-}];
-
-// 编辑弹窗组件
-const EditModal = ({
-  report,
-  isOpen,
-  onClose,
-  onSave,
-  toast
-}) => {
-  const [editData, setEditData] = useState(null);
-  const [calculatedCV, setCalculatedCV] = useState(0);
-  const [isCalculating, setIsCalculating] = useState(false);
-
-  // 初始化编辑数据
-  React.useEffect(() => {
-    if (report && report.detectionData && report.detectionData.repeatabilityTest) {
-      const repeatabilityData = report.detectionData.repeatabilityTest;
-      if (repeatabilityData.testData) {
-        setEditData({
-          ...repeatabilityData,
-          testData: repeatabilityData.testData.map(test => ({
-            ...test
-          }))
-        });
-        calculateCV(repeatabilityData.testData);
-      }
+  priority: 'high',
+  // 详细检测数据
+  detectionData: {
+    moduleTemperature: {
+      standard: '25-40°C',
+      result: '38.5°C',
+      conclusion: 'pass',
+      icon: Thermometer
+    },
+    systemPressure: {
+      standard: '5.0-8.0 MPa',
+      result: '7.2 MPa',
+      conclusion: 'pass',
+      icon: Gauge
+    },
+    hbA1cAppearanceTime: {
+      standard: '36-40 秒',
+      result: '42.3 秒',
+      conclusion: 'fail',
+      icon: Timer
+    },
+    repeatabilityTest: {
+      standard: 'CV < 1.5%',
+      result: '1.8%',
+      conclusion: 'fail',
+      icon: Activity
+    },
+    appearanceInspection: {
+      standard: '包装完整，无明显损坏',
+      result: '包装轻微破损',
+      conclusion: 'fail',
+      icon: Package
     }
-  }, [report]);
-
-  // 计算CV值
-  const calculateCV = testData => {
-    if (!testData || testData.length === 0) return;
-    setIsCalculating(true);
-    setTimeout(() => {
-      const values = testData.map(test => parseFloat(test.value));
-      const mean = values.reduce((sum, val) => sum + val, 0) / values.length;
-      const variance = values.reduce((sum, val) => sum + Math.pow(val - mean, 2), 0) / values.length;
-      const stdDev = Math.sqrt(variance);
-      const cv = stdDev / mean * 100;
-      setCalculatedCV(cv);
-      setIsCalculating(false);
-    }, 300);
-  };
-
-  // 更新测试值
-  const updateTestValue = (testId, newValue) => {
-    if (!editData) return;
-    const updatedTestData = editData.testData.map(test => test.id === testId ? {
-      ...test,
-      value: newValue
-    } : test);
-    setEditData({
-      ...editData,
-      testData: updatedTestData
-    });
-    calculateCV(updatedTestData);
-  };
-
-  // 保存修改
-  const handleSave = () => {
-    if (!editData || !report) return;
-
-    // 检查CV值是否合格
-    const isQualified = calculatedCV < 1.5;
-
-    // 更新报告数据
-    const updatedReport = {
-      ...report,
-      detectionData: {
-        ...report.detectionData,
-        repeatabilityTest: {
-          ...report.detectionData.repeatabilityTest,
-          result: `${calculatedCV.toFixed(2)}%`,
-          conclusion: isQualified ? 'pass' : 'fail',
-          testData: editData.testData
-        }
-      },
-      finalConclusion: isQualified ? 'qualified' : 'unqualified',
-      不合格原因: isQualified ? '' : 'CV值超标'
-    };
-    onSave(updatedReport);
-    onClose();
-    toast({
-      title: "保存成功",
-      description: `CV值已更新为 ${calculatedCV.toFixed(2)}%，${isQualified ? '报告已合格' : '报告仍不合格'}`,
-      variant: isQualified ? "default" : "destructive"
-    });
-  };
-  if (!isOpen || !report || !editData) return null;
-  return <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-      <div className="bg-white rounded-lg w-full max-w-3xl max-h-[90vh] overflow-y-auto">
-        <div className="sticky top-0 bg-white border-b border-gray-200 px-6 py-4">
-          <div className="flex items-center justify-between">
-            <h2 className="text-xl font-semibold">编辑重复性测试数据</h2>
-            <Button variant="outline" size="sm" onClick={onClose} className="h-8 w-8 p-0">
-              <X className="w-4 h-4" />
-            </Button>
-          </div>
-        </div>
-
-        <div className="p-6 space-y-6">
-          {/* 基本信息 */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="text-lg">报告信息</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-                <div>
-                  <span className="text-sm text-gray-500">报告编号</span>
-                  <p className="font-medium">{report.id}</p>
-                </div>
-                <div>
-                  <span className="text-sm text-gray-500">层析柱序列号</span>
-                  <p className="font-medium">{report.columnSerial}</p>
-                </div>
-                <div>
-                  <span className="text-sm text-gray-500">不合格项目</span>
-                  <p className="font-medium">{report.不合格项目}</p>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-
-          {/* CV值计算结果 */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="text-lg flex items-center gap-2">
-                <Calculator className="w-5 h-5" />
-                CV值计算结果
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="flex items-center justify-between">
-                <div>
-                  <span className="text-sm text-gray-500">标准值</span>
-                  <p className="text-lg font-medium">CV &lt; 1.5%</p>
-                </div>
-                <div className="text-center">
-                  <span className="text-sm text-gray-500">当前CV值</span>
-                  <p className={`text-2xl font-bold ${calculatedCV < 1.5 ? 'text-green-600' : 'text-red-600'}`}>
-                    {isCalculating ? <Loader2 className="w-6 h-6 animate-spin inline" /> : `${calculatedCV.toFixed(2)}%`}
-                  </p>
-                </div>
-                <div>
-                  <span className="text-sm text-gray-500">结论</span>
-                  <p className="text-lg font-medium">
-                    {calculatedCV < 1.5 ? <Badge variant="default" className="bg-green-100 text-green-800 border-green-200">合格</Badge> : <Badge variant="destructive">不合格</Badge>}
-                  </p>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-
-          {/* 重复性测试数据编辑 */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="text-lg">重复性测试数据</CardTitle>
-              <p className="text-sm text-gray-500">修改测试值后系统将自动重新计算CV值</p>
-            </CardHeader>
-            <CardContent>
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>序号</TableHead>
-                    <TableHead>测试时间</TableHead>
-                    <TableHead>测试值</TableHead>
-                    <TableHead>单位</TableHead>
-                    <TableHead>操作</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {editData.testData.map((test, index) => <TableRow key={test.id}>
-                      <TableCell>{index + 1}</TableCell>
-                      <TableCell>{test.time}</TableCell>
-                      <TableCell>
-                        <Input type="number" step="0.1" value={test.value} onChange={e => updateTestValue(test.id, e.target.value)} className="w-24" />
-                      </TableCell>
-                      <TableCell>{test.unit}</TableCell>
-                      <TableCell>
-                        <Button size="sm" variant="outline" onClick={() => {
-                      const newValue = prompt('请输入新的测试值:', test.value);
-                      if (newValue && !isNaN(newValue)) {
-                        updateTestValue(test.id, parseFloat(newValue));
-                      }
-                    }}>
-                          <Edit className="w-4 h-4" />
-                        </Button>
-                      </TableCell>
-                    </TableRow>)}
-                </TableBody>
-              </Table>
-            </CardContent>
-          </Card>
-
-          {/* 统计信息 */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="text-lg">统计信息</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                <div>
-                  <span className="text-sm text-gray-500">平均值</span>
-                  <p className="font-medium">
-                    {(editData.testData.reduce((sum, test) => sum + parseFloat(test.value), 0) / editData.testData.length).toFixed(2)}
-                  </p>
-                </div>
-                <div>
-                  <span className="text-sm text-gray-500">最大值</span>
-                  <p className="font-medium">
-                    {Math.max(...editData.testData.map(test => parseFloat(test.value))).toFixed(2)}
-                  </p>
-                </div>
-                <div>
-                  <span className="text-sm text-gray-500">最小值</span>
-                  <p className="font-medium">
-                    {Math.min(...editData.testData.map(test => parseFloat(test.value))).toFixed(2)}
-                  </p>
-                </div>
-                <div>
-                  <span className="text-sm text-gray-500">极差</span>
-                  <p className="font-medium">
-                    {(Math.max(...editData.testData.map(test => parseFloat(test.value))) - Math.min(...editData.testData.map(test => parseFloat(test.value)))).toFixed(2)}
-                  </p>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        </div>
-
-        <div className="sticky bottom-0 bg-white border-t border-gray-200 px-6 py-4">
-          <div className="flex justify-end space-x-2">
-            <Button variant="outline" onClick={onClose}>
-              取消
-            </Button>
-            <Button onClick={handleSave} className="bg-blue-600 hover:bg-blue-700">
-              <Save className="w-4 h-4 mr-2" />
-              保存修改
-            </Button>
-          </div>
-        </div>
-      </div>
-    </div>;
-};
+  },
+  finalConclusion: 'unqualified',
+  // 操作历史
+  operationHistory: [{
+    time: '2025-01-15 14:30:00',
+    operator: '张三',
+    action: '提交检测',
+    remark: '完成所有检测项目'
+  }, {
+    time: '2025-01-15 15:00:00',
+    operator: '系统',
+    action: '自动判定',
+    remark: '检测结果显示不合格'
+  }]
+}, {
+  id: 'COL-002',
+  workOrder: 'WO202501002',
+  columnSerial: 'COL-2025-002',
+  orderNumber: 'ORD-202501002',
+  instrumentSerial: 'INST-002',
+  columnName: 'Ion Exchange Column',
+  testType: 'pH值检测',
+  testDate: '2025-01-14',
+  testResult: '不合格',
+  不合格原因: 'pH值超出范围',
+  operator: '李四',
+  submitTime: '2025-01-14 16:45:00',
+  priority: 'medium',
+  // 详细检测数据
+  detectionData: {
+    moduleTemperature: {
+      standard: '25-40°C',
+      result: '35.2°C',
+      conclusion: 'pass',
+      icon: Thermometer
+    },
+    systemPressure: {
+      standard: '5.0-8.0 MPa',
+      result: '6.8 MPa',
+      conclusion: 'pass',
+      icon: Gauge
+    },
+    hbA1cAppearanceTime: {
+      standard: '36-40 秒',
+      result: '38.1 秒',
+      conclusion: 'pass',
+      icon: Timer
+    },
+    repeatabilityTest: {
+      standard: 'CV < 1.5%',
+      result: '1.2%',
+      conclusion: 'pass',
+      icon: Activity
+    },
+    appearanceInspection: {
+      standard: '包装完整，无明显损坏',
+      result: '包装完好',
+      conclusion: 'pass',
+      icon: Package
+    }
+  },
+  finalConclusion: 'qualified',
+  operationHistory: [{
+    time: '2025-01-14 16:45:00',
+    operator: '李四',
+    action: '提交检测',
+    remark: '完成pH值检测'
+  }]
+}, {
+  id: 'COL-003',
+  workOrder: 'WO202501003',
+  columnSerial: 'COL-2025-003',
+  orderNumber: 'ORD-202501003',
+  instrumentSerial: 'INST-001',
+  columnName: 'Gel Filtration Column',
+  testType: '杂质含量',
+  testDate: '2025-01-13',
+  testResult: '不合格',
+  不合格原因: '杂质含量超标',
+  operator: '王五',
+  submitTime: '2025-01-13 11:20:00',
+  priority: 'low',
+  // 详细检测数据
+  detectionData: {
+    moduleTemperature: {
+      standard: '25-40°C',
+      result: '32.1°C',
+      conclusion: 'pass',
+      icon: Thermometer
+    },
+    systemPressure: {
+      standard: '5.0-8.0 MPa',
+      result: '5.5 MPa',
+      conclusion: 'pass',
+      icon: Gauge
+    },
+    hbA1cAppearanceTime: {
+      standard: '36-40 秒',
+      result: '39.8 秒',
+      conclusion: 'pass',
+      icon: Timer
+    },
+    repeatabilityTest: {
+      standard: 'CV < 1.5%',
+      result: '2.1%',
+      conclusion: 'fail',
+      icon: Activity
+    },
+    appearanceInspection: {
+      standard: '包装完整，无明显损坏',
+      result: '密封塞松动',
+      conclusion: 'fail',
+      icon: Package
+    }
+  },
+  finalConclusion: 'unqualified',
+  operationHistory: [{
+    time: '2025-01-13 11:20:00',
+    operator: '王五',
+    action: '提交检测',
+    remark: '完成杂质含量检测'
+  }]
+}, {
+  id: 'COL-004',
+  workOrder: 'WO202501004',
+  columnSerial: 'COL-2025-004',
+  orderNumber: 'ORD-202501004',
+  instrumentSerial: 'INST-003',
+  columnName: 'Affinity Column',
+  testType: '溶解度测试',
+  testDate: '2025-01-12',
+  testResult: '不合格',
+  不合格原因: '溶解度不达标',
+  operator: '赵六',
+  submitTime: '2025-01-12 09:15:00',
+  priority: 'high',
+  // 详细检测数据
+  detectionData: {
+    moduleTemperature: {
+      standard: '25-40°C',
+      result: '29.7°C',
+      conclusion: 'pass',
+      icon: Thermometer
+    },
+    systemPressure: {
+      standard: '5.0-8.0 MPa',
+      result: '7.8 MPa',
+      conclusion: 'pass',
+      icon: Gauge
+    },
+    hbA1cAppearanceTime: {
+      standard: '36-40 秒',
+      result: '35.2 秒',
+      conclusion: 'fail',
+      icon: Timer
+    },
+    repeatabilityTest: {
+      standard: 'CV < 1.5%',
+      result: '0.9%',
+      conclusion: 'pass',
+      icon: Activity
+    },
+    appearanceInspection: {
+      standard: '包装完整，无明显损坏',
+      result: '包装完好',
+      conclusion: 'pass',
+      icon: Package
+    }
+  },
+  finalConclusion: 'unqualified',
+  operationHistory: [{
+    time: '2025-01-12 09:15:00',
+    operator: '赵六',
+    action: '提交检测',
+    remark: '完成溶解度测试'
+  }]
+}, {
+  id: 'COL-005',
+  workOrder: 'WO202501005',
+  columnSerial: 'COL-2025-005',
+  orderNumber: 'ORD-202501005',
+  instrumentSerial: 'INST-002',
+  columnName: 'HPLC Column',
+  testType: '稳定性测试',
+  testDate: '2025-01-11',
+  testResult: '不合格',
+  不合格原因: '稳定性时间不足',
+  operator: '张三',
+  submitTime: '2025-01-11 15:30:00',
+  priority: 'medium',
+  // 详细检测数据
+  detectionData: {
+    moduleTemperature: {
+      standard: '25-40°C',
+      result: '36.8°C',
+      conclusion: 'pass',
+      icon: Thermometer
+    },
+    systemPressure: {
+      standard: '5.0-8.0 MPa',
+      result: '6.2 MPa',
+      conclusion: 'pass',
+      icon: Gauge
+    },
+    hbA1cAppearanceTime: {
+      standard: '36-40 秒',
+      result: '37.5 秒',
+      conclusion: 'pass',
+      icon: Timer
+    },
+    repeatabilityTest: {
+      standard: 'CV < 1.5%',
+      result: '1.6%',
+      conclusion: 'fail',
+      icon: Activity
+    },
+    appearanceInspection: {
+      standard: '包装完整，无明显损坏',
+      result: '包装完好',
+      conclusion: 'pass',
+      icon: Package
+    }
+  },
+  finalConclusion: 'unqualified',
+  operationHistory: [{
+    time: '2025-01-11 15:30:00',
+    operator: '张三',
+    action: '提交检测',
+    remark: '完成稳定性测试'
+  }]
+}];
 export default function MainPage(props) {
   const {
     $w,
@@ -461,8 +485,6 @@ export default function MainPage(props) {
   const {
     toast
   } = useToast();
-  const canvasRef = useRef(null);
-  const [isDrawing, setIsDrawing] = useState(false);
 
   // 当前用户信息
   const currentUser = {
@@ -487,6 +509,11 @@ export default function MainPage(props) {
   // 编辑相关状态
   const [showEditModal, setShowEditModal] = useState(false);
   const [editingReport, setEditingReport] = useState(null);
+
+  // 批量审核相关状态（从batch-audit迁移）
+  const [expandedColumns, setExpandedColumns] = useState(new Set());
+  const [showDetailModal, setShowDetailModal] = useState(false);
+  const [selectedColumn, setSelectedColumn] = useState(null);
 
   // 客户状态
   const [qualifiedReports, setQualifiedReports] = useState(mockQualifiedReports);
@@ -513,7 +540,7 @@ export default function MainPage(props) {
     dateRange: 'all'
   });
 
-  // 待审核搜索条件
+  // 待审核搜索条件（从batch-audit迁移）
   const [auditSearchParams, setAuditSearchParams] = useState({
     workOrder: '',
     columnSerial: '',
@@ -681,52 +708,6 @@ export default function MainPage(props) {
     return <Badge variant={config.color}>{config.label}</Badge>;
   };
 
-  // 获取优先级标签
-  const getPriorityBadge = priority => {
-    const priorityConfig = {
-      high: {
-        label: '高',
-        color: 'destructive'
-      },
-      medium: {
-        label: '中',
-        color: 'secondary'
-      },
-      low: {
-        label: '低',
-        color: 'outline'
-      }
-    };
-    const config = priorityConfig[priority] || priorityConfig.medium;
-    return <Badge variant={config.color}>{config.label}</Badge>;
-  };
-
-  // 签名板功能
-  const startDrawing = e => {
-    setIsDrawing(true);
-    const canvas = canvasRef.current;
-    const rect = canvas.getBoundingClientRect();
-    const ctx = canvas.getContext('2d');
-    ctx.beginPath();
-    ctx.moveTo(e.clientX - rect.left, e.clientY - rect.top);
-  };
-  const draw = e => {
-    if (!isDrawing) return;
-    const canvas = canvasRef.current;
-    const rect = canvas.getBoundingClientRect();
-    const ctx = canvas.getContext('2d');
-    ctx.lineTo(e.clientX - rect.left, e.clientY - rect.top);
-    ctx.stroke();
-  };
-  const stopDrawing = () => {
-    setIsDrawing(false);
-  };
-  const clearSignature = () => {
-    const canvas = canvasRef.current;
-    const ctx = canvas.getContext('2d');
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
-  };
-
   // 批量审核
   const handleBatchAudit = () => {
     if (selectedColumns.length === 0) {
@@ -742,15 +723,6 @@ export default function MainPage(props) {
 
   // 确认审核
   const confirmAudit = async () => {
-    const canvas = canvasRef.current;
-    if (isCanvasEmpty(canvas)) {
-      toast({
-        title: "请签名",
-        description: "请在签名板上签名确认",
-        variant: "destructive"
-      });
-      return;
-    }
     setSigning(true);
     try {
       await new Promise(resolve => setTimeout(resolve, 2000));
@@ -763,7 +735,6 @@ export default function MainPage(props) {
         description: `已${auditAction === 'approve' ? '通过' : '拒绝'} ${selectedColumns.length} 个层析柱的审核`
       });
       setShowSignaturePad(false);
-      clearSignature();
       setAuditComment('');
     } catch (error) {
       toast({
@@ -776,14 +747,82 @@ export default function MainPage(props) {
     }
   };
 
-  // 检查画布是否为空
-  const isCanvasEmpty = canvas => {
-    const ctx = canvas.getContext('2d');
-    const pixelData = ctx.getImageData(0, 0, canvas.width, canvas.height).data;
-    for (let i = 3; i < pixelData.length; i += 4) {
-      if (pixelData[i] !== 0) return false;
+  // 批量审核相关功能（从batch-audit迁移）
+  // 搜索功能
+  const handleAuditSearch = () => {
+    const filtered = pendingColumns.filter(column => {
+      return (!auditSearchParams.workOrder || column.workOrder.toLowerCase().includes(auditSearchParams.workOrder.toLowerCase())) && (!auditSearchParams.columnSerial || column.columnSerial.toLowerCase().includes(auditSearchParams.columnSerial.toLowerCase())) && (!auditSearchParams.orderNumber || column.orderNumber.toLowerCase().includes(auditSearchParams.orderNumber.toLowerCase())) && (!auditSearchParams.instrumentSerial || column.instrumentSerial.toLowerCase().includes(auditSearchParams.instrumentSerial.toLowerCase())) && (auditSearchParams.testType === 'all' || column.testType === auditSearchParams.testType) && (auditSearchParams.priority === 'all' || column.priority === auditSearchParams.priority);
+    });
+    setFilteredPendingColumns(filtered);
+    toast({
+      title: "查询完成",
+      description: `找到 ${filtered.length} 条待审核记录`
+    });
+  };
+
+  // 重置搜索
+  const handleAuditReset = () => {
+    setAuditSearchParams({
+      workOrder: '',
+      columnSerial: '',
+      orderNumber: '',
+      instrumentSerial: '',
+      testType: 'all',
+      priority: 'all'
+    });
+    setFilteredPendingColumns(pendingColumns);
+  };
+
+  // 批量选择
+  const handleSelectAll = checked => {
+    if (checked) {
+      setSelectedColumns(filteredPendingColumns.map(column => column.id));
+    } else {
+      setSelectedColumns([]);
     }
-    return true;
+  };
+
+  // 单个选择
+  const handleSelectColumn = columnId => {
+    if (selectedColumns.includes(columnId)) {
+      setSelectedColumns(selectedColumns.filter(id => id !== columnId));
+    } else {
+      setSelectedColumns([...selectedColumns, columnId]);
+    }
+  };
+
+  // 切换检测数据展开状态
+  const toggleExpanded = columnId => {
+    const newExpanded = new Set(expandedColumns);
+    if (newExpanded.has(columnId)) {
+      newExpanded.delete(columnId);
+    } else {
+      newExpanded.add(columnId);
+    }
+    setExpandedColumns(newExpanded);
+  };
+
+  // 查看详情
+  const handleViewDetail = columnId => {
+    const column = pendingColumns.find(c => c.id === columnId);
+    if (column) {
+      setSelectedColumn(column);
+      setShowDetailModal(true);
+    }
+  };
+
+  // 关闭详情弹窗
+  const handleCloseDetailModal = () => {
+    setShowDetailModal(false);
+    setSelectedColumn(null);
+  };
+
+  // 跳转到batch-audit页面
+  const handleGoToBatchAudit = () => {
+    $w.utils.navigateTo({
+      pageId: 'batch-audit',
+      params: {}
+    });
   };
 
   // 当前页数据
@@ -1148,284 +1187,15 @@ export default function MainPage(props) {
               </Card>
             </div>}
 
-          {/* 批量审核签字 */}
-          {activeTab === 'audit' && <div>
-              <Card className="mb-6">
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <Search className="w-5 h-5" />
-                    查询条件
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-4">
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">工单号</label>
-                      <Input placeholder="请输入工单号" value={auditSearchParams.workOrder} onChange={e => setAuditSearchParams({
-                    ...auditSearchParams,
-                    workOrder: e.target.value
-                  })} />
-                    </div>
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">层析柱序列号</label>
-                      <Input placeholder="请输入层析柱序列号" value={auditSearchParams.columnSerial} onChange={e => setAuditSearchParams({
-                    ...auditSearchParams,
-                    columnSerial: e.target.value
-                  })} />
-                    </div>
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">订单号</label>
-                      <Input placeholder="请输入订单号" value={auditSearchParams.orderNumber} onChange={e => setAuditSearchParams({
-                    ...auditSearchParams,
-                    orderNumber: e.target.value
-                  })} />
-                    </div>
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">仪器序列号</label>
-                      <Input placeholder="请输入仪器序列号" value={auditSearchParams.instrumentSerial} onChange={e => setAuditSearchParams({
-                    ...auditSearchParams,
-                    instrumentSerial: e.target.value
-                  })} />
-                    </div>
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">检测类型</label>
-                      <Select value={auditSearchParams.testType} onValueChange={value => setAuditSearchParams({
-                    ...auditSearchParams,
-                    testType: value
-                  })}>
-                        <SelectTrigger>
-                          <SelectValue placeholder="选择检测类型" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="all">全部类型</SelectItem>
-                          <SelectItem value="纯度检测">纯度检测</SelectItem>
-                          <SelectItem value="pH值检测">pH值检测</SelectItem>
-                          <SelectItem value="杂质含量">杂质含量</SelectItem>
-                          <SelectItem value="溶解度测试">溶解度测试</SelectItem>
-                          <SelectItem value="稳定性测试">稳定性测试</SelectItem>
-                        </SelectContent>
-                      </Select>
-                    </div>
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">优先级</label>
-                      <Select value={auditSearchParams.priority} onValueChange={value => setAuditSearchParams({
-                    ...auditSearchParams,
-                    priority: value
-                  })}>
-                        <SelectTrigger>
-                          <SelectValue placeholder="选择优先级" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="all">全部优先级</SelectItem>
-                          <SelectItem value="high">高</SelectItem>
-                          <SelectItem value="medium">中</SelectItem>
-                          <SelectItem value="low">低</SelectItem>
-                        </SelectContent>
-                      </Select>
-                    </div>
-                  </div>
-                  <div className="flex space-x-2">
-                    <Button onClick={handleAdminSearch} className="bg-blue-600 hover:bg-blue-700">
-                      <Search className="w-4 h-4 mr-2" />
-                      查询
-                    </Button>
-                    <Button variant="outline" onClick={() => {
-                  setAuditSearchParams({
-                    workOrder: '',
-                    columnSerial: '',
-                    orderNumber: '',
-                    instrumentSerial: '',
-                    testType: 'all',
-                    priority: 'all'
-                  });
-                  setFilteredPendingColumns(pendingColumns);
-                }}>
-                      重置
-                    </Button>
-                  </div>
-                </CardContent>
-              </Card>
-
-              {/* 操作区域 */}
-              <div className="flex items-center justify-between mb-4">
-                <div className="flex items-center space-x-2">
-                  <Button onClick={handleBatchAudit} disabled={selectedColumns.length === 0} className="bg-green-600 hover:bg-green-700">
-                    <CheckCircle className="w-4 h-4 mr-2" />
-                    批量审核 ({selectedColumns.length})
-                  </Button>
-                </div>
-                <div className="text-sm text-gray-500">
-                  共 {filteredPendingColumns.length} 条待审核记录
-                </div>
-              </div>
-
-              {/* 待审核列表 */}
-              <Card>
-                <CardContent className="p-0">
-                  <Table>
-                    <TableHeader>
-                      <TableRow>
-                        <TableHead className="w-12">
-                          <input type="checkbox" onChange={e => {
-                        if (e.target.checked) {
-                          setSelectedColumns(filteredPendingColumns.map(column => column.id));
-                        } else {
-                          setSelectedColumns([]);
-                        }
-                      }} checked={selectedColumns.length === filteredPendingColumns.length && filteredPendingColumns.length > 0} className="rounded border-gray-300" />
-                        </TableHead>
-                        <TableHead>层析柱编号</TableHead>
-                        <TableHead>工单号</TableHead>
-                        <TableHead>层析柱名称</TableHead>
-                        <TableHead>检测类型</TableHead>
-                        <TableHead>检测日期</TableHead>
-                        <TableHead>操作员</TableHead>
-                        <TableHead>优先级</TableHead>
-                        <TableHead>提交时间</TableHead>
-                      </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                      {filteredPendingColumns.map(column => <TableRow key={column.id} className="hover:bg-gray-50">
-                          <TableCell>
-                            <input type="checkbox" checked={selectedColumns.includes(column.id)} onChange={() => {
-                        if (selectedColumns.includes(column.id)) {
-                          setSelectedColumns(selectedColumns.filter(id => id !== column.id));
-                        } else {
-                          setSelectedColumns([...selectedColumns, column.id]);
-                        }
-                      }} className="rounded border-gray-300" />
-                          </TableCell>
-                          <TableCell className="font-medium">{column.columnSerial}</TableCell>
-                          <TableCell>{column.workOrder}</TableCell>
-                          <TableCell>
-                            <div className="max-w-32">
-                              <div className="truncate" title={column.columnName}>
-                                {column.columnName}
-                              </div>
-                              <div className="text-xs text-gray-500">
-                                {column.orderNumber}
-                              </div>
-                            </div>
-                          </TableCell>
-                          <TableCell>{column.testType}</TableCell>
-                          <TableCell>{column.testDate}</TableCell>
-                          <TableCell>
-                            <div className="flex items-center gap-1">
-                              <User className="w-4 h-4 text-gray-400" />
-                              {column.operator}
-                            </div>
-                          </TableCell>
-                          <TableCell>{getPriorityBadge(column.priority)}</TableCell>
-                          <TableCell>
-                            <div className="flex items-center gap-1">
-                              <Clock className="w-4 h-4 text-gray-400" />
-                              {column.submitTime}
-                            </div>
-                          </TableCell>
-                        </TableRow>)}
-                    </TableBody>
-                  </Table>
-                </CardContent>
-              </Card>
-            </div>}
+          {/* 批量审核签字 - 使用抽离的组件 */}
+          {activeTab === 'audit' && <BatchAuditSection auditSearchParams={auditSearchParams} setAuditSearchParams={setAuditSearchParams} filteredPendingColumns={filteredPendingColumns} pendingColumns={pendingColumns} selectedColumns={selectedColumns} setSelectedColumns={setSelectedColumns} expandedColumns={expandedColumns} setExpandedColumns={setExpandedColumns} showDetailModal={showDetailModal} setShowDetailModal={setShowDetailModal} selectedColumn={selectedColumn} setSelectedColumn={setSelectedColumn} onGoToBatchAudit={handleGoToBatchAudit} onBatchAudit={handleBatchAudit} onAuditSearch={handleAuditSearch} onAuditReset={handleAuditReset} onSelectAll={handleSelectAll} onSelectColumn={handleSelectColumn} onToggleExpanded={toggleExpanded} onViewDetail={handleViewDetail} onCloseDetailModal={handleCloseDetailModal} />}
         </div>
 
-        {/* 分页 */}
-        {totalPages > 1 && <div className="px-6 pb-6">
-            <Pagination>
-              <PaginationContent>
-                <PaginationItem>
-                  <PaginationPrevious onClick={() => setCurrentPage(Math.max(1, currentPage - 1))} className={currentPage === 1 ? 'pointer-events-none opacity-50' : 'cursor-pointer'} />
-                </PaginationItem>
-                {[...Array(totalPages)].map((_, index) => <PaginationItem key={index + 1}>
-                    <PaginationLink onClick={() => setCurrentPage(index + 1)} isActive={currentPage === index + 1} className="cursor-pointer">
-                      {index + 1}
-                    </PaginationLink>
-                  </PaginationItem>)}
-                <PaginationItem>
-                  <PaginationNext onClick={() => setCurrentPage(Math.min(totalPages, currentPage + 1))} className={currentPage === totalPages ? 'pointer-events-none opacity-50' : 'cursor-pointer'} />
-                </PaginationItem>
-              </PaginationContent>
-            </Pagination>
-          </div>}
-
-        {/* 签名弹窗 */}
-        {showSignaturePad && <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-            <div className="bg-white rounded-lg p-6 w-full max-w-2xl">
-              <div className="flex items-center justify-between mb-4">
-                <h3 className="text-lg font-semibold">电子签字确认</h3>
-                <Button variant="outline" size="sm" onClick={() => setShowSignaturePad(false)}>
-                  ×
-                </Button>
-              </div>
-
-              <div className="space-y-4">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">审核操作</label>
-                  <Select value={auditAction} onValueChange={setAuditAction}>
-                    <SelectTrigger>
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="approve">通过审核</SelectItem>
-                      <SelectItem value="reject">拒绝审核</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">审核意见</label>
-                  <textarea value={auditComment} onChange={e => setAuditComment(e.target.value)} placeholder="请输入审核意见..." className="w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500" rows={3} />
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">电子签名</label>
-                  <div className="border-2 border-dashed border-gray-300 rounded-lg p-2">
-                    <canvas ref={canvasRef} width={600} height={200} className="border border-gray-200 rounded cursor-crosshair bg-white" onMouseDown={startDrawing} onMouseMove={draw} onMouseUp={stopDrawing} onMouseLeave={stopDrawing} />
-                  </div>
-                  <div className="flex justify-between mt-2">
-                    <p className="text-sm text-gray-500">请在上方区域签名</p>
-                    <Button variant="outline" size="sm" onClick={clearSignature}>
-                      清除签名
-                    </Button>
-                  </div>
-                </div>
-
-                <div className="bg-gray-50 p-4 rounded-lg">
-                  <p className="text-sm text-gray-600">
-                    即将{auditAction === 'approve' ? '通过' : '拒绝'} <span className="font-semibold text-blue-600">{selectedColumns.length}</span> 个层析柱的审核
-                  </p>
-                  <p className="text-sm text-gray-600">
-                    审核人: <span className="font-semibold">{currentUser.name}</span>
-                  </p>
-                  <p className="text-sm text-gray-600">
-                    审核时间: <span className="font-semibold">{new Date().toLocaleString('zh-CN')}</span>
-                  </p>
-                </div>
-
-                <div className="flex justify-end space-x-2">
-                  <Button variant="outline" onClick={() => setShowSignaturePad(false)}>
-                    取消
-                  </Button>
-                  <Button onClick={confirmAudit} disabled={signing} className={auditAction === 'approve' ? 'bg-green-600 hover:bg-green-700' : 'bg-red-600 hover:bg-red-700'}>
-                    {signing ? <>
-                        <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                        处理中...
-                      </> : <>
-                        <PenTool className="w-4 h-4 mr-2" />
-                        确认{auditAction === 'approve' ? '通过' : '拒绝'}
-                      </>}
-                  </Button>
-                </div>
-              </div>
-            </div>
-          </div>}
-
         {/* 编辑弹窗 */}
-        <EditModal report={editingReport} isOpen={showEditModal} onClose={() => {
-        setShowEditModal(false);
-        setEditingReport(null);
-      }} onSave={handleSaveEditedReport} toast={toast} />
+        <EditModal report={editingReport} isOpen={showEditModal} onClose={() => setShowEditModal(false)} onSave={handleSaveEditedReport} toast={toast} />
+
+        {/* 签名板 */}
+        <SignaturePad showSignaturePad={showSignaturePad} setShowSignaturePad={setShowSignaturePad} signing={signing} setSigning={setSigning} auditComment={auditComment} setAuditComment={setAuditComment} auditAction={auditAction} setAuditAction={setAuditAction} onConfirmAudit={confirmAudit} selectedColumns={selectedColumns} />
       </div>;
   }
 
@@ -1437,7 +1207,7 @@ export default function MainPage(props) {
           <div className="flex items-center space-x-4">
             <FileText className="w-8 h-8 text-blue-600" />
             <div>
-              <h1 className="text-2xl font-bold text-gray-900">报告查询</h1>
+              <h1 className="text-2xl font-bold text-gray-900">报告查询系统</h1>
               <p className="text-sm text-gray-500">欢迎回来，{currentUser.name}</p>
             </div>
           </div>
@@ -1451,19 +1221,7 @@ export default function MainPage(props) {
       </div>
 
       <div className="p-6">
-        {/* 权限提示 */}
-        <Card className="mb-6 bg-blue-50 border-blue-200">
-          <CardContent className="pt-6">
-            <div className="flex items-center space-x-2">
-              <FileText className="w-5 h-5 text-blue-600" />
-              <p className="text-sm text-blue-800">
-                您正在以客户身份访问报告查询系统，可以查看和下载合格的层析柱报告。
-              </p>
-            </div>
-          </CardContent>
-        </Card>
-
-        {/* 查询条件 */}
+        {/* 搜索区域 */}
         <Card className="mb-6">
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
@@ -1566,7 +1324,7 @@ export default function MainPage(props) {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {filteredQualifiedReports.map(report => <TableRow key={report.id} className="hover:bg-gray-50">
+                {qualifiedReports.map(report => <TableRow key={report.id} className="hover:bg-gray-50">
                     <TableCell className="font-medium">{report.id}</TableCell>
                     <TableCell>
                       <div className="max-w-48">
@@ -1600,15 +1358,6 @@ export default function MainPage(props) {
             </Table>
           </CardContent>
         </Card>
-
-        {/* 空状态 */}
-        {filteredQualifiedReports.length === 0 && <Card className="text-center py-12">
-            <CardContent>
-              <FileText className="w-16 h-16 text-gray-300 mx-auto mb-4" />
-              <h3 className="text-lg font-medium text-gray-900 mb-2">暂无报告</h3>
-              <p className="text-gray-500 mb-4">请输入查询条件并生成报告</p>
-            </CardContent>
-          </Card>}
       </div>
     </div>;
 }
