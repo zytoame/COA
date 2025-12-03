@@ -3,7 +3,7 @@ import React, { useState, useRef } from 'react';
 // @ts-ignore;
 import { Button, Input, Card, CardContent, CardHeader, CardTitle, Badge, Table, TableBody, TableCell, TableHead, TableHeader, TableRow, Pagination, PaginationContent, PaginationEllipsis, PaginationItem, PaginationLink, PaginationNext, PaginationPrevious, Select, SelectContent, SelectItem, SelectTrigger, SelectValue, useToast } from '@/components/ui';
 // @ts-ignore;
-import { Search, Edit, RefreshCw, Download, Eye, Filter, FileText, AlertTriangle, CheckCircle, Clock, Shield, User, Calendar, PenTool, Loader2 } from 'lucide-react';
+import { Search, Edit, RefreshCw, Download, Eye, Filter, FileText, AlertTriangle, CheckCircle, Clock, Shield, User, Calendar, PenTool, Loader2, X, Save, Calculator } from 'lucide-react';
 
 // 模拟合格报告数据（只有合格的层析柱才会生成报告）
 const mockQualifiedReports = [{
@@ -65,7 +65,44 @@ const mockUnqualifiedReports = [{
   不合格项目: '溶解度测试',
   不合格原因: '溶解度不达标',
   负责人: '赵六',
-  审核状态: 'pending'
+  审核状态: 'pending',
+  // 详细检测数据
+  detectionData: {
+    moduleTemperature: {
+      standard: '25-40°C',
+      result: '29.7°C',
+      conclusion: 'pass'
+    },
+    systemPressure: {
+      standard: '5.0-8.0 MPa',
+      result: '7.8 MPa',
+      conclusion: 'pass'
+    },
+    hbA1cAppearanceTime: {
+      standard: '36-40 秒',
+      result: '35.2 秒',
+      conclusion: 'fail'
+    },
+    repeatabilityTest: {
+      standard: 'CV < 1.5%',
+      result: '0.9%',
+      conclusion: 'pass',
+      // 重复性测试详细数据
+      testData: [
+        { id: 1, time: '09:15:23', value: 45.2, unit: '秒' },
+        { id: 2, time: '09:16:45', value: 45.8, unit: '秒' },
+        { id: 3, time: '09:18:12', value: 44.9, unit: '秒' },
+        { id: 4, time: '09:19:30', value: 45.5, unit: '秒' },
+        { id: 5, time: '09:20:48', value: 45.1, unit: '秒' }
+      ]
+    },
+    appearanceInspection: {
+      standard: '包装完整，无明显损坏',
+      result: '包装完好',
+      conclusion: 'pass'
+    }
+  },
+  finalConclusion: 'unqualified'
 }, {
   id: 'RPT-U002',
   workOrder: 'WO202501005',
@@ -74,10 +111,47 @@ const mockUnqualifiedReports = [{
   instrumentSerial: 'INST-002',
   status: 'unqualified',
   reportDate: '2025-01-11',
-  不合格项目: 'pH值检测',
-  不合格原因: 'pH值超出范围',
+  不合格项目: '重复性测试',
+  不合格原因: 'CV值超标',
   负责人: '张三',
-  审核状态: 'pending'
+  审核状态: 'pending',
+  // 详细检测数据
+  detectionData: {
+    moduleTemperature: {
+      standard: '25-40°C',
+      result: '36.8°C',
+      conclusion: 'pass'
+    },
+    systemPressure: {
+      standard: '5.0-8.0 MPa',
+      result: '6.2 MPa',
+      conclusion: 'pass'
+    },
+    hbA1cAppearanceTime: {
+      standard: '36-40 秒',
+      result: '37.5 秒',
+      conclusion: 'pass'
+    },
+    repeatabilityTest: {
+      standard: 'CV < 1.5%',
+      result: '2.1%',
+      conclusion: 'fail',
+      // 重复性测试详细数据
+      testData: [
+        { id: 1, time: '14:25:15', value: 38.2, unit: '秒' },
+        { id: 2, time: '14:26:30', value: 42.1, unit: '秒' },
+        { id: 3, time: '14:27:45', value: 35.8, unit: '秒' },
+        { id: 4, time: '14:29:00', value: 41.5, unit: '秒' },
+        { id: 5, time: '14:30:15', value: 39.7, unit: '秒' }
+      ]
+    },
+    appearanceInspection: {
+      standard: '包装完整，无明显损坏',
+      result: '包装完好',
+      conclusion: 'pass'
+    }
+  },
+  finalConclusion: 'unqualified'
 }];
 
 // 模拟待审核层析柱数据（管理员专用）
@@ -96,6 +170,276 @@ const mockPendingColumns = [{
   submitTime: '2025-01-15 14:30:00',
   priority: 'high'
 }];
+
+// 编辑弹窗组件
+const EditModal = ({
+  report,
+  isOpen,
+  onClose,
+  onSave,
+  toast
+}) => {
+  const [editData, setEditData] = useState(null);
+  const [calculatedCV, setCalculatedCV] = useState(0);
+  const [isCalculating, setIsCalculating] = useState(false);
+
+  // 初始化编辑数据
+  React.useEffect(() => {
+    if (report && report.detectionData && report.detectionData.repeatabilityTest) {
+      const repeatabilityData = report.detectionData.repeatabilityTest;
+      if (repeatabilityData.testData) {
+        setEditData({
+          ...repeatabilityData,
+          testData: repeatabilityData.testData.map(test => ({ ...test }))
+        });
+        calculateCV(repeatabilityData.testData);
+      }
+    }
+  }, [report]);
+
+  // 计算CV值
+  const calculateCV = (testData) => {
+    if (!testData || testData.length === 0) return;
+
+    setIsCalculating(true);
+    setTimeout(() => {
+      const values = testData.map(test => parseFloat(test.value));
+      const mean = values.reduce((sum, val) => sum + val, 0) / values.length;
+      const variance = values.reduce((sum, val) => sum + Math.pow(val - mean, 2), 0) / values.length;
+      const stdDev = Math.sqrt(variance);
+      const cv = (stdDev / mean) * 100;
+      
+      setCalculatedCV(cv);
+      setIsCalculating(false);
+    }, 300);
+  };
+
+  // 更新测试值
+  const updateTestValue = (testId, newValue) => {
+    if (!editData) return;
+    
+    const updatedTestData = editData.testData.map(test => 
+      test.id === testId ? { ...test, value: newValue } : test
+    );
+    
+    setEditData({
+      ...editData,
+      testData: updatedTestData
+    });
+    
+    calculateCV(updatedTestData);
+  };
+
+  // 保存修改
+  const handleSave = () => {
+    if (!editData || !report) return;
+
+    // 检查CV值是否合格
+    const isQualified = calculatedCV < 1.5;
+    
+    // 更新报告数据
+    const updatedReport = {
+      ...report,
+      detectionData: {
+        ...report.detectionData,
+        repeatabilityTest: {
+          ...report.detectionData.repeatabilityTest,
+          result: `${calculatedCV.toFixed(2)}%`,
+          conclusion: isQualified ? 'pass' : 'fail',
+          testData: editData.testData
+        }
+      },
+      finalConclusion: isQualified ? 'qualified' : 'unqualified',
+      不合格原因: isQualified ? '' : 'CV值超标'
+    };
+
+    onSave(updatedReport);
+    onClose();
+    
+    toast({
+      title: "保存成功",
+      description: `CV值已更新为 ${calculatedCV.toFixed(2)}%，${isQualified ? '报告已合格' : '报告仍不合格'}`,
+      variant: isQualified ? "default" : "destructive"
+    });
+  };
+
+  if (!isOpen || !report || !editData) return null;
+
+  return <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+      <div className="bg-white rounded-lg w-full max-w-3xl max-h-[90vh] overflow-y-auto">
+        <div className="sticky top-0 bg-white border-b border-gray-200 px-6 py-4">
+          <div className="flex items-center justify-between">
+            <h2 className="text-xl font-semibold">编辑重复性测试数据</h2>
+            <Button variant="outline" size="sm" onClick={onClose} className="h-8 w-8 p-0">
+              <X className="w-4 h-4" />
+            </Button>
+          </div>
+        </div>
+
+        <div className="p-6 space-y-6">
+          {/* 基本信息 */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-lg">报告信息</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+                <div>
+                  <span className="text-sm text-gray-500">报告编号</span>
+                  <p className="font-medium">{report.id}</p>
+                </div>
+                <div>
+                  <span className="text-sm text-gray-500">层析柱序列号</span>
+                  <p className="font-medium">{report.columnSerial}</p>
+                </div>
+                <div>
+                  <span className="text-sm text-gray-500">不合格项目</span>
+                  <p className="font-medium">{report.不合格项目}</p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* CV值计算结果 */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-lg flex items-center gap-2">
+                <Calculator className="w-5 h-5" />
+                CV值计算结果
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="flex items-center justify-between">
+                <div>
+                  <span className="text-sm text-gray-500">标准值</span>
+                  <p className="text-lg font-medium">CV &lt; 1.5%</p>
+                </div>
+                <div className="text-center">
+                  <span className="text-sm text-gray-500">当前CV值</span>
+                  <p className={`text-2xl font-bold ${calculatedCV < 1.5 ? 'text-green-600' : 'text-red-600'}`}>
+                    {isCalculating ? (
+                      <Loader2 className="w-6 h-6 animate-spin inline" />
+                    ) : (
+                      `${calculatedCV.toFixed(2)}%`
+                    )}
+                  </p>
+                </div>
+                <div>
+                  <span className="text-sm text-gray-500">结论</span>
+                  <p className="text-lg font-medium">
+                    {calculatedCV < 1.5 ? (
+                      <Badge variant="default" className="bg-green-100 text-green-800 border-green-200">合格</Badge>
+                    ) : (
+                      <Badge variant="destructive">不合格</Badge>
+                    )}
+                  </p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* 重复性测试数据编辑 */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-lg">重复性测试数据</CardTitle>
+              <p className="text-sm text-gray-500">修改测试值后系统将自动重新计算CV值</p>
+            </CardHeader>
+            <CardContent>
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>序号</TableHead>
+                    <TableHead>测试时间</TableHead>
+                    <TableHead>测试值</TableHead>
+                    <TableHead>单位</TableHead>
+                    <TableHead>操作</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {editData.testData.map((test, index) => <TableRow key={test.id}>
+                      <TableCell>{index + 1}</TableCell>
+                      <TableCell>{test.time}</TableCell>
+                      <TableCell>
+                        <Input 
+                          type="number" 
+                          step="0.1"
+                          value={test.value} 
+                          onChange={(e) => updateTestValue(test.id, e.target.value)}
+                          className="w-24"
+                        />
+                      </TableCell>
+                      <TableCell>{test.unit}</TableCell>
+                      <TableCell>
+                        <Button 
+                          size="sm" 
+                          variant="outline"
+                          onClick={() => {
+                            const newValue = prompt('请输入新的测试值:', test.value);
+                            if (newValue && !isNaN(newValue)) {
+                              updateTestValue(test.id, parseFloat(newValue));
+                            }
+                          }}
+                        >
+                          <Edit className="w-4 h-4" />
+                        </Button>
+                      </TableCell>
+                    </TableRow>)}
+                </TableBody>
+              </Table>
+            </CardContent>
+          </Card>
+
+          {/* 统计信息 */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-lg">统计信息</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                <div>
+                  <span className="text-sm text-gray-500">平均值</span>
+                  <p className="font-medium">
+                    {(editData.testData.reduce((sum, test) => sum + parseFloat(test.value), 0) / editData.testData.length).toFixed(2)}
+                  </p>
+                </div>
+                <div>
+                  <span className="text-sm text-gray-500">最大值</span>
+                  <p className="font-medium">
+                    {Math.max(...editData.testData.map(test => parseFloat(test.value))).toFixed(2)}
+                  </p>
+                </div>
+                <div>
+                  <span className="text-sm text-gray-500">最小值</span>
+                  <p className="font-medium">
+                    {Math.min(...editData.testData.map(test => parseFloat(test.value))).toFixed(2)}
+                  </p>
+                </div>
+                <div>
+                  <span className="text-sm text-gray-500">极差</span>
+                  <p className="font-medium">
+                    {(Math.max(...editData.testData.map(test => parseFloat(test.value))) - 
+                      Math.min(...editData.testData.map(test => parseFloat(test.value)))).toFixed(2)}
+                  </p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+
+        <div className="sticky bottom-0 bg-white border-t border-gray-200 px-6 py-4">
+          <div className="flex justify-end space-x-2">
+            <Button variant="outline" onClick={onClose}>
+              取消
+            </Button>
+            <Button onClick={handleSave} className="bg-blue-600 hover:bg-blue-700">
+              <Save className="w-4 h-4 mr-2" />
+              保存修改
+            </Button>
+          </div>
+        </div>
+      </div>
+    </div>;
+};
 export default function MainPage(props) {
   const {
     $w,
@@ -126,6 +470,10 @@ export default function MainPage(props) {
   const [signing, setSigning] = useState(false);
   const [auditComment, setAuditComment] = useState('');
   const [auditAction, setAuditAction] = useState('approve');
+
+  // 编辑相关状态
+  const [showEditModal, setShowEditModal] = useState(false);
+  const [editingReport, setEditingReport] = useState(null);
 
   // 客户状态
   const [qualifiedReports, setQualifiedReports] = useState(mockQualifiedReports);
@@ -165,6 +513,34 @@ export default function MainPage(props) {
   // 分页
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize] = useState(10);
+
+  // 处理编辑报告
+  const handleEditReport = (reportId) => {
+    const report = unqualifiedReports.find(r => r.id === reportId);
+    if (report) {
+      // 检查是否有重复性测试数据
+      if (report.detectionData && report.detectionData.repeatabilityTest && 
+          report.detectionData.repeatabilityTest.testData) {
+        setEditingReport(report);
+        setShowEditModal(true);
+      } else {
+        toast({
+          title: "无法编辑",
+          description: "该报告没有重复性测试数据，无法编辑",
+          variant: "destructive"
+        });
+      }
+    }
+  };
+
+  // 保存编辑后的报告
+  const handleSaveEditedReport = (updatedReport) => {
+    const updatedReports = unqualifiedReports.map(report => 
+      report.id === updatedReport.id ? updatedReport : report
+    );
+    setUnqualifiedReports(updatedReports);
+    setFilteredUnqualifiedReports(updatedReports);
+  };
 
   // 管理员搜索功能
   const handleAdminSearch = () => {
@@ -604,10 +980,7 @@ export default function MainPage(props) {
                               <Button size="sm" variant="outline" onClick={() => handleDownload(report.id)} className="h-8 w-8 p-0">
                                 <Download className="w-4 h-4" />
                               </Button>
-                              <Button size="sm" variant="outline" onClick={() => toast({
-                          title: "编辑功能",
-                          description: `正在编辑报告 ${report.id}`
-                        })} className="h-8 w-8 p-0">
+                              <Button size="sm" variant="outline" onClick={() => handleEditReport(report.id)} className="h-8 w-8 p-0">
                                 <Edit className="w-4 h-4" />
                               </Button>
                               <Button size="sm" variant="outline" onClick={() => toast({
@@ -1026,200 +1399,4 @@ export default function MainPage(props) {
                   </Button>
                   <Button onClick={confirmAudit} disabled={signing} className={auditAction === 'approve' ? 'bg-green-600 hover:bg-green-700' : 'bg-red-600 hover:bg-red-700'}>
                     {signing ? <>
-                        <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                        处理中...
-                      </> : <>
-                        <PenTool className="w-4 h-4 mr-2" />
-                        确认{auditAction === 'approve' ? '通过' : '拒绝'}
-                      </>}
-                  </Button>
-                </div>
-              </div>
-            </div>
-          </div>}
-      </div>;
-  }
-
-  // 客户界面
-  return <div style={style} className="min-h-screen bg-gray-50">
-      {/* 顶部导航 */}
-      <div className="bg-white border-b border-gray-200 px-6 py-4">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center space-x-4">
-            <FileText className="w-8 h-8 text-blue-600" />
-            <div>
-              <h1 className="text-2xl font-bold text-gray-900">报告查询</h1>
-              <p className="text-sm text-gray-500">欢迎回来，{currentUser.name}</p>
-            </div>
-          </div>
-          <div className="flex items-center space-x-2">
-            <Badge variant="outline" className="bg-blue-50 text-blue-700 border-blue-200">
-              <User className="w-3 h-3 mr-1" />
-              客户
-            </Badge>
-          </div>
-        </div>
-      </div>
-
-      <div className="p-6">
-        {/* 权限提示 */}
-        <Card className="mb-6 bg-blue-50 border-blue-200">
-          <CardContent className="pt-6">
-            <div className="flex items-center space-x-2">
-              <FileText className="w-5 h-5 text-blue-600" />
-              <p className="text-sm text-blue-800">
-                您正在以客户身份访问报告查询系统，可以查看和下载合格的层析柱报告。
-              </p>
-            </div>
-          </CardContent>
-        </Card>
-
-        {/* 查询条件 */}
-        <Card className="mb-6">
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Search className="w-5 h-5" />
-              查询条件
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">工单号</label>
-                <Input placeholder="请输入工单号" value={customerSearchParams.workOrder} onChange={e => setCustomerSearchParams({
-                ...customerSearchParams,
-                workOrder: e.target.value
-              })} />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">层析柱序列号</label>
-                <Input placeholder="请输入层析柱序列号" value={customerSearchParams.columnSerial} onChange={e => setCustomerSearchParams({
-                ...customerSearchParams,
-                columnSerial: e.target.value
-              })} />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">订单号</label>
-                <Input placeholder="请输入订单号" value={customerSearchParams.orderNumber} onChange={e => setCustomerSearchParams({
-                ...customerSearchParams,
-                orderNumber: e.target.value
-              })} />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">仪器序列号</label>
-                <Input placeholder="请输入仪器序列号" value={customerSearchParams.instrumentSerial} onChange={e => setCustomerSearchParams({
-                ...customerSearchParams,
-                instrumentSerial: e.target.value
-              })} />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">报告类型</label>
-                <Select value={customerSearchParams.reportType} onValueChange={value => setCustomerSearchParams({
-                ...customerSearchParams,
-                reportType: value
-              })}>
-                  <SelectTrigger>
-                    <SelectValue placeholder="选择报告类型" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="all">全部类型</SelectItem>
-                    <SelectItem value="quality">质量检测报告</SelectItem>
-                    <SelectItem value="stability">稳定性测试报告</SelectItem>
-                    <SelectItem value="purity">纯度分析报告</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-            </div>
-            <div className="flex space-x-2">
-              <Button onClick={handleGenerateReport} disabled={generating} className="bg-green-600 hover:bg-green-700">
-                {generating ? <>
-                    <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                    生成中...
-                  </> : <>
-                    <FileText className="w-4 h-4 mr-2" />
-                    生成报告
-                  </>}
-              </Button>
-              <Button variant="outline" onClick={handleCustomerSearch}>
-                <Search className="w-4 h-4 mr-2" />
-                查询
-              </Button>
-            </div>
-          </CardContent>
-        </Card>
-
-        {/* 合格报告列表 */}
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center justify-between">
-              <span className="flex items-center gap-2">
-                <FileText className="w-5 h-5" />
-                合格报告列表
-              </span>
-              <div className="text-sm text-gray-500">
-                共 {qualifiedReports.length} 份报告
-              </div>
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="p-0">
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>报告编号</TableHead>
-                  <TableHead>报告名称</TableHead>
-                  <TableHead>工单号</TableHead>
-                  <TableHead>层析柱序列号</TableHead>
-                  <TableHead>检测项目</TableHead>
-                  <TableHead>检测结果</TableHead>
-                  <TableHead>报告日期</TableHead>
-                  <TableHead>文件大小</TableHead>
-                  <TableHead>操作</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {filteredQualifiedReports.map(report => <TableRow key={report.id} className="hover:bg-gray-50">
-                    <TableCell className="font-medium">{report.id}</TableCell>
-                    <TableCell>
-                      <div className="max-w-48">
-                        <div className="truncate" title={report.reportName}>
-                          {report.reportName}
-                        </div>
-                      </div>
-                    </TableCell>
-                    <TableCell>{report.workOrder}</TableCell>
-                    <TableCell>{report.columnSerial}</TableCell>
-                    <TableCell>{report.检测项目}</TableCell>
-                    <TableCell>
-                      <Badge variant="default" className="bg-green-100 text-green-800 border-green-200">
-                        {report.检测结果}
-                      </Badge>
-                    </TableCell>
-                    <TableCell>{report.reportDate}</TableCell>
-                    <TableCell>{report.fileSize}</TableCell>
-                    <TableCell>
-                      <div className="flex space-x-1">
-                        <Button size="sm" variant="outline" onClick={() => handlePreview(report.id)} className="h-8 w-8 p-0">
-                          <Eye className="w-4 h-4" />
-                        </Button>
-                        <Button size="sm" variant="outline" onClick={() => handleDownload(report.id)} className="h-8 w-8 p-0">
-                          <Download className="w-4 h-4" />
-                        </Button>
-                      </div>
-                    </TableCell>
-                  </TableRow>)}
-              </TableBody>
-            </Table>
-          </CardContent>
-        </Card>
-
-        {/* 空状态 */}
-        {filteredQualifiedReports.length === 0 && <Card className="text-center py-12">
-            <CardContent>
-              <FileText className="w-16 h-16 text-gray-300 mx-auto mb-4" />
-              <h3 className="text-lg font-medium text-gray-900 mb-2">暂无报告</h3>
-              <p className="text-gray-500 mb-4">请输入查询条件并生成报告</p>
-            </CardContent>
-          </Card>}
-      </div>
-    </div>;
-}
+                        <Loader2
