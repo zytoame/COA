@@ -18,7 +18,6 @@ const functionModules = [{
   description: '管理和编辑不合格的层析柱检测报告，支持修改检测数据并重新计算CV值',
   icon: AlertTriangle,
   color: 'red',
-  features: ['查看不合格报告', '编辑检测数据', '重新计算CV值', '下载COA报告'],
   stats: {
     total: 12,
     pending: 5,
@@ -31,7 +30,6 @@ const functionModules = [{
   description: '查询和生成各类检测报告，支持多条件筛选和报告预览',
   icon: Search,
   color: 'blue',
-  features: ['多条件查询', '报告生成', '在线预览', '批量下载'],
   stats: {
     total: 156,
     today: 8,
@@ -44,7 +42,6 @@ const functionModules = [{
   description: '批量审核待审核的层析柱，支持电子签名和审核意见记录',
   icon: CheckCircle,
   color: 'green',
-  features: ['批量选择', '电子签名', '审核记录', '状态追踪'],
   stats: {
     total: 28,
     pending: 15,
@@ -163,6 +160,44 @@ export default function MainPage(props) {
               </div>
             </CardContent>
           </Card>
+        </div>
+
+        {/* 功能模块 */}
+        <div className="mb-8">
+          <h2 className="text-xl font-semibold text-gray-900 mb-6">功能模块</h2>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            {functionModules.map(module => {
+            const Icon = module.icon;
+            return <Card key={module.id} className="hover:shadow-lg transition-shadow duration-200 cursor-pointer border-2 hover:border-blue-300" onClick={() => handleNavigateToPage(module.pageId, module.title)}>
+                <CardHeader className="pb-4">
+                  <div className="flex items-center justify-between">
+                    <div className={`p-3 rounded-lg ${getIconBgColor(module.color)}`}>
+                      <Icon className="w-6 h-6" />
+                    </div>
+                    <ArrowRight className="w-5 h-5 text-gray-400" />
+                  </div>
+                  <CardTitle className="text-lg">{module.title}</CardTitle>
+                  <p className="text-sm text-gray-600 mt-2">{module.description}</p>
+                </CardHeader>
+                <CardContent className="pt-0">
+                  {/* 统计信息 */}
+                  <div className="grid grid-cols-3 gap-2">
+                    {Object.entries(module.stats).map(([key, value]) => <div key={key} className="text-center">
+                        <p className="text-lg font-semibold text-gray-900">{value}</p>
+                        <p className="text-xs text-gray-500">
+                          {key === 'total' && '总计'}
+                          {key === 'pending' && '待处理'}
+                          {key === 'urgent' && '紧急'}
+                          {key === 'today' && '今日'}
+                          {key === 'thisWeek' && '本周'}
+                          {key === 'completed' && '已完成'}
+                        </p>
+                      </div>)}
+                  </div>
+                </CardContent>
+              </Card>;
+          })}
+          </div>
         </div>
 
         {/* 快速操作 */}
