@@ -99,6 +99,9 @@ export default function MainPage(props) {
     };
     return colorMap[color] || colorMap.blue;
   };
+
+  // 计算待处理总数：不合格报告管理中的待审核数量 + 批量审核签字中的待处理数量
+  const totalPending = functionModules.find(m => m.id === 'unqualified-reports')?.stats.pending + functionModules.find(m => m.id === 'batch-audit')?.stats.pending;
   return <div style={style} className="min-h-screen bg-gray-50">
       {/* 顶部导航 */}
       <div className="bg-white border-b border-gray-200 px-6 py-4">
@@ -153,61 +156,13 @@ export default function MainPage(props) {
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-orange-100">待处理</p>
-                  <p className="text-3xl font-bold">28</p>
-                  <p className="text-orange-100 text-sm">紧急处理 5</p>
+                  <p className="text-3xl font-bold">{totalPending}</p>
+                  <p className="text-orange-100 text-sm">紧急处理 {functionModules.find(m => m.id === 'unqualified-reports')?.stats.urgent}</p>
                 </div>
                 <ClipboardList className="w-12 h-12 text-orange-200" />
               </div>
             </CardContent>
           </Card>
-        </div>
-
-        {/* 功能模块 */}
-        <div className="mb-8">
-          <h2 className="text-xl font-semibold text-gray-900 mb-6">功能模块</h2>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            {functionModules.map(module => {
-            const Icon = module.icon;
-            return <Card key={module.id} className="hover:shadow-lg transition-shadow duration-200 cursor-pointer border-2 hover:border-blue-300" onClick={() => handleNavigateToPage(module.pageId, module.title)}>
-                <CardHeader className="pb-4">
-                  <div className="flex items-center justify-between">
-                    <div className={`p-3 rounded-lg ${getIconBgColor(module.color)}`}>
-                      <Icon className="w-6 h-6" />
-                    </div>
-                    <ArrowRight className="w-5 h-5 text-gray-400" />
-                  </div>
-                  <CardTitle className="text-lg">{module.title}</CardTitle>
-                  <p className="text-sm text-gray-600 mt-2">{module.description}</p>
-                </CardHeader>
-                <CardContent className="pt-0">
-                  {/* 统计信息 */}
-                  <div className="grid grid-cols-3 gap-2 mb-4">
-                    {Object.entries(module.stats).map(([key, value]) => <div key={key} className="text-center">
-                        <p className="text-lg font-semibold text-gray-900">{value}</p>
-                        <p className="text-xs text-gray-500">
-                          {key === 'total' && '总计'}
-                          {key === 'pending' && '待处理'}
-                          {key === 'urgent' && '紧急'}
-                          {key === 'today' && '今日'}
-                          {key === 'thisWeek' && '本周'}
-                          {key === 'completed' && '已完成'}
-                        </p>
-                      </div>)}
-                  </div>
-                  
-                  {/* 功能特性 */}
-                  <div className="space-y-2">
-                    <p className="text-sm font-medium text-gray-700">主要功能：</p>
-                    <div className="flex flex-wrap gap-1">
-                      {module.features.map((feature, index) => <Badge key={index} variant="secondary" className="text-xs">
-                          {feature}
-                        </Badge>)}
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>;
-          })}
-          </div>
         </div>
 
         {/* 快速操作 */}
