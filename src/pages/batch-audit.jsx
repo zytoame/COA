@@ -3,9 +3,9 @@ import React, { useState, useRef } from 'react';
 // @ts-ignore;
 import { Button, Input, Card, CardContent, CardHeader, CardTitle, Badge, Table, TableBody, TableCell, TableHead, TableHeader, TableRow, Select, SelectContent, SelectItem, SelectTrigger, SelectValue, useToast } from '@/components/ui';
 // @ts-ignore;
-import { Search, CheckCircle, XCircle, Clock, AlertTriangle, FileText, User, Calendar, PenTool, Download, Eye, RefreshCw, Loader2 } from 'lucide-react';
+import { Search, CheckCircle, XCircle, Clock, AlertTriangle, FileText, User, Calendar, PenTool, Download, Eye, RefreshCw, Loader2, ChevronDown, ChevronUp, Thermometer, Gauge, Timer, Activity, Package } from 'lucide-react';
 
-// 模拟待审核层析柱数据
+// 模拟待审核层析柱数据（包含详细检测数据）
 const mockPendingColumns = [{
   id: 'COL-001',
   workOrder: 'WO202501001',
@@ -19,7 +19,41 @@ const mockPendingColumns = [{
   不合格原因: '纯度低于标准值',
   operator: '张三',
   submitTime: '2025-01-15 14:30:00',
-  priority: 'high'
+  priority: 'high',
+  // 详细检测数据
+  detectionData: {
+    moduleTemperature: {
+      standard: '25-40°C',
+      result: '38.5°C',
+      conclusion: 'pass',
+      icon: Thermometer
+    },
+    systemPressure: {
+      standard: '5.0-8.0 MPa',
+      result: '7.2 MPa',
+      conclusion: 'pass',
+      icon: Gauge
+    },
+    hbA1cAppearanceTime: {
+      standard: '36-40 秒',
+      result: '42.3 秒',
+      conclusion: 'fail',
+      icon: Timer
+    },
+    repeatabilityTest: {
+      standard: 'CV < 1.5%',
+      result: '1.8%',
+      conclusion: 'fail',
+      icon: Activity
+    },
+    appearanceInspection: {
+      standard: '包装完整，无明显损坏',
+      result: '包装轻微破损',
+      conclusion: 'fail',
+      icon: Package
+    }
+  },
+  finalConclusion: 'unqualified'
 }, {
   id: 'COL-002',
   workOrder: 'WO202501002',
@@ -33,7 +67,41 @@ const mockPendingColumns = [{
   不合格原因: 'pH值超出范围',
   operator: '李四',
   submitTime: '2025-01-14 16:45:00',
-  priority: 'medium'
+  priority: 'medium',
+  // 详细检测数据
+  detectionData: {
+    moduleTemperature: {
+      standard: '25-40°C',
+      result: '35.2°C',
+      conclusion: 'pass',
+      icon: Thermometer
+    },
+    systemPressure: {
+      standard: '5.0-8.0 MPa',
+      result: '6.8 MPa',
+      conclusion: 'pass',
+      icon: Gauge
+    },
+    hbA1cAppearanceTime: {
+      standard: '36-40 秒',
+      result: '38.1 秒',
+      conclusion: 'pass',
+      icon: Timer
+    },
+    repeatabilityTest: {
+      standard: 'CV < 1.5%',
+      result: '1.2%',
+      conclusion: 'pass',
+      icon: Activity
+    },
+    appearanceInspection: {
+      standard: '包装完整，无明显损坏',
+      result: '包装完好',
+      conclusion: 'pass',
+      icon: Package
+    }
+  },
+  finalConclusion: 'qualified'
 }, {
   id: 'COL-003',
   workOrder: 'WO202501003',
@@ -47,7 +115,41 @@ const mockPendingColumns = [{
   不合格原因: '杂质含量超标',
   operator: '王五',
   submitTime: '2025-01-13 11:20:00',
-  priority: 'low'
+  priority: 'low',
+  // 详细检测数据
+  detectionData: {
+    moduleTemperature: {
+      standard: '25-40°C',
+      result: '32.1°C',
+      conclusion: 'pass',
+      icon: Thermometer
+    },
+    systemPressure: {
+      standard: '5.0-8.0 MPa',
+      result: '5.5 MPa',
+      conclusion: 'pass',
+      icon: Gauge
+    },
+    hbA1cAppearanceTime: {
+      standard: '36-40 秒',
+      result: '39.8 秒',
+      conclusion: 'pass',
+      icon: Timer
+    },
+    repeatabilityTest: {
+      standard: 'CV < 1.5%',
+      result: '2.1%',
+      conclusion: 'fail',
+      icon: Activity
+    },
+    appearanceInspection: {
+      standard: '包装完整，无明显损坏',
+      result: '密封塞松动',
+      conclusion: 'fail',
+      icon: Package
+    }
+  },
+  finalConclusion: 'unqualified'
 }, {
   id: 'COL-004',
   workOrder: 'WO202501004',
@@ -61,7 +163,41 @@ const mockPendingColumns = [{
   不合格原因: '溶解度不达标',
   operator: '赵六',
   submitTime: '2025-01-12 09:15:00',
-  priority: 'high'
+  priority: 'high',
+  // 详细检测数据
+  detectionData: {
+    moduleTemperature: {
+      standard: '25-40°C',
+      result: '29.7°C',
+      conclusion: 'pass',
+      icon: Thermometer
+    },
+    systemPressure: {
+      standard: '5.0-8.0 MPa',
+      result: '7.8 MPa',
+      conclusion: 'pass',
+      icon: Gauge
+    },
+    hbA1cAppearanceTime: {
+      standard: '36-40 秒',
+      result: '35.2 秒',
+      conclusion: 'fail',
+      icon: Timer
+    },
+    repeatabilityTest: {
+      standard: 'CV < 1.5%',
+      result: '0.9%',
+      conclusion: 'pass',
+      icon: Activity
+    },
+    appearanceInspection: {
+      standard: '包装完整，无明显损坏',
+      result: '包装完好',
+      conclusion: 'pass',
+      icon: Package
+    }
+  },
+  finalConclusion: 'unqualified'
 }, {
   id: 'COL-005',
   workOrder: 'WO202501005',
@@ -75,8 +211,115 @@ const mockPendingColumns = [{
   不合格原因: '稳定性时间不足',
   operator: '张三',
   submitTime: '2025-01-11 15:30:00',
-  priority: 'medium'
+  priority: 'medium',
+  // 详细检测数据
+  detectionData: {
+    moduleTemperature: {
+      standard: '25-40°C',
+      result: '36.8°C',
+      conclusion: 'pass',
+      icon: Thermometer
+    },
+    systemPressure: {
+      standard: '5.0-8.0 MPa',
+      result: '6.2 MPa',
+      conclusion: 'pass',
+      icon: Gauge
+    },
+    hbA1cAppearanceTime: {
+      standard: '36-40 秒',
+      result: '37.5 秒',
+      conclusion: 'pass',
+      icon: Timer
+    },
+    repeatabilityTest: {
+      standard: 'CV < 1.5%',
+      result: '1.6%',
+      conclusion: 'fail',
+      icon: Activity
+    },
+    appearanceInspection: {
+      standard: '包装完整，无明显损坏',
+      result: '包装完好',
+      conclusion: 'pass',
+      icon: Package
+    }
+  },
+  finalConclusion: 'unqualified'
 }];
+
+// 检测项目详情组件
+const DetectionDataCard = ({
+  detectionData,
+  finalConclusion
+}) => {
+  const [isExpanded, setIsExpanded] = useState(false);
+  const getConclusionBadge = conclusion => {
+    return conclusion === 'pass' ? <Badge variant="default" className="bg-green-100 text-green-800 border-green-200">合格</Badge> : <Badge variant="destructive">不合格</Badge>;
+  };
+  const getFinalConclusionBadge = conclusion => {
+    return conclusion === 'qualified' ? <Badge variant="default" className="bg-green-100 text-green-800 border-green-200">最终合格</Badge> : <Badge variant="destructive">最终不合格</Badge>;
+  };
+  return <Card className="mb-4">
+      <CardHeader className="pb-3">
+        <div className="flex items-center justify-between">
+          <CardTitle className="text-lg flex items-center gap-2">
+            <Activity className="w-5 h-5" />
+            检测数据详情
+          </CardTitle>
+          <div className="flex items-center gap-2">
+            {getFinalConclusionBadge(finalConclusion)}
+            <Button variant="outline" size="sm" onClick={() => setIsExpanded(!isExpanded)} className="h-8 w-8 p-0">
+              {isExpanded ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
+            </Button>
+          </div>
+        </div>
+      </CardHeader>
+      {isExpanded && <CardContent>
+          <div className="space-y-4">
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead className="w-12">图标</TableHead>
+                  <TableHead>检测项目</TableHead>
+                  <TableHead>标准值</TableHead>
+                  <TableHead>检测结果</TableHead>
+                  <TableHead>结论</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {Object.entries(detectionData).map(([key, data]) => {
+              const Icon = data.icon;
+              return <TableRow key={key}>
+                      <TableCell>
+                        <Icon className="w-5 h-5 text-gray-600" />
+                      </TableCell>
+                      <TableCell className="font-medium">
+                        {key === 'moduleTemperature' && '模块温度'}
+                        {key === 'systemPressure' && '系统压力'}
+                        {key === 'hbA1cAppearanceTime' && 'HbA1c出峰时间'}
+                        {key === 'repeatabilityTest' && '重复性测试'}
+                        {key === 'appearanceInspection' && '外观检查'}
+                      </TableCell>
+                      <TableCell>
+                        <span className="text-blue-600 font-medium">{data.standard}</span>
+                      </TableCell>
+                      <TableCell>
+                        <span className={data.conclusion === 'pass' ? 'text-green-600' : 'text-red-600'}>
+                          {data.result}
+                        </span>
+                      </TableCell>
+                      <TableCell>
+                        {getConclusionBadge(data.conclusion)}
+                      </TableCell>
+                    </TableRow>;
+            })}
+              </TableBody>
+            </Table>
+          </div>
+        </CardContent>}
+    </Card>;
+};
 export default function BatchAuditPage(props) {
   const {
     $w,
@@ -95,6 +338,7 @@ export default function BatchAuditPage(props) {
   const [showSignaturePad, setShowSignaturePad] = useState(false);
   const [auditComment, setAuditComment] = useState('');
   const [auditAction, setAuditAction] = useState('approve'); // approve or reject
+  const [expandedColumns, setExpandedColumns] = useState(new Set());
 
   // 搜索条件
   const [searchParams, setSearchParams] = useState({
@@ -153,6 +397,17 @@ export default function BatchAuditPage(props) {
     } else {
       setSelectedColumns([...selectedColumns, columnId]);
     }
+  };
+
+  // 切换检测数据展开状态
+  const toggleExpanded = columnId => {
+    const newExpanded = new Set(expandedColumns);
+    if (newExpanded.has(columnId)) {
+      newExpanded.delete(columnId);
+    } else {
+      newExpanded.add(columnId);
+    }
+    setExpandedColumns(newExpanded);
   };
 
   // 获取优先级标签
@@ -404,67 +659,80 @@ export default function BatchAuditPage(props) {
         </div>
 
         {/* 待审核列表 */}
-        <Card>
-          <CardContent className="p-0">
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead className="w-12">
-                    <input type="checkbox" onChange={e => handleSelectAll(e.target.checked)} checked={selectedColumns.length === filteredColumns.length && filteredColumns.length > 0} className="rounded border-gray-300" />
-                  </TableHead>
-                  <TableHead>层析柱编号</TableHead>
-                  <TableHead>工单号</TableHead>
-                  <TableHead>层析柱名称</TableHead>
-                  <TableHead>检测类型</TableHead>
-                  <TableHead>检测日期</TableHead>
-                  <TableHead>操作员</TableHead>
-                  <TableHead>优先级</TableHead>
-                  <TableHead>提交时间</TableHead>
-                  <TableHead>操作</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {filteredColumns.map(column => <TableRow key={column.id} className="hover:bg-gray-50">
-                    <TableCell>
-                      <input type="checkbox" checked={selectedColumns.includes(column.id)} onChange={() => handleSelectColumn(column.id)} className="rounded border-gray-300" />
-                    </TableCell>
-                    <TableCell className="font-medium">{column.columnSerial}</TableCell>
-                    <TableCell>{column.workOrder}</TableCell>
-                    <TableCell>
-                      <div className="max-w-32">
-                        <div className="truncate" title={column.columnName}>
-                          {column.columnName}
-                        </div>
-                        <div className="text-xs text-gray-500">
-                          {column.orderNumber}
-                        </div>
+        <div className="space-y-4">
+          {filteredColumns.map(column => <Card key={column.id} className="overflow-hidden">
+              <CardHeader className="pb-3">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center space-x-3">
+                    <input type="checkbox" checked={selectedColumns.includes(column.id)} onChange={() => handleSelectColumn(column.id)} className="rounded border-gray-300 w-4 h-4" />
+                    <div>
+                      <div className="flex items-center space-x-2">
+                        <h3 className="font-semibold text-lg">{column.columnSerial}</h3>
+                        {getPriorityBadge(column.priority)}
                       </div>
-                    </TableCell>
-                    <TableCell>{column.testType}</TableCell>
-                    <TableCell>{column.testDate}</TableCell>
-                    <TableCell>
-                      <div className="flex items-center gap-1">
-                        <User className="w-4 h-4 text-gray-400" />
-                        {column.operator}
-                      </div>
-                    </TableCell>
-                    <TableCell>{getPriorityBadge(column.priority)}</TableCell>
-                    <TableCell>
-                      <div className="flex items-center gap-1">
-                        <Clock className="w-4 h-4 text-gray-400" />
-                        {column.submitTime}
-                      </div>
-                    </TableCell>
-                    <TableCell>
-                      <Button size="sm" variant="outline" onClick={() => handleViewDetail(column.id)} className="h-8 w-8 p-0">
-                        <Eye className="w-4 h-4" />
-                      </Button>
-                    </TableCell>
-                  </TableRow>)}
-              </TableBody>
-            </Table>
-          </CardContent>
-        </Card>
+                      <p className="text-sm text-gray-500">{column.columnName}</p>
+                    </div>
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <Button size="sm" variant="outline" onClick={() => toggleExpanded(column.id)} className="h-8 w-8 p-0">
+                      {expandedColumns.has(column.id) ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
+                    </Button>
+                    <Button size="sm" variant="outline" onClick={() => handleViewDetail(column.id)} className="h-8 w-8 p-0">
+                      <Eye className="w-4 h-4" />
+                    </Button>
+                  </div>
+                </div>
+              </CardHeader>
+              
+              <CardContent className="pt-0">
+                {/* 基本信息 */}
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-4">
+                  <div>
+                    <span className="text-sm text-gray-500">工单号</span>
+                    <p className="font-medium">{column.workOrder}</p>
+                  </div>
+                  <div>
+                    <span className="text-sm text-gray-500">订单号</span>
+                    <p className="font-medium">{column.orderNumber}</p>
+                  </div>
+                  <div>
+                    <span className="text-sm text-gray-500">检测类型</span>
+                    <p className="font-medium">{column.testType}</p>
+                  </div>
+                  <div>
+                    <span className="text-sm text-gray-500">检测日期</span>
+                    <p className="font-medium">{column.testDate}</p>
+                  </div>
+                </div>
+
+                {/* 检测数据详情 */}
+                {expandedColumns.has(column.id) && <DetectionDataCard detectionData={column.detectionData} finalConclusion={column.finalConclusion} />}
+
+                {/* 不合格原因 */}
+                <div className="mt-3 p-3 bg-red-50 border border-red-200 rounded-lg">
+                  <div className="flex items-center space-x-2">
+                    <AlertTriangle className="w-4 h-4 text-red-600" />
+                    <span className="text-sm font-medium text-red-800">不合格原因:</span>
+                    <span className="text-sm text-red-600">{column.不合格原因}</span>
+                  </div>
+                </div>
+
+                {/* 提交信息 */}
+                <div className="flex items-center justify-between mt-3 pt-3 border-t border-gray-200">
+                  <div className="flex items-center space-x-4 text-sm text-gray-500">
+                    <div className="flex items-center space-x-1">
+                      <User className="w-4 h-4" />
+                      <span>操作员: {column.operator}</span>
+                    </div>
+                    <div className="flex items-center space-x-1">
+                      <Clock className="w-4 h-4" />
+                      <span>提交时间: {column.submitTime}</span>
+                    </div>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>)}
+        </div>
 
         {/* 空状态 */}
         {filteredColumns.length === 0 && <Card className="text-center py-12">
