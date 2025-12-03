@@ -213,14 +213,7 @@ export default function UnqualifiedReportsPage(props) {
     if (report) {
       toast({
         title: "预览报告",
-        description: `正在预览报告 ${reportId}`,
-        action: {
-          label: "查看详情",
-          onClick: () => {
-            // 这里可以打开一个详细的预览弹窗
-            console.log("查看报告详情:", report);
-          }
-        }
+        description: `正在预览报告 ${reportId}，请查看详细信息`
       });
     }
   };
@@ -231,13 +224,7 @@ export default function UnqualifiedReportsPage(props) {
     if (report) {
       toast({
         title: "下载报告",
-        description: `正在下载报告 ${reportId}`,
-        action: {
-          label: "查看进度",
-          onClick: () => {
-            console.log("查看下载进度:", reportId);
-          }
-        }
+        description: `正在下载报告 ${reportId}，请稍候`
       });
 
       // 模拟下载过程
@@ -285,13 +272,7 @@ export default function UnqualifiedReportsPage(props) {
     if (report) {
       toast({
         title: "重新计算",
-        description: `正在重新计算报告 ${reportId}`,
-        action: {
-          label: "查看进度",
-          onClick: () => {
-            console.log("查看计算进度:", reportId);
-          }
-        }
+        description: `正在重新计算报告 ${reportId}，请稍候`
       });
 
       // 模拟重新计算过程

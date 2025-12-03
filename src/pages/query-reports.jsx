@@ -178,11 +178,7 @@ export default function QueryReportsPage(props) {
       setFilteredReports([newReport, ...filteredReports]);
       toast({
         title: "报告生成成功",
-        description: `报告 ${newReport.id} 已生成`,
-        action: {
-          label: "查看报告",
-          onClick: () => handlePreview(newReport.id)
-        }
+        description: `报告 ${newReport.id} 已生成，请查看报告列表`
       });
     } catch (error) {
       toast({
@@ -201,14 +197,7 @@ export default function QueryReportsPage(props) {
     if (report) {
       toast({
         title: "预览报告",
-        description: `正在预览报告 ${reportId}`,
-        action: {
-          label: "全屏查看",
-          onClick: () => {
-            // 这里可以打开一个全屏预览
-            console.log("全屏预览报告:", report);
-          }
-        }
+        description: `正在预览报告 ${reportId}，请查看详细信息`
       });
     }
   };
@@ -219,26 +208,14 @@ export default function QueryReportsPage(props) {
     if (report) {
       toast({
         title: "下载报告",
-        description: `正在下载报告 ${reportId}`,
-        action: {
-          label: "查看进度",
-          onClick: () => {
-            console.log("查看下载进度:", reportId);
-          }
-        }
+        description: `正在下载报告 ${reportId}，请稍候`
       });
 
       // 模拟下载过程
       setTimeout(() => {
         toast({
           title: "下载完成",
-          description: `报告 ${reportId} 已下载到本地`,
-          action: {
-            label: "打开文件",
-            onClick: () => {
-              console.log("打开下载的文件:", report.reportName);
-            }
-          }
+          description: `报告 ${reportId} 已下载到本地`
         });
       }, 2000);
     }
@@ -256,13 +233,7 @@ export default function QueryReportsPage(props) {
     }
     toast({
       title: "批量下载",
-      description: `正在下载 ${selectedReports.length} 份报告`,
-      action: {
-        label: "查看进度",
-        onClick: () => {
-          console.log("查看批量下载进度:", selectedReports);
-        }
-      }
+      description: `正在下载 ${selectedReports.length} 份报告，请稍候`
     });
 
     // 模拟批量下载过程
