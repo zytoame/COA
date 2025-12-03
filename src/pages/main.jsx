@@ -70,10 +70,7 @@ export default function MainPage(props) {
           from: 'main'
         }
       });
-      toast({
-        title: "页面跳转",
-        description: `正在跳转到${moduleName}页面`
-      });
+      // 移除跳转成功提示，让用户体验更流畅
     } catch (error) {
       toast({
         title: "跳转失败",
