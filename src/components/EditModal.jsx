@@ -49,26 +49,43 @@ export function EditModal({
   };
 
   // 更新重复性测试的原始测值
-  const updateRepeatabilityValues = (index, value) => {
+  const updateRepeatabilityValues = (category, index, value) => {
     const currentData = editedReport.detectionData?.repeatabilityTest || {};
-    const currentValues = currentData.rawValues || [];
-    const newValues = [...currentValues];
-    newValues[index] = value;
+    const currentValues = {
+      ...currentData.rawValues
+    };
+    if (!currentValues[category]) {
+      currentValues[category] = [];
+    }
+    const newCategoryValues = [...currentValues[category]];
+    newCategoryValues[index] = value;
+    currentValues[category] = newCategoryValues;
 
     // 重新计算CV值
-    const cvValue = calculateCV(newValues);
+    const cvValue = calculateCV(currentValues);
     const conclusion = cvValue <= parseFloat(currentData.standard?.replace(/[^0-9.]/g, '') || 1.5) ? 'pass' : 'fail';
-    updateDetectionData('repeatabilityTest', 'rawValues', newValues);
+    updateDetectionData('repeatabilityTest', 'rawValues', currentValues);
     updateDetectionData('repeatabilityTest', 'result', `${cvValue.toFixed(2)}%`);
     updateDetectionData('repeatabilityTest', 'conclusion', conclusion);
   };
 
-  // 计算CV值（变异系数）
-  const calculateCV = values => {
-    const validValues = values.filter(v => v && !isNaN(parseFloat(v))).map(v => parseFloat(v));
-    if (validValues.length < 2) return 0;
-    const mean = validValues.reduce((sum, val) => sum + val, 0) / validValues.length;
-    const variance = validValues.reduce((sum, val) => sum + Math.pow(val - mean, 2), 0) / validValues.length;
+  // 计算CV值（变异系数）- 支持多分类测值
+  const calculateCV = rawValues => {
+    const allValues = [];
+
+    // 将所有分类的测值合并计算
+    Object.values(rawValues).forEach(categoryValues => {
+      if (Array.isArray(categoryValues)) {
+        categoryValues.forEach(value => {
+          if (value && !isNaN(parseFloat(value))) {
+            allValues.push(parseFloat(value));
+          }
+        });
+      }
+    });
+    if (allValues.length < 2) return 0;
+    const mean = allValues.reduce((sum, val) => sum + val, 0) / allValues.length;
+    const variance = allValues.reduce((sum, val) => sum + Math.pow(val - mean, 2), 0) / allValues.length;
     const standardDeviation = Math.sqrt(variance);
     const cv = standardDeviation / mean * 100;
     return cv;
@@ -117,34 +134,51 @@ export function EditModal({
     return filteredData;
   };
 
-  // 初始化20个重复性测值（如果没有数据的话）
-  const initializeRepeatabilityValues = () => {
+  // 获取重复性测值的分类信息
+  const getRepeatabilityCategories = () => {
     const currentData = editedReport.detectionData?.repeatabilityTest || {};
-    if (!currentData.rawValues || currentData.rawValues.length === 0) {
-      // 生成20个示例测值
-      const sampleValues = Array.from({
-        length: 20
-      }, (_, i) => (35.5 + Math.random() * 0.8).toFixed(2));
-      updateDetectionData('repeatabilityTest', 'rawValues', sampleValues);
-    } else if (currentData.rawValues.length < 20) {
-      // 如果不足20个，补充到20个
-      const existingValues = currentData.rawValues;
-      const additionalValues = Array.from({
-        length: 20 - existingValues.length
-      }, () => (35.5 + Math.random() * 0.8).toFixed(2));
-      updateDetectionData('repeatabilityTest', 'rawValues', [...existingValues, ...additionalValues]);
-    } else if (currentData.rawValues.length > 20) {
-      // 如果超过20个，截取前20个
-      updateDetectionData('repeatabilityTest', 'rawValues', currentData.rawValues.slice(0, 20));
+    const rawValues = currentData.rawValues || {};
+
+    // 如果rawValues是数组，说明是旧格式，转换为糖化模式格式
+    if (Array.isArray(rawValues)) {
+      return {
+        '糖化模式': rawValues
+      };
     }
+
+    // 如果是对象，返回分类格式
+    return rawValues;
   };
 
-  // 组件挂载时初始化测值
-  useEffect(() => {
-    if (isOpen && editedReport.detectionData?.repeatabilityTest) {
-      initializeRepeatabilityValues();
-    }
-  }, [isOpen, editedReport.detectionData?.repeatabilityTest]);
+  // 获取所有测值的总数
+  const getTotalValuesCount = () => {
+    const categories = getRepeatabilityCategories();
+    let totalCount = 0;
+    Object.values(categories).forEach(values => {
+      if (Array.isArray(values)) {
+        totalCount += values.length;
+      }
+    });
+    return totalCount;
+  };
+
+  // 获取所有测值的平均值
+  const getAllValuesAverage = () => {
+    const categories = getRepeatabilityCategories();
+    const allValues = [];
+    Object.values(categories).forEach(values => {
+      if (Array.isArray(values)) {
+        values.forEach(value => {
+          if (value && !isNaN(parseFloat(value))) {
+            allValues.push(parseFloat(value));
+          }
+        });
+      }
+    });
+    if (allValues.length === 0) return 0;
+    const sum = allValues.reduce((acc, val) => acc + val, 0);
+    return (sum / allValues.length).toFixed(2);
+  };
   if (!isOpen || !editedReport) return null;
   return <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="max-w-6xl max-h-[90vh] overflow-y-auto">
@@ -260,12 +294,17 @@ export function EditModal({
                     {key === 'repeatabilityTest' && <div className="space-y-3">
                         <div>
                           <label className="block text-sm font-medium text-gray-700 mb-2">
-                            层析柱重复性测值 (20个固定测值)
+                            层析柱重复性测值
                           </label>
-                          <div className="grid grid-cols-5 gap-2 max-h-60 overflow-y-auto p-2 border border-gray-200 rounded-lg bg-gray-50">
-                            {(data.rawValues || []).map((value, index) => <div key={index} className="flex items-center gap-1">
-                                <span className="text-xs text-gray-500 w-8">{index + 1}.</span>
-                                <Input type="number" step="0.01" value={value} onChange={e => updateRepeatabilityValues(index, e.target.value)} placeholder="测值" className="flex-1 h-8 text-sm" />
+                          <div className="space-y-4">
+                            {Object.entries(getRepeatabilityCategories()).map(([category, values]) => <div key={category} className="border border-gray-200 rounded-lg p-3 bg-gray-50">
+                                <h4 className="text-sm font-medium text-gray-700 mb-2">{category} ({values.length}个测值)</h4>
+                                <div className="grid grid-cols-5 gap-2 max-h-40 overflow-y-auto">
+                                  {values.map((value, index) => <div key={index} className="flex items-center gap-1">
+                                      <span className="text-xs text-gray-500 w-8">{index + 1}.</span>
+                                      <Input type="number" step="0.01" value={value} onChange={e => updateRepeatabilityValues(category, index, e.target.value)} placeholder="测值" className="flex-1 h-8 text-sm" />
+                                    </div>)}
+                                </div>
                               </div>)}
                           </div>
                         </div>
@@ -274,10 +313,10 @@ export function EditModal({
                             <strong>计算说明：</strong>CV值（变异系数）= 标准差 / 平均值 × 100%
                           </p>
                           <p className="text-sm text-blue-600 mt-1">
-                            当前测值数量：{(data.rawValues || []).length} 个（固定20个测值）
+                            当前测值总数：{getTotalValuesCount()} 个
                           </p>
                           <p className="text-sm text-blue-600">
-                            平均值：{((data.rawValues || []).filter(v => v && !isNaN(parseFloat(v))).map(v => parseFloat(v)).reduce((sum, val, arr) => sum + val, 0) / ((data.rawValues || []).filter(v => v && !isNaN(parseFloat(v))).length || 1)).toFixed(2)}
+                            平均值：{getAllValuesAverage()}
                           </p>
                         </div>
                       </div>}
