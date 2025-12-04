@@ -14,7 +14,7 @@ import { SignaturePad } from '@/components/SignaturePad';
 const mockPendingColumns = [{
   id: 'COL-001',
   workOrder: 'WO202501001',
-  columnSerial: 'COL-2025-001',
+  columnSn: 'COL-2025-001',
   orderNumber: 'ORD-202501001',
   instrumentSerial: 'INST-001',
   columnName: 'Protein A Column',
@@ -233,60 +233,6 @@ const mockPendingColumns = [{
     action: '提交检测',
     remark: '完成溶解度测试'
   }]
-}, {
-  id: 'COL-005',
-  workOrder: 'WO202501005',
-  columnSerial: 'COL-2025-005',
-  orderNumber: 'ORD-202501005',
-  instrumentSerial: 'INST-002',
-  columnName: 'HPLC Column',
-  testType: '稳定性测试',
-  testDate: '2025-01-11',
-  testResult: '不合格',
-  不合格原因: '稳定性时间不足',
-  operator: '张三',
-  submitTime: '2025-01-11 15:30:00',
-  priority: 'medium',
-  // 详细检测数据
-  detectionData: {
-    moduleTemperature: {
-      standard: '25-40°C',
-      result: '36.8°C',
-      conclusion: 'pass',
-      icon: Thermometer
-    },
-    systemPressure: {
-      standard: '5.0-8.0 MPa',
-      result: '6.2 MPa',
-      conclusion: 'pass',
-      icon: Gauge
-    },
-    hbA1cAppearanceTime: {
-      standard: '36-40 秒',
-      result: '37.5 秒',
-      conclusion: 'pass',
-      icon: Timer
-    },
-    repeatabilityTest: {
-      standard: 'CV < 1.5%',
-      result: '1.6%',
-      conclusion: 'fail',
-      icon: Activity
-    },
-    appearanceInspection: {
-      standard: '包装完整，无明显损坏',
-      result: '包装完好',
-      conclusion: 'pass',
-      icon: Package
-    }
-  },
-  finalConclusion: 'unqualified',
-  operationHistory: [{
-    time: '2025-01-11 15:30:00',
-    operator: '张三',
-    action: '提交检测',
-    remark: '完成稳定性测试'
-  }]
 }];
 export default function BatchAuditPage(props) {
   const {
@@ -312,7 +258,7 @@ export default function BatchAuditPage(props) {
   // 搜索条件
   const [auditSearchParams, setAuditSearchParams] = useState({
     workOrder: '',
-    columnSerial: '',
+    columnSn: '',
     orderNumber: '',
     instrumentSerial: '',
     testType: 'all',
@@ -364,7 +310,7 @@ export default function BatchAuditPage(props) {
   // 搜索功能
   const handleAuditSearch = () => {
     const filtered = pendingColumns.filter(column => {
-      return (!auditSearchParams.workOrder || column.workOrder.toLowerCase().includes(auditSearchParams.workOrder.toLowerCase())) && (!auditSearchParams.columnSerial || column.columnSerial.toLowerCase().includes(auditSearchParams.columnSerial.toLowerCase())) && (!auditSearchParams.orderNumber || column.orderNumber.toLowerCase().includes(auditSearchParams.orderNumber.toLowerCase())) && (!auditSearchParams.instrumentSerial || column.instrumentSerial.toLowerCase().includes(auditSearchParams.instrumentSerial.toLowerCase())) && (auditSearchParams.testType === 'all' || column.testType === auditSearchParams.testType) && (auditSearchParams.priority === 'all' || column.priority === auditSearchParams.priority);
+      return (!auditSearchParams.workOrder || column.workOrder.toLowerCase().includes(auditSearchParams.workOrder.toLowerCase())) && (!auditSearchParams.columnSn || column.columnSn.toLowerCase().includes(auditSearchParams.columnSn.toLowerCase())) && (!auditSearchParams.orderNumber || column.orderNumber.toLowerCase().includes(auditSearchParams.orderNumber.toLowerCase())) && (!auditSearchParams.instrumentSerial || column.instrumentSerial.toLowerCase().includes(auditSearchParams.instrumentSerial.toLowerCase())) && (auditSearchParams.testType === 'all' || column.testType === auditSearchParams.testType) && (auditSearchParams.priority === 'all' || column.priority === auditSearchParams.priority);
     });
     setFilteredPendingColumns(filtered);
     toast({
@@ -377,7 +323,7 @@ export default function BatchAuditPage(props) {
   const handleAuditReset = () => {
     setAuditSearchParams({
       workOrder: '',
-      columnSerial: '',
+      columnSn: '',
       orderNumber: '',
       instrumentSerial: '',
       testType: 'all',
@@ -475,7 +421,7 @@ export default function BatchAuditPage(props) {
     if (column) {
       toast({
         title: "下载COA报告",
-        description: `正在下载 ${column.columnSerial} 的COA报告`
+        description: `正在下载 ${column.columnSn} 的COA报告`
       });
     }
   };
@@ -584,9 +530,9 @@ export default function BatchAuditPage(props) {
               </div>
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">层析柱序列号</label>
-                <Input placeholder="请输入层析柱序列号" value={auditSearchParams.columnSerial} onChange={e => setAuditSearchParams({
+                <Input placeholder="请输入层析柱序列号" value={auditSearchParams.columnSn} onChange={e => setAuditSearchParams({
                 ...auditSearchParams,
-                columnSerial: e.target.value
+                columnSn: e.target.value
               })} />
               </div>
               <div>
@@ -614,11 +560,8 @@ export default function BatchAuditPage(props) {
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="all">全部类型</SelectItem>
-                    <SelectItem value="纯度检测">纯度检测</SelectItem>
-                    <SelectItem value="pH值检测">pH值检测</SelectItem>
-                    <SelectItem value="杂质含量">杂质含量</SelectItem>
-                    <SelectItem value="溶解度测试">溶解度测试</SelectItem>
-                    <SelectItem value="稳定性测试">稳定性测试</SelectItem>
+                    <SelectItem value="糖化模式">糖化模式</SelectItem>
+                    <SelectItem value="地貧模式">地貧模式</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
@@ -695,7 +638,7 @@ export default function BatchAuditPage(props) {
                       <TableCell>
                         <input type="checkbox" checked={selectedColumns.includes(column.id)} onChange={() => handleSelectColumn(column.id)} className="rounded border-gray-300" />
                       </TableCell>
-                      <TableCell className="font-medium">{column.columnSerial}</TableCell>
+                      <TableCell className="font-medium">{column.columnSn}</TableCell>
                       <TableCell>
                         <div className="max-w-32">
                           <div className="truncate" title={column.columnName}>

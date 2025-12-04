@@ -99,6 +99,7 @@ export default function MainPage(props) {
 
   // 计算待处理总数：不合格报告管理中的待审核数量 + 批量审核签字中的待处理数量
   const totalPending = functionModules.find(m => m.id === 'unqualified-reports')?.stats.pending + functionModules.find(m => m.id === 'batch-audit')?.stats.pending;
+
   return <div style={style} className="min-h-screen bg-gray-50">
       {/* 顶部导航 */}
       <div className="bg-white border-b border-gray-200 px-6 py-4">
