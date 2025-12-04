@@ -1,7 +1,7 @@
 // @ts-ignore;
 import React, { useState } from 'react';
 // @ts-ignore;
-import { Button, Input, Card, CardContent, CardHeader, CardTitle, Badge, Table, TableBody, TableCell, TableHead, TableHeader, TableRow, Select, SelectContent, SelectItem, SelectTrigger, SelectValue, useToast } from '@/components/ui';
+import { Button, Input, Card, CardContent, CardHeader, CardTitle, Badge, Table, TableBody, TableCell, TableHead, TableHeader, TableRow, Select, SelectContent, SelectItem, SelectTrigger, SelectValue, useToast, Pagination, PaginationContent, PaginationEllipsis, PaginationItem, PaginationLink, PaginationNext, PaginationPrevious } from '@/components/ui';
 // @ts-ignore;
 import { Search, Download, Eye, FileText, Calendar, User, ArrowLeft, Filter, Plus, BarChart3, CheckCircle, Clock, Loader2, FileCheck } from 'lucide-react';
 
@@ -86,6 +86,326 @@ const mockQualifiedReports = [{
   fileSize: '2.5MB',
   reportName: '地贫模式报告_20250111',
   generateTime: '2025-01-11 15:30:00'
+}, {
+  id: 'RPT-Q006',
+  workOrder: 'WO202501006',
+  columnSn: 'COL-2025-006',
+  orderNumber: 'ORD-202501006',
+  instrumentSerial: 'INST-001',
+  reportType: 'glycation',
+  status: 'qualified',
+  reportDate: '2025-01-10',
+  检测项目: '糖化模式',
+  检测结果: '合格',
+  负责人: '李四',
+  审核状态: 'approved',
+  fileSize: '2.2MB',
+  reportName: '糖化模式报告_20250110',
+  generateTime: '2025-01-10 13:20:00'
+}, {
+  id: 'RPT-Q007',
+  workOrder: 'WO202501007',
+  columnSn: 'COL-2025-007',
+  orderNumber: 'ORD-202501007',
+  instrumentSerial: 'INST-003',
+  reportType: 'purity',
+  status: 'qualified',
+  reportDate: '2025-01-09',
+  检测项目: '纯度分析',
+  检测结果: '合格',
+  负责人: '王五',
+  审核状态: 'approved',
+  fileSize: '1.7MB',
+  reportName: '纯度分析报告_20250109',
+  generateTime: '2025-01-09 10:45:00'
+}, {
+  id: 'RPT-Q008',
+  workOrder: 'WO202501008',
+  columnSn: 'COL-2025-008',
+  orderNumber: 'ORD-202501008',
+  instrumentSerial: 'INST-002',
+  reportType: 'thalassemia',
+  status: 'qualified',
+  reportDate: '2025-01-08',
+  检测项目: '地贫模式',
+  检测结果: '合格',
+  负责人: '赵六',
+  审核状态: 'approved',
+  fileSize: '2.0MB',
+  reportName: '地贫模式报告_20250108',
+  generateTime: '2025-01-08 16:10:00'
+}, {
+  id: 'RPT-Q009',
+  workOrder: 'WO202501009',
+  columnSn: 'COL-2025-009',
+  orderNumber: 'ORD-202501009',
+  instrumentSerial: 'INST-001',
+  reportType: 'glycation',
+  status: 'qualified',
+  reportDate: '2025-01-07',
+  检测项目: '糖化模式',
+  检测结果: '合格',
+  负责人: '张三',
+  审核状态: 'approved',
+  fileSize: '2.4MB',
+  reportName: '糖化模式报告_20250107',
+  generateTime: '2025-01-07 14:55:00'
+}, {
+  id: 'RPT-Q010',
+  workOrder: 'WO202501010',
+  columnSn: 'COL-2025-010',
+  orderNumber: 'ORD-202501010',
+  instrumentSerial: 'INST-003',
+  reportType: 'purity',
+  status: 'qualified',
+  reportDate: '2025-01-06',
+  检测项目: '纯度分析',
+  检测结果: '合格',
+  负责人: '李四',
+  审核状态: 'approved',
+  fileSize: '1.9MB',
+  reportName: '纯度分析报告_20250106',
+  generateTime: '2025-01-06 11:30:00'
+}, {
+  id: 'RPT-Q011',
+  workOrder: 'WO202501011',
+  columnSn: 'COL-2025-011',
+  orderNumber: 'ORD-202501011',
+  instrumentSerial: 'INST-002',
+  reportType: 'thalassemia',
+  status: 'qualified',
+  reportDate: '2025-01-05',
+  检测项目: '地贫模式',
+  检测结果: '合格',
+  负责人: '王五',
+  审核状态: 'approved',
+  fileSize: '2.1MB',
+  reportName: '地贫模式报告_20250105',
+  generateTime: '2025-01-05 15:20:00'
+}, {
+  id: 'RPT-Q012',
+  workOrder: 'WO202501012',
+  columnSn: 'COL-2025-012',
+  orderNumber: 'ORD-202501012',
+  instrumentSerial: 'INST-001',
+  reportType: 'glycation',
+  status: 'qualified',
+  reportDate: '2025-01-04',
+  检测项目: '糖化模式',
+  检测结果: '合格',
+  负责人: '赵六',
+  审核状态: 'approved',
+  fileSize: '2.3MB',
+  reportName: '糖化模式报告_20250104',
+  generateTime: '2025-01-04 12:40:00'
+}, {
+  id: 'RPT-Q013',
+  workOrder: 'WO202501013',
+  columnSn: 'COL-2025-013',
+  orderNumber: 'ORD-202501013',
+  instrumentSerial: 'INST-003',
+  reportType: 'purity',
+  status: 'qualified',
+  reportDate: '2025-01-03',
+  检测项目: '纯度分析',
+  检测结果: '合格',
+  负责人: '张三',
+  审核状态: 'approved',
+  fileSize: '1.8MB',
+  reportName: '纯度分析报告_20250103',
+  generateTime: '2025-01-03 09:25:00'
+}, {
+  id: 'RPT-Q014',
+  workOrder: 'WO202501014',
+  columnSn: 'COL-2025-014',
+  orderNumber: 'ORD-202501014',
+  instrumentSerial: 'INST-002',
+  reportType: 'thalassemia',
+  status: 'qualified',
+  reportDate: '2025-01-02',
+  检测项目: '地贫模式',
+  检测结果: '合格',
+  负责人: '李四',
+  审核状态: 'approved',
+  fileSize: '2.0MB',
+  reportName: '地贫模式报告_20250102',
+  generateTime: '2025-01-02 14:15:00'
+}, {
+  id: 'RPT-Q015',
+  workOrder: 'WO202501015',
+  columnSn: 'COL-2025-015',
+  orderNumber: 'ORD-202501015',
+  instrumentSerial: 'INST-001',
+  reportType: 'glycation',
+  status: 'qualified',
+  reportDate: '2025-01-01',
+  检测项目: '糖化模式',
+  检测结果: '合格',
+  负责人: '王五',
+  审核状态: 'approved',
+  fileSize: '2.2MB',
+  reportName: '糖化模式报告_20250101',
+  generateTime: '2025-01-01 10:50:00'
+}, {
+  id: 'RPT-Q016',
+  workOrder: 'WO202501016',
+  columnSn: 'COL-2025-016',
+  orderNumber: 'ORD-202501016',
+  instrumentSerial: 'INST-003',
+  reportType: 'purity',
+  status: 'qualified',
+  reportDate: '2024-12-31',
+  检测项目: '纯度分析',
+  检测结果: '合格',
+  负责人: '赵六',
+  审核状态: 'approved',
+  fileSize: '1.9MB',
+  reportName: '纯度分析报告_20241231',
+  generateTime: '2024-12-31 16:35:00'
+}, {
+  id: 'RPT-Q017',
+  workOrder: 'WO202501017',
+  columnSn: 'COL-2025-017',
+  orderNumber: 'ORD-202501017',
+  instrumentSerial: 'INST-002',
+  reportType: 'thalassemia',
+  status: 'qualified',
+  reportDate: '2024-12-30',
+  检测项目: '地贫模式',
+  检测结果: '合格',
+  负责人: '张三',
+  审核状态: 'approved',
+  fileSize: '2.4MB',
+  reportName: '地贫模式报告_20241230',
+  generateTime: '2024-12-30 13:05:00'
+}, {
+  id: 'RPT-Q018',
+  workOrder: 'WO202501018',
+  columnSn: 'COL-2025-018',
+  orderNumber: 'ORD-202501018',
+  instrumentSerial: 'INST-001',
+  reportType: 'glycation',
+  status: 'qualified',
+  reportDate: '2024-12-29',
+  检测项目: '糖化模式',
+  检测结果: '合格',
+  负责人: '李四',
+  审核状态: 'approved',
+  fileSize: '2.1MB',
+  reportName: '糖化模式报告_20241229',
+  generateTime: '2024-12-29 11:40:00'
+}, {
+  id: 'RPT-Q019',
+  workOrder: 'WO202501019',
+  columnSn: 'COL-2025-019',
+  orderNumber: 'ORD-202501019',
+  instrumentSerial: 'INST-003',
+  reportType: 'purity',
+  status: 'qualified',
+  reportDate: '2024-12-28',
+  检测项目: '纯度分析',
+  检测结果: '合格',
+  负责人: '王五',
+  审核状态: 'approved',
+  fileSize: '1.7MB',
+  reportName: '纯度分析报告_20241228',
+  generateTime: '2024-12-28 15:25:00'
+}, {
+  id: 'RPT-Q020',
+  workOrder: 'WO202501020',
+  columnSn: 'COL-2025-020',
+  orderNumber: 'ORD-202501020',
+  instrumentSerial: 'INST-002',
+  reportType: 'thalassemia',
+  status: 'qualified',
+  reportDate: '2024-12-27',
+  检测项目: '地贫模式',
+  检测结果: '合格',
+  负责人: '赵六',
+  审核状态: 'approved',
+  fileSize: '2.0MB',
+  reportName: '地贫模式报告_20241227',
+  generateTime: '2024-12-27 12:10:00'
+}, {
+  id: 'RPT-Q021',
+  workOrder: 'WO202501021',
+  columnSn: 'COL-2025-021',
+  orderNumber: 'ORD-202501021',
+  instrumentSerial: 'INST-001',
+  reportType: 'glycation',
+  status: 'qualified',
+  reportDate: '2024-12-26',
+  检测项目: '糖化模式',
+  检测结果: '合格',
+  负责人: '张三',
+  审核状态: 'approved',
+  fileSize: '2.3MB',
+  reportName: '糖化模式报告_20241226',
+  generateTime: '2024-12-26 14:45:00'
+}, {
+  id: 'RPT-Q022',
+  workOrder: 'WO202501022',
+  columnSn: 'COL-2025-022',
+  orderNumber: 'ORD-202501022',
+  instrumentSerial: 'INST-003',
+  reportType: 'purity',
+  status: 'qualified',
+  reportDate: '2024-12-25',
+  检测项目: '纯度分析',
+  检测结果: '合格',
+  负责人: '李四',
+  审核状态: 'approved',
+  fileSize: '1.8MB',
+  reportName: '纯度分析报告_20241225',
+  generateTime: '2024-12-25 10:20:00'
+}, {
+  id: 'RPT-Q023',
+  workOrder: 'WO202501023',
+  columnSn: 'COL-2025-023',
+  orderNumber: 'ORD-202501023',
+  instrumentSerial: 'INST-002',
+  reportType: 'thalassemia',
+  status: 'qualified',
+  reportDate: '2024-12-24',
+  检测项目: '地贫模式',
+  检测结果: '合格',
+  负责人: '王五',
+  审核状态: 'approved',
+  fileSize: '2.2MB',
+  reportName: '地贫模式报告_20241224',
+  generateTime: '2024-12-24 16:00:00'
+}, {
+  id: 'RPT-Q024',
+  workOrder: 'WO202501024',
+  columnSn: 'COL-2025-024',
+  orderNumber: 'ORD-202501024',
+  instrumentSerial: 'INST-001',
+  reportType: 'glycation',
+  status: 'qualified',
+  reportDate: '2024-12-23',
+  检测项目: '糖化模式',
+  检测结果: '合格',
+  负责人: '赵六',
+  审核状态: 'approved',
+  fileSize: '2.0MB',
+  reportName: '糖化模式报告_20241223',
+  generateTime: '2024-12-23 13:35:00'
+}, {
+  id: 'RPT-Q025',
+  workOrder: 'WO202501025',
+  columnSn: 'COL-2025-025',
+  orderNumber: 'ORD-202501025',
+  instrumentSerial: 'INST-003',
+  reportType: 'purity',
+  status: 'qualified',
+  reportDate: '2024-12-22',
+  检测项目: '纯度分析',
+  检测结果: '合格',
+  负责人: '张三',
+  审核状态: 'approved',
+  fileSize: '1.9MB',
+  reportName: '纯度分析报告_20241222',
+  generateTime: '2024-12-22 11:15:00'
 }];
 export default function QueryReportsPage(props) {
   const {
@@ -101,6 +421,10 @@ export default function QueryReportsPage(props) {
   const [filteredReports, setFilteredReports] = useState(mockQualifiedReports);
   const [generating, setGenerating] = useState(false);
   const [selectedReports, setSelectedReports] = useState([]);
+
+  // 分页状态
+  const [currentPage, setCurrentPage] = useState(1);
+  const pageSize = 20; // 每页显示20条记录
 
   // 搜索条件
   const [searchParams, setSearchParams] = useState({
@@ -118,12 +442,19 @@ export default function QueryReportsPage(props) {
     type: 'admin'
   };
 
+  // 计算分页数据
+  const totalPages = Math.ceil(filteredReports.length / pageSize);
+  const startIndex = (currentPage - 1) * pageSize;
+  const endIndex = startIndex + pageSize;
+  const currentReports = filteredReports.slice(startIndex, endIndex);
+
   // 搜索功能
   const handleSearch = () => {
     const filtered = qualifiedReports.filter(report => {
       return (!searchParams.workOrder || report.workOrder.toLowerCase().includes(searchParams.workOrder.toLowerCase())) && (!searchParams.columnSn || report.columnSn.toLowerCase().includes(searchParams.columnSn.toLowerCase())) && (!searchParams.orderNumber || report.orderNumber.toLowerCase().includes(searchParams.orderNumber.toLowerCase())) && (!searchParams.instrumentSerial || report.instrumentSerial.toLowerCase().includes(searchParams.instrumentSerial.toLowerCase())) && (searchParams.reportType === 'all' || report.reportType === searchParams.reportType);
     });
     setFilteredReports(filtered);
+    setCurrentPage(1); // 重置到第一页
     toast({
       title: "查询完成",
       description: `找到 ${filtered.length} 条合格报告`
@@ -141,6 +472,7 @@ export default function QueryReportsPage(props) {
       dateRange: 'all'
     });
     setFilteredReports(qualifiedReports);
+    setCurrentPage(1); // 重置到第一页
   };
 
   // 生成报告
@@ -176,6 +508,7 @@ export default function QueryReportsPage(props) {
       };
       setQualifiedReports([newReport, ...qualifiedReports]);
       setFilteredReports([newReport, ...filteredReports]);
+      setCurrentPage(1); // 新报告生成后跳转到第一页
       toast({
         title: "报告生成成功",
         description: `报告 ${newReport.id} 已生成，请查看报告列表`
@@ -255,12 +588,12 @@ export default function QueryReportsPage(props) {
     }
   };
 
-  // 全选/取消全选
+  // 全选/取消全选（仅当前页）
   const handleSelectAll = checked => {
     if (checked) {
-      setSelectedReports(filteredReports.map(report => report.id));
+      setSelectedReports([...selectedReports, ...currentReports.map(report => report.id)]);
     } else {
-      setSelectedReports([]);
+      setSelectedReports(selectedReports.filter(id => !currentReports.some(report => report.id === id)));
     }
   };
 
@@ -303,6 +636,46 @@ export default function QueryReportsPage(props) {
       pageId: 'main',
       params: {}
     });
+  };
+
+  // 分页组件
+  const renderPagination = () => {
+    if (totalPages <= 1) return null;
+    return <div className="flex items-center justify-between px-2">
+        <div className="text-sm text-gray-500">
+          显示第 {startIndex + 1} - {Math.min(endIndex, filteredReports.length)} 条，共 {filteredReports.length} 条记录
+        </div>
+        <Pagination>
+          <PaginationContent>
+            <PaginationItem>
+              <PaginationPrevious onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))} className={currentPage === 1 ? 'pointer-events-none opacity-50' : 'cursor-pointer'} />
+            </PaginationItem>
+            
+            {/* 页码显示逻辑 */}
+            {Array.from({
+            length: totalPages
+          }, (_, i) => i + 1).map(page => {
+            // 显示逻辑：当前页前后各显示2页，超出范围显示省略号
+            if (page === 1 || page === totalPages || page >= currentPage - 2 && page <= currentPage + 2) {
+              return <PaginationItem key={page}>
+                    <PaginationLink onClick={() => setCurrentPage(page)} isActive={currentPage === page} className="cursor-pointer">
+                      {page}
+                    </PaginationLink>
+                  </PaginationItem>;
+            } else if (page === currentPage - 3 || page === currentPage + 3) {
+              return <PaginationItem key={page}>
+                    <PaginationEllipsis />
+                  </PaginationItem>;
+            }
+            return null;
+          })}
+            
+            <PaginationItem>
+              <PaginationNext onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))} className={currentPage === totalPages ? 'pointer-events-none opacity-50' : 'cursor-pointer'} />
+            </PaginationItem>
+          </PaginationContent>
+        </Pagination>
+      </div>;
   };
   return <div style={style} className="min-h-screen bg-gray-50">
       {/* 顶部导航 */}
@@ -506,7 +879,7 @@ export default function QueryReportsPage(props) {
                 合格报告列表
               </span>
               <div className="text-sm text-gray-500">
-                共 {filteredReports.length} 份报告
+                当前页显示 {currentReports.length} 条，共 {filteredReports.length} 份报告
               </div>
             </CardTitle>
           </CardHeader>
@@ -515,7 +888,7 @@ export default function QueryReportsPage(props) {
               <TableHeader>
                 <TableRow>
                   <TableHead className="w-12">
-                    <input type="checkbox" checked={selectedReports.length === filteredReports.length && filteredReports.length > 0} onChange={e => handleSelectAll(e.target.checked)} className="rounded border-gray-300" />
+                    <input type="checkbox" checked={currentReports.length > 0 && currentReports.every(report => selectedReports.includes(report.id))} onChange={e => handleSelectAll(e.target.checked)} className="rounded border-gray-300" />
                   </TableHead>
                   <TableHead>报告编号</TableHead>
                   <TableHead>报告名称</TableHead>
@@ -531,7 +904,7 @@ export default function QueryReportsPage(props) {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {filteredReports.map(report => <TableRow key={report.id} className="hover:bg-gray-50">
+                {currentReports.map(report => <TableRow key={report.id} className="hover:bg-gray-50">
                     <TableCell>
                       <input type="checkbox" checked={selectedReports.includes(report.id)} onChange={() => handleSelectReport(report.id)} className="rounded border-gray-300" />
                     </TableCell>
@@ -575,6 +948,11 @@ export default function QueryReportsPage(props) {
             </Table>
           </CardContent>
         </Card>
+
+        {/* 分页组件 */}
+        {filteredReports.length > 0 && <div className="mt-4">
+            {renderPagination()}
+          </div>}
 
         {/* 空状态 */}
         {filteredReports.length === 0 && <Card className="text-center py-12">
