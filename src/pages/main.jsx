@@ -1,5 +1,5 @@
 // @ts-ignore;
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 // @ts-ignore;
 import { Button, Card, CardContent, CardHeader, CardTitle, Badge, useToast } from '@/components/ui';
 // @ts-ignore;
@@ -58,6 +58,85 @@ export default function MainPage(props) {
     toast
   } = useToast();
 
+  // 状态管理
+  const [statsData, setStatsData] = useState({
+    totalReports: 196,
+    completedAudits: 168,
+    pendingCount: 20,
+    urgentCount: 2
+  });
+  const [recentActivities, setRecentActivities] = useState([]);
+
+  // TODO: 从后端获取统计数据
+  // 需要调用接口获取：
+  // - 总报告数量
+  // - 已完成审核数量
+  // - 待处理数量
+  // - 紧急处理数量
+  const fetchStatsData = async () => {
+    try {
+      // TODO: 替换为实际的数据源调用
+      // const result = await $w.cloud.callDataSource({
+      //   dataSourceName: 'chromatography_reports',
+      //   methodName: 'wedaGetRecordsV2',
+      //   params: {
+      //     filter: {
+      //       where: {
+      //         $and: [
+      //           { createBy: { $eq-current-user: true } }
+      //         ]
+      //       }
+      //     },
+      //     select: {
+      //       $master: true
+      //     },
+      //     getCount: true
+      //   }
+      // });
+      // setStatsData({
+      //   totalReports: result.total,
+      //   completedAudits: result.records.filter(r => r.auditStatus === 'approved').length,
+      //   pendingCount: result.records.filter(r => r.auditStatus === 'pending').length,
+      //   urgentCount: result.records.filter(r => r.priority === 'high').length
+      // });
+    } catch (error) {
+      console.error('获取统计数据失败:', error);
+    }
+  };
+
+  // TODO: 从后端获取最近活动记录
+  // 需要调用接口获取用户的操作历史
+  const fetchRecentActivities = async () => {
+    try {
+      // TODO: 替换为实际的数据源调用
+      // const result = await $w.cloud.callDataSource({
+      //   dataSourceName: 'audit_records',
+      //   methodName: 'wedaGetRecordsV2',
+      //   params: {
+      //     filter: {
+      //       where: {
+      //         $and: [
+      //           { createBy: { $eq-current-user: true } }
+      //         ]
+      //       }
+      //     },
+      //     orderBy: [{ createdAt: 'desc' }],
+      //     select: { $master: true },
+      //     pageSize: 10
+      //   }
+      // });
+      // setRecentActivities(result.records);
+    } catch (error) {
+      console.error('获取最近活动失败:', error);
+    }
+  };
+
+  // 组件挂载时获取数据
+  useEffect(() => {
+    fetchStatsData();
+    fetchRecentActivities();
+  }, []);
+
   // 页面跳转处理
   const handleNavigateToPage = (pageId, moduleName) => {
     try {
@@ -67,7 +146,6 @@ export default function MainPage(props) {
           from: 'main'
         }
       });
-      // 移除跳转成功提示，让用户体验更流畅
     } catch (error) {
       toast({
         title: "跳转失败",
@@ -99,7 +177,6 @@ export default function MainPage(props) {
 
   // 计算待处理总数：不合格报告管理中的待审核数量 + 批量审核签字中的待处理数量
   const totalPending = functionModules.find(m => m.id === 'unqualified-reports')?.stats.pending + functionModules.find(m => m.id === 'batch-audit')?.stats.pending;
-
   return <div style={style} className="min-h-screen bg-gray-50">
       {/* 顶部导航 */}
       <div className="bg-white border-b border-gray-200 px-6 py-4">
@@ -128,7 +205,7 @@ export default function MainPage(props) {
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-blue-100">总报告数</p>
-                  <p className="text-3xl font-bold">196</p>
+                  <p className="text-3xl font-bold">{statsData.totalReports}</p>
                   <p className="text-blue-100 text-sm">本月新增 45</p>
                 </div>
                 <BarChart3 className="w-12 h-12 text-blue-200" />
@@ -141,8 +218,8 @@ export default function MainPage(props) {
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-green-100">已完成审核</p>
-                  <p className="text-3xl font-bold">168</p>
-                  <p className="text-green-100 text-sm">完成率 85.7%</p>
+                  <p className="text-3xl font-bold">{statsData.completedAudits}</p>
+                  <p className="text-green-100 text-sm">完成率 {(statsData.completedAudits / statsData.totalReports * 100).toFixed(1)}%</p>
                 </div>
                 <FileCheck className="w-12 h-12 text-green-200" />
               </div>
@@ -154,8 +231,8 @@ export default function MainPage(props) {
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-orange-100">待处理</p>
-                  <p className="text-3xl font-bold">{totalPending}</p>
-                  <p className="text-orange-100 text-sm">紧急处理 {functionModules.find(m => m.id === 'unqualified-reports')?.stats.urgent}</p>
+                  <p className="text-3xl font-bold">{statsData.pendingCount}</p>
+                  <p className="text-orange-100 text-sm">紧急处理 {statsData.urgentCount}</p>
                 </div>
                 <ClipboardList className="w-12 h-12 text-orange-200" />
               </div>
@@ -241,32 +318,17 @@ export default function MainPage(props) {
           </CardHeader>
           <CardContent>
             <div className="space-y-4">
-              <div className="flex items-center space-x-3 p-3 bg-gray-50 rounded-lg">
-                <div className="w-2 h-2 bg-green-500 rounded-full"></div>
-                <div className="flex-1">
-                  <p className="text-sm font-medium">张三 完成了批量审核</p>
-                  <p className="text-xs text-gray-500">审核了 5 个层析柱，通过 3 个，拒绝 2 个</p>
-                </div>
-                <span className="text-xs text-gray-500">10分钟前</span>
-              </div>
-              
-              <div className="flex items-center space-x-3 p-3 bg-gray-50 rounded-lg">
-                <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
-                <div className="flex-1">
-                  <p className="text-sm font-medium">李四 生成了新的检测报告</p>
-                  <p className="text-xs text-gray-500">工单号：WO202501020，层析柱：COL-2025-020</p>
-                </div>
-                <span className="text-xs text-gray-500">25分钟前</span>
-              </div>
-              
-              <div className="flex items-center space-x-3 p-3 bg-gray-50 rounded-lg">
-                <div className="w-2 h-2 bg-orange-500 rounded-full"></div>
-                <div className="flex-1">
-                  <p className="text-sm font-medium">王五 修改了检测数据</p>
-                  <p className="text-xs text-gray-500">重新计算CV值后，报告状态更新为合格</p>
-                </div>
-                <span className="text-xs text-gray-500">1小时前</span>
-              </div>
+              {recentActivities.length > 0 ? recentActivities.map((activity, index) => <div key={index} className="flex items-center space-x-3 p-3 bg-gray-50 rounded-lg">
+                  <div className={`w-2 h-2 rounded-full ${activity.type === 'audit' ? 'bg-green-500' : activity.type === 'generate' ? 'bg-blue-500' : 'bg-orange-500'}`}></div>
+                  <div className="flex-1">
+                    <p className="text-sm font-medium">{activity.title}</p>
+                    <p className="text-xs text-gray-500">{activity.description}</p>
+                  </div>
+                  <span className="text-xs text-gray-500">{activity.time}</span>
+                </div>) : <div className="text-center py-8 text-gray-500">
+                  <Clock className="w-12 h-12 mx-auto mb-2 text-gray-300" />
+                  <p>暂无最近活动</p>
+                </div>}
             </div>
           </CardContent>
         </Card>

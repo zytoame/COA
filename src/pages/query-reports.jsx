@@ -1,9 +1,14 @@
 // @ts-ignore;
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 // @ts-ignore;
-import { Button, Input, Card, CardContent, CardHeader, CardTitle, Badge, Table, TableBody, TableCell, TableHead, TableHeader, TableRow, Select, SelectContent, SelectItem, SelectTrigger, SelectValue, useToast, Pagination, PaginationContent, PaginationEllipsis, PaginationItem, PaginationLink, PaginationNext, PaginationPrevious } from '@/components/ui';
+import { Button, Card, CardContent, CardHeader, CardTitle, Badge, useToast, Pagination, PaginationContent, PaginationEllipsis, PaginationItem, PaginationLink, PaginationNext, PaginationPrevious } from '@/components/ui';
 // @ts-ignore;
-import { Search, Download, Eye, FileText, Calendar, User, ArrowLeft, Filter, Plus, BarChart3, CheckCircle, Clock, Loader2, FileCheck } from 'lucide-react';
+import { Search, Download, Eye, FileText, ArrowLeft, Plus, Loader2, FileCheck, Clock, User } from 'lucide-react';
+
+// 引入子组件
+import { ReportTable } from '@/components/ReportTable';
+import { ReportStats } from '@/components/ReportStats';
+import { SearchFilters } from '@/components/SearchFilters';
 
 // 模拟合格报告数据 - 只显示最新下载或预览的20份报告
 const mockQualifiedReports = [{
@@ -377,10 +382,11 @@ export default function QueryReportsPage(props) {
   } = useToast();
 
   // 状态管理
-  const [qualifiedReports, setQualifiedReports] = useState(mockQualifiedReports);
-  const [filteredReports, setFilteredReports] = useState(mockQualifiedReports);
+  const [qualifiedReports, setQualifiedReports] = useState([]);
+  const [filteredReports, setFilteredReports] = useState([]);
   const [generating, setGenerating] = useState(false);
   const [selectedReports, setSelectedReports] = useState([]);
+  const [loading, setLoading] = useState(false);
 
   // 分页状态
   const [currentPage, setCurrentPage] = useState(1);
@@ -408,17 +414,109 @@ export default function QueryReportsPage(props) {
   const endIndex = startIndex + pageSize;
   const currentReports = filteredReports.slice(startIndex, endIndex);
 
-  // 搜索功能
-  const handleSearch = () => {
-    const filtered = qualifiedReports.filter(report => {
-      return (!searchParams.workOrder || report.workOrder.toLowerCase().includes(searchParams.workOrder.toLowerCase())) && (!searchParams.columnSn || report.columnSn.toLowerCase().includes(searchParams.columnSn.toLowerCase())) && (!searchParams.orderNumber || report.orderNumber.toLowerCase().includes(searchParams.orderNumber.toLowerCase())) && (!searchParams.instrumentSerial || report.instrumentSerial.toLowerCase().includes(searchParams.instrumentSerial.toLowerCase())) && (searchParams.reportType === 'all' || report.reportType === searchParams.reportType);
-    });
-    setFilteredReports(filtered);
-    setCurrentPage(1); // 重置到第一页
-    toast({
-      title: "查询完成",
-      description: `找到 ${filtered.length} 条合格报告`
-    });
+  // TODO: 从后端获取合格报告列表
+  // 需要调用接口获取最近访问的20份合格报告
+  const fetchQualifiedReports = async () => {
+    setLoading(true);
+    try {
+      // TODO: 替换为实际的数据源调用
+      // const result = await $w.cloud.callDataSource({
+      //   dataSourceName: 'chromatography_reports',
+      //   methodName: 'wedaGetRecordsV2',
+      //   params: {
+      //     filter: {
+      //       where: {
+      //         $and: [
+      //           { testResult: { $eq: '合格' } },
+      //           { createBy: { $eq-current-user: true } }
+      //         ]
+      //       }
+      //     },
+      //     orderBy: [{ lastAccessTime: 'desc' }],
+      //     select: { $master: true },
+      //     getCount: true,
+      //     pageSize: 20
+      //   }
+      // });
+      // setQualifiedReports(result.records);
+      // setFilteredReports(result.records);
+
+      // 临时使用模拟数据
+      setQualifiedReports(mockQualifiedReports);
+      setFilteredReports(mockQualifiedReports);
+    } catch (error) {
+      console.error('获取合格报告失败:', error);
+      toast({
+        title: "获取数据失败",
+        description: "无法加载合格报告列表",
+        variant: "destructive"
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // TODO: 根据搜索条件查询报告
+  // 需要调用后端接口进行高级搜索
+  const handleSearch = async () => {
+    setLoading(true);
+    try {
+      // TODO: 替换为实际的数据源调用
+      // const filterConditions = {
+      //   $and: [
+      //     { testResult: { $eq: '合格' } }
+      //   ]
+      // };
+
+      // if (searchParams.workOrder) {
+      //   filterConditions.$and.push({ workOrder: { $eq: searchParams.workOrder } });
+      // }
+      // if (searchParams.columnSn) {
+      //   filterConditions.$and.push({ columnSn: { $eq: searchParams.columnSn } });
+      // }
+      // if (searchParams.orderNumber) {
+      //   filterConditions.$and.push({ orderNumber: { $eq: searchParams.orderNumber } });
+      // }
+      // if (searchParams.instrumentSerial) {
+      //   filterConditions.$and.push({ instrumentSerial: { $eq: searchParams.instrumentSerial } });
+      // }
+      // if (searchParams.reportType !== 'all') {
+      //   filterConditions.$and.push({ reportType: { $eq: searchParams.reportType } });
+      // }
+
+      // const result = await $w.cloud.callDataSource({
+      //   dataSourceName: 'chromatography_reports',
+      //   methodName: 'wedaGetRecordsV2',
+      //   params: {
+      //     filter: { where: filterConditions },
+      //     orderBy: [{ lastAccessTime: 'desc' }],
+      //     select: { $master: true },
+      //     getCount: true,
+      //     pageSize: 200
+      //   }
+      // });
+      // setFilteredReports(result.records);
+
+      // 临时使用前端过滤
+      const filtered = qualifiedReports.filter(report => {
+        return (!searchParams.workOrder || report.workOrder.toLowerCase().includes(searchParams.workOrder.toLowerCase())) && (!searchParams.columnSn || report.columnSn.toLowerCase().includes(searchParams.columnSn.toLowerCase())) && (!searchParams.orderNumber || report.orderNumber.toLowerCase().includes(searchParams.orderNumber.toLowerCase())) && (!searchParams.instrumentSerial || report.instrumentSerial.toLowerCase().includes(searchParams.instrumentSerial.toLowerCase())) && (searchParams.reportType === 'all' || report.reportType === searchParams.reportType);
+      });
+      setFilteredReports(filtered);
+      setCurrentPage(1); // 重置到第一页
+      toast({
+        title: "查询完成",
+        description: `找到 ${filtered.length} 条合格报告`
+      });
+    } catch (error) {
+      console.error('搜索失败:', error);
+      toast({
+        title: "搜索失败",
+        description: "无法执行搜索操作",
+        variant: "destructive"
+      });
+    } finally {
+      setLoading(false);
+    }
   };
 
   // 重置搜索
@@ -435,7 +533,8 @@ export default function QueryReportsPage(props) {
     setCurrentPage(1); // 重置到第一页
   };
 
-  // 生成报告
+  // TODO: 生成新报告
+  // 需要调用后端接口创建新的检测报告
   const handleGenerateReport = async () => {
     if (!searchParams.workOrder && !searchParams.columnSn && !searchParams.orderNumber && !searchParams.instrumentSerial) {
       toast({
@@ -447,7 +546,48 @@ export default function QueryReportsPage(props) {
     }
     setGenerating(true);
     try {
-      // 模拟报告生成过程
+      // TODO: 替换为实际的数据源调用
+      // const newReportData = {
+      //   workOrder: searchParams.workOrder || 'WO' + Date.now(),
+      //   columnSn: searchParams.columnSn || 'COL-' + Date.now(),
+      //   orderNumber: searchParams.orderNumber || 'ORD-' + Date.now(),
+      //   instrumentSerial: searchParams.instrumentSerial || 'INST-' + Math.floor(Math.random() * 1000),
+      //   reportType: searchParams.reportType === 'all' ? 'glycation' : searchParams.reportType,
+      //   status: 'qualified',
+      //   reportDate: new Date().toISOString().slice(0, 10),
+      //   检测项目: getReportTypeName(searchParams.reportType),
+      //   检测结果: '合格',
+      //   负责人: currentUser.name,
+      //   审核状态: 'approved',
+      //   fileSize: (Math.random() * 3 + 0.5).toFixed(1) + 'MB',
+      //   reportName: `${getReportTypeName(searchParams.reportType)}报告_${new Date().toISOString().slice(0, 10).replace(/-/g, '')}`,
+      //   generateTime: new Date().toLocaleString('zh-CN'),
+      //   lastAccessTime: new Date().toLocaleString('zh-CN'),
+      //   accessType: 'preview',
+      //   createBy: currentUser.name,
+      //   createTime: new Date().getTime()
+      // };
+
+      // const result = await $w.cloud.callDataSource({
+      //   dataSourceName: 'chromatography_reports',
+      //   methodName: 'wedaCreateV2',
+      //   params: {
+      //     data: newReportData
+      //   }
+      // });
+
+      // if (result._id) {
+      //   // 重新获取报告列表
+      //   await fetchQualifiedReports();
+      //   toast({
+      //     title: "报告生成成功",
+      //     description: `报告 ${result._id} 已生成，请查看报告列表`
+      //   });
+      // } else {
+      //   throw new Error('生成失败');
+      // }
+
+      // 临时模拟报告生成过程
       await new Promise(resolve => setTimeout(resolve, 3000));
       const newReport = {
         id: `RPT-Q-${Date.now()}`,
@@ -476,9 +616,10 @@ export default function QueryReportsPage(props) {
         description: `报告 ${newReport.id} 已生成，请查看报告列表`
       });
     } catch (error) {
+      console.error('报告生成失败:', error);
       toast({
         title: "报告生成失败",
-        description: error.message,
+        description: error.message || "无法生成报告",
         variant: "destructive"
       });
     } finally {
@@ -486,11 +627,47 @@ export default function QueryReportsPage(props) {
     }
   };
 
-  // 预览报告
-  const handlePreview = reportId => {
-    const report = qualifiedReports.find(r => r.id === reportId);
-    if (report) {
-      // 更新最后访问时间和类型
+  // TODO: 预览报告
+  // 需要从后端获取报告详情并显示预览
+  const handlePreview = async reportId => {
+    try {
+      // TODO: 替换为实际的数据源调用
+      // const result = await $w.cloud.callDataSource({
+      //   dataSourceName: 'chromatography_reports',
+      //   methodName: 'wedaGetItemV2',
+      //   params: {
+      //     filter: {
+      //       where: {
+      //         $and: [
+      //           { _id: { $eq: reportId } }
+      //         ]
+      //       }
+      //     },
+      //     select: { $master: true }
+      //   }
+      // });
+
+      // // 更新最后访问时间和类型
+      // await $w.cloud.callDataSource({
+      //   dataSourceName: 'chromatography_reports',
+      //   methodName: 'wedaUpdateV2',
+      //   params: {
+      //     data: {
+      //       lastAccessTime: new Date().toLocaleString('zh-CN'),
+      //       accessType: 'preview',
+      //       updateTime: new Date().getTime()
+      //     },
+      //     filter: {
+      //       where: {
+      //         $and: [
+      //           { _id: { $eq: reportId } }
+      //         ]
+      //       }
+      //     }
+      //   }
+      // });
+
+      // 临时使用本地数据更新
       const updatedReports = qualifiedReports.map(r => r.id === reportId ? {
         ...r,
         lastAccessTime: new Date().toLocaleString('zh-CN'),
@@ -502,14 +679,67 @@ export default function QueryReportsPage(props) {
         title: "预览报告",
         description: `正在预览报告 ${reportId}，请查看详细信息`
       });
+    } catch (error) {
+      console.error('预览失败:', error);
+      toast({
+        title: "预览失败",
+        description: "无法预览报告",
+        variant: "destructive"
+      });
     }
   };
 
-  // 下载报告
-  const handleDownload = reportId => {
-    const report = qualifiedReports.find(r => r.id === reportId);
-    if (report) {
-      // 更新最后访问时间和类型
+  // TODO: 下载报告
+  // 需要调用后端接口生成并下载报告文件
+  const handleDownload = async reportId => {
+    try {
+      // TODO: 替换为实际的数据源调用
+      // const result = await $w.cloud.callDataSource({
+      //   dataSourceName: 'chromatography_reports',
+      //   methodName: 'wedaGetItemV2',
+      //   params: {
+      //     filter: {
+      //       where: {
+      //         $and: [
+      //           { _id: { $eq: reportId } }
+      //         ]
+      //       }
+      //     },
+      //     select: { $master: true }
+      //   }
+      // });
+
+      // // 调用报告生成服务
+      // const downloadResult = await $w.cloud.callFunction({
+      //   name: 'generateReport',
+      //   data: {
+      //     reportId: reportId,
+      //     reportType: 'qualified',
+      //     format: 'pdf'
+      //   }
+      // });
+
+      // // 更新最后访问时间和类型
+      // await $w.cloud.callDataSource({
+      //   dataSourceName: 'chromatography_reports',
+      //   methodName: 'wedaUpdateV2',
+      //   params: {
+      //     data: {
+      //       lastAccessTime: new Date().toLocaleString('zh-CN'),
+      //       accessType: 'download',
+      //       updateTime: new Date().getTime()
+      //     },
+      //     filter: {
+      //       where: {
+      //         $and: [
+      //           { _id: { $eq: reportId } }
+      //         ]
+      //       }
+      //     }
+      //   }
+      // });
+
+      // 临时使用本地数据更新
       const updatedReports = qualifiedReports.map(r => r.id === reportId ? {
         ...r,
         lastAccessTime: new Date().toLocaleString('zh-CN'),
@@ -529,11 +759,19 @@ export default function QueryReportsPage(props) {
           description: `报告 ${reportId} 已下载到本地`
         });
       }, 2000);
+    } catch (error) {
+      console.error('下载失败:', error);
+      toast({
+        title: "下载失败",
+        description: "无法下载报告",
+        variant: "destructive"
+      });
     }
   };
 
-  // 批量下载
-  const handleBatchDownload = () => {
+  // TODO: 批量下载报告
+  // 需要调用后端接口批量生成并下载报告
+  const handleBatchDownload = async () => {
     if (selectedReports.length === 0) {
       toast({
         title: "请选择报告",
@@ -542,28 +780,70 @@ export default function QueryReportsPage(props) {
       });
       return;
     }
+    try {
+      // TODO: 替换为实际的数据源调用
+      // const downloadResult = await $w.cloud.callFunction({
+      //   name: 'batchGenerateReports',
+      //   data: {
+      //     reportIds: selectedReports,
+      //     reportType: 'qualified',
+      //     format: 'pdf'
+      //   }
+      // });
 
-    // 更新所有选中报告的最后访问时间
-    const updatedReports = qualifiedReports.map(r => selectedReports.includes(r.id) ? {
-      ...r,
-      lastAccessTime: new Date().toLocaleString('zh-CN'),
-      accessType: 'download'
-    } : r);
-    setQualifiedReports(updatedReports);
-    setFilteredReports(updatedReports);
-    toast({
-      title: "批量下载",
-      description: `正在下载 ${selectedReports.length} 份报告，请稍候`
-    });
+      // // 批量更新最后访问时间和类型
+      // const updatePromises = selectedReports.map(reportId => 
+      //   $w.cloud.callDataSource({
+      //     dataSourceName: 'chromatography_reports',
+      //     methodName: 'wedaUpdateV2',
+      //     params: {
+      //       data: {
+      //         lastAccessTime: new Date().toLocaleString('zh-CN'),
+      //         accessType: 'download',
+      //         updateTime: new Date().getTime()
+      //       },
+      //       filter: {
+      //         where: {
+      //           $and: [
+      //             { _id: { $eq: reportId } }
+      //           ]
+      //         }
+      //       }
+      //     }
+      //   })
+      // );
 
-    // 模拟批量下载过程
-    setTimeout(() => {
+      // await Promise.all(updatePromises);
+
+      // 临时使用本地数据更新
+      const updatedReports = qualifiedReports.map(r => selectedReports.includes(r.id) ? {
+        ...r,
+        lastAccessTime: new Date().toLocaleString('zh-CN'),
+        accessType: 'download'
+      } : r);
+      setQualifiedReports(updatedReports);
+      setFilteredReports(updatedReports);
       toast({
-        title: "批量下载完成",
-        description: `${selectedReports.length} 份报告已下载完成`
+        title: "批量下载",
+        description: `正在下载 ${selectedReports.length} 份报告，请稍候`
       });
-      setSelectedReports([]);
-    }, 3000);
+
+      // 模拟批量下载过程
+      setTimeout(() => {
+        toast({
+          title: "批量下载完成",
+          description: `${selectedReports.length} 份报告已下载完成`
+        });
+        setSelectedReports([]);
+      }, 3000);
+    } catch (error) {
+      console.error('批量下载失败:', error);
+      toast({
+        title: "批量下载失败",
+        description: "无法批量下载报告",
+        variant: "destructive"
+      });
+    }
   };
 
   // 选择/取消选择报告
@@ -589,6 +869,7 @@ export default function QueryReportsPage(props) {
     const typeMap = {
       glycation: '糖化模式',
       thalassemia: '地贫模式',
+      purity: '纯度分析',
       all: '综合'
     };
     return typeMap[type] || '糖化模式';
@@ -670,6 +951,18 @@ export default function QueryReportsPage(props) {
         </Pagination>
       </div>;
   };
+
+  // 组件挂载时获取数据
+  useEffect(() => {
+    fetchQualifiedReports();
+  }, []);
+
+  // 计算统计数据
+  const todayGenerated = qualifiedReports.filter(r => {
+    const today = new Date().toISOString().slice(0, 10);
+    return r.generateTime.includes(today);
+  }).length;
+  const downloadedCount = qualifiedReports.filter(r => r.accessType === 'download').length;
   return <div style={style} className="min-h-screen bg-gray-50">
       {/* 顶部导航 */}
       <div className="bg-white border-b border-gray-200 px-6 py-4">
@@ -696,140 +989,23 @@ export default function QueryReportsPage(props) {
 
       <div className="p-6">
         {/* 统计概览 */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
-          <Card>
-            <CardContent className="p-4">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm text-gray-500">最近报告数</p>
-                  <p className="text-2xl font-bold">{qualifiedReports.length}</p>
-                </div>
-                <FileText className="w-8 h-8 text-gray-400" />
-              </div>
-            </CardContent>
-          </Card>
-          
-          <Card>
-            <CardContent className="p-4">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm text-gray-500">今日生成</p>
-                  <p className="text-2xl font-bold text-green-600">3</p>
-                </div>
-                <Plus className="w-8 h-8 text-green-400" />
-              </div>
-            </CardContent>
-          </Card>
-          
-          <Card>
-            <CardContent className="p-4">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm text-gray-500">已下载</p>
-                  <p className="text-2xl font-bold text-blue-600">
-                    {qualifiedReports.filter(r => r.accessType === 'download').length}
-                  </p>
-                </div>
-                <Download className="w-8 h-8 text-blue-400" />
-              </div>
-            </CardContent>
-          </Card>
-          
-        </div>
+        <ReportStats qualifiedReports={qualifiedReports} todayGenerated={todayGenerated} downloadedCount={downloadedCount} />
 
         {/* 搜索区域 */}
-        <Card className="mb-6">
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Filter className="w-5 h-5" />
-              查询条件
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">工单号</label>
-                <Input placeholder="请输入工单号" value={searchParams.workOrder} onChange={e => setSearchParams({
-                ...searchParams,
-                workOrder: e.target.value
-              })} />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">层析柱序列号</label>
-                <Input placeholder="请输入层析柱序列号" value={searchParams.columnSn} onChange={e => setSearchParams({
-                ...searchParams,
-                columnSn: e.target.value
-              })} />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">订单号</label>
-                <Input placeholder="请输入订单号" value={searchParams.orderNumber} onChange={e => setSearchParams({
-                ...searchParams,
-                orderNumber: e.target.value
-              })} />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">仪器序列号</label>
-                <Input placeholder="请输入仪器序列号" value={searchParams.instrumentSerial} onChange={e => setSearchParams({
-                ...searchParams,
-                instrumentSerial: e.target.value
-              })} />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">报告类型</label>
-                <Select value={searchParams.reportType} onValueChange={value => setSearchParams({
-                ...searchParams,
-                reportType: value
-              })}>
-                  <SelectTrigger>
-                    <SelectValue placeholder="选择报告类型" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="all">全部类型</SelectItem>
-                    <SelectItem value="glycation">糖化模式报告</SelectItem>
-                    <SelectItem value="thalassemia">地贫模式报告</SelectItem>
-                    <SelectItem value="glycation">糖化模式报告</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">时间范围</label>
-                <Select value={searchParams.dateRange} onValueChange={value => setSearchParams({
-                ...searchParams,
-                dateRange: value
-              })}>
-                  <SelectTrigger>
-                    <SelectValue placeholder="选择时间范围" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="all">全部时间</SelectItem>
-                    <SelectItem value="today">今天</SelectItem>
-                    <SelectItem value="week">本周</SelectItem>
-                    <SelectItem value="month">本月</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-            </div>
-            <div className="flex space-x-2">
-              <Button onClick={handleGenerateReport} disabled={generating} className="bg-green-600 hover:bg-green-700">
-                {generating ? <>
-                    <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                    生成中...
-                  </> : <>
-                    <Plus className="w-4 h-4 mr-2" />
-                    生成报告
-                  </>}
-              </Button>
-              <Button variant="outline" onClick={handleSearch}>
-                <Search className="w-4 h-4 mr-2" />
-                查询
-              </Button>
-              <Button variant="outline" onClick={handleReset}>
-                重置
-              </Button>
-            </div>
-          </CardContent>
-        </Card>
+        <SearchFilters searchParams={searchParams} setSearchParams={setSearchParams} onSearch={handleSearch} onReset={handleReset} loading={loading} />
+
+        {/* 生成报告按钮 */}
+        <div className="mb-6">
+          <Button onClick={handleGenerateReport} disabled={generating} className="bg-green-600 hover:bg-green-700">
+            {generating ? <>
+                <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                生成中...
+              </> : <>
+                <Plus className="w-4 h-4 mr-2" />
+                生成报告
+              </>}
+          </Button>
+        </div>
 
         {/* 批量操作 */}
         {selectedReports.length > 0 && <Card className="mb-6 bg-blue-50 border-blue-200">
@@ -868,70 +1044,10 @@ export default function QueryReportsPage(props) {
             </CardTitle>
           </CardHeader>
           <CardContent className="p-0">
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead className="w-12">
-                    <input type="checkbox" checked={currentReports.length > 0 && currentReports.every(report => selectedReports.includes(report.id))} onChange={e => handleSelectAll(e.target.checked)} className="rounded border-gray-300" />
-                  </TableHead>
-                  <TableHead>报告编号</TableHead>
-                  <TableHead>报告名称</TableHead>
-                  <TableHead>工单号</TableHead>
-                  <TableHead>层析柱序列号</TableHead>
-                  <TableHead>检测项目</TableHead>
-                  <TableHead>报告类型</TableHead>
-                  <TableHead>检测结果</TableHead>
-                  <TableHead>负责人</TableHead>
-                  <TableHead>最后访问</TableHead>
-                  <TableHead>访问状态</TableHead>
-                  <TableHead>操作</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {currentReports.map(report => <TableRow key={report.id} className="hover:bg-gray-50">
-                    <TableCell>
-                      <input type="checkbox" checked={selectedReports.includes(report.id)} onChange={() => handleSelectReport(report.id)} className="rounded border-gray-300" />
-                    </TableCell>
-                    <TableCell className="font-medium">{report.id}</TableCell>
-                    <TableCell>
-                      <div className="max-w-48">
-                        <div className="truncate" title={report.reportName}>
-                          {report.reportName}
-                        </div>
-                      </div>
-                    </TableCell>
-                    <TableCell>{report.workOrder}</TableCell>
-                    <TableCell>{report.columnSn}</TableCell>
-                    <TableCell>{report.检测项目}</TableCell>
-                    <TableCell>{getReportTypeBadge(report.reportType)}</TableCell>
-                    <TableCell>
-                      <Badge variant="default" className="bg-green-100 text-green-800 border-green-200">
-                        {report.检测结果}
-                      </Badge>
-                    </TableCell>
-                    <TableCell>{report.负责人}</TableCell>
-                    <TableCell>
-                      <div className="flex items-center gap-1">
-                        <Clock className="w-4 h-4 text-gray-400" />
-                        {report.lastAccessTime}
-                      </div>
-                    </TableCell>
-                    <TableCell>
-                      {getAccessTypeBadge(report.accessType)}
-                    </TableCell>
-                    <TableCell>
-                      <div className="flex space-x-1">
-                        <Button size="sm" variant="outline" onClick={() => handlePreview(report.id)} className="h-8 w-8 p-0" title="预览报告">
-                          <Eye className="w-4 h-4" />
-                        </Button>
-                        <Button size="sm" variant="outline" onClick={() => handleDownload(report.id)} className="h-8 w-8 p-0" title="下载报告">
-                          <Download className="w-4 h-4" />
-                        </Button>
-                      </div>
-                    </TableCell>
-                  </TableRow>)}
-              </TableBody>
-            </Table>
+            {loading ? <div className="flex items-center justify-center py-12">
+                <Loader2 className="w-8 h-8 animate-spin text-gray-400" />
+                <span className="ml-2 text-gray-500">加载中...</span>
+              </div> : <ReportTable reports={currentReports} selectedReports={selectedReports} onSelectReport={handleSelectReport} onSelectAll={handleSelectAll} onPreview={handlePreview} onDownload={handleDownload} getReportTypeBadge={getReportTypeBadge} getAccessTypeBadge={getAccessTypeBadge} />}
           </CardContent>
         </Card>
 
@@ -941,7 +1057,7 @@ export default function QueryReportsPage(props) {
           </div>}
 
         {/* 空状态 */}
-        {filteredReports.length === 0 && <Card className="text-center py-12">
+        {!loading && filteredReports.length === 0 && <Card className="text-center py-12">
             <CardContent>
               <FileText className="w-16 h-16 text-gray-300 mx-auto mb-4" />
               <h3 className="text-lg font-medium text-gray-900 mb-2">暂无报告</h3>

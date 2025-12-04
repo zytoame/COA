@@ -1,0 +1,63 @@
+// @ts-ignore;
+import React from 'react';
+// @ts-ignore;
+import { Card, CardContent } from '@/components/ui';
+// @ts-ignore;
+import { CheckCircle, AlertTriangle, Clock, Package } from 'lucide-react';
+
+export function BatchAuditStats({
+  totalColumns,
+  pendingCount,
+  highPriorityCount,
+  qualifiedCount
+}) {
+  return <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+      <Card>
+        <CardContent className="p-4">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-sm text-gray-500">待审核总数</p>
+              <p className="text-2xl font-bold text-blue-600">{totalColumns}</p>
+            </div>
+            <Package className="w-8 h-8 text-blue-400" />
+          </div>
+        </CardContent>
+      </Card>
+      
+      <Card>
+        <CardContent className="p-4">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-sm text-gray-500">待处理</p>
+              <p className="text-2xl font-bold text-orange-600">{pendingCount}</p>
+            </div>
+            <Clock className="w-8 h-8 text-orange-400" />
+          </div>
+        </CardContent>
+      </Card>
+      
+      <Card>
+        <CardContent className="p-4">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-sm text-gray-500">高优先级</p>
+              <p className="text-2xl font-bold text-red-600">{highPriorityCount}</p>
+            </div>
+            <AlertTriangle className="w-8 h-8 text-red-400" />
+          </div>
+        </CardContent>
+      </Card>
+      
+      <Card>
+        <CardContent className="p-4">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-sm text-gray-500">已合格</p>
+              <p className="text-2xl font-bold text-green-600">{qualifiedCount}</p>
+            </div>
+            <CheckCircle className="w-8 h-8 text-green-400" />
+          </div>
+        </CardContent>
+      </Card>
+    </div>;
+}

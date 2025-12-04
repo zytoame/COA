@@ -1,12 +1,14 @@
 // @ts-ignore;
-import React, { useState, useRef } from 'react';
+import React, { useState, useEffect } from 'react';
 // @ts-ignore;
-import { Button, Input, Card, CardContent, CardHeader, CardTitle, Badge, Table, TableBody, TableCell, TableHead, TableHeader, TableRow, Select, SelectContent, SelectItem, SelectTrigger, SelectValue, useToast, Pagination, PaginationContent, PaginationEllipsis, PaginationItem, PaginationLink, PaginationNext, PaginationPrevious } from '@/components/ui';
+import { Button, Card, CardContent, CardHeader, CardTitle, Badge, useToast, Pagination, PaginationContent, PaginationEllipsis, PaginationItem, PaginationLink, PaginationNext, PaginationPrevious } from '@/components/ui';
 // @ts-ignore;
-import { Search, CheckCircle, Eye, Download, AlertTriangle, Clock, User, Calendar, ChevronDown, ChevronUp, Thermometer, Gauge, Timer, Activity, Package, ArrowLeft, PenTool, XCircle, Loader2 } from 'lucide-react';
+import { CheckCircle, ArrowLeft, PenTool, XCircle, Loader2, FileCheck, User } from 'lucide-react';
 
 // 引入子组件
-import { DetectionDataCard } from '@/components/DetectionDataCard';
+import { BatchAuditTable } from '@/components/BatchAuditTable';
+import { BatchAuditStats } from '@/components/BatchAuditStats';
+import { BatchSearchFilters } from '@/components/BatchSearchFilters';
 import { DetailModal } from '@/components/DetailModal';
 import { SignaturePad } from '@/components/SignaturePad';
 
@@ -557,114 +559,6 @@ const mockPendingColumns = [{
     action: '提交检测',
     remark: '完成特异性测试'
   }]
-}, {
-  id: 'COL-011',
-  workOrder: 'WO202501011',
-  columnSn: 'COL-2025-011',
-  orderNumber: 'ORD-202501011',
-  instrumentSerial: 'INST-002',
-  columnName: 'Separation Column',
-  testType: '批间差异测试',
-  testDate: '2025-01-05',
-  testResult: '不合格',
-  不合格原因: '批间差异过大',
-  operator: '王五',
-  submitTime: '2025-01-05 15:20:00',
-  priority: 'medium',
-  // 详细检测数据
-  detectionData: {
-    setTemperature: {
-      standard: '25-40°C',
-      result: '32.8°C',
-      conclusion: 'pass',
-      icon: Thermometer
-    },
-    pressure: {
-      standard: '5.0-8.0 MPa',
-      result: '6.4 MPa',
-      conclusion: 'pass',
-      icon: Gauge
-    },
-    peakTime: {
-      standard: '36-40 秒',
-      result: '39.1 秒',
-      conclusion: 'pass',
-      icon: Timer
-    },
-    repeatabilityTest: {
-      standard: 'CV < 1.5%',
-      result: '2.2%',
-      conclusion: 'fail',
-      icon: Activity
-    },
-    appearanceInspection: {
-      standard: '包装完整，无明显损坏',
-      result: '包装完好',
-      conclusion: 'pass',
-      icon: Package
-    }
-  },
-  finalConclusion: 'unqualified',
-  operationHistory: [{
-    time: '2025-01-05 15:20:00',
-    operator: '王五',
-    action: '提交检测',
-    remark: '完成批间差异测试'
-  }]
-}, {
-  id: 'COL-012',
-  workOrder: 'WO202501012',
-  columnSn: 'COL-2025-012',
-  orderNumber: 'ORD-202501012',
-  instrumentSerial: 'INST-001',
-  columnName: 'HPLC Column',
-  testType: '载量测试',
-  testDate: '2025-01-04',
-  testResult: '不合格',
-  不合格原因: '载量不足',
-  operator: '赵六',
-  submitTime: '2025-01-04 12:40:00',
-  priority: 'low',
-  // 详细检测数据
-  detectionData: {
-    setTemperature: {
-      standard: '25-40°C',
-      result: '35.7°C',
-      conclusion: 'pass',
-      icon: Thermometer
-    },
-    pressure: {
-      standard: '5.0-8.0 MPa',
-      result: '7.1 MPa',
-      conclusion: 'pass',
-      icon: Gauge
-    },
-    peakTime: {
-      standard: '36-40 秒',
-      result: '37.6 秒',
-      conclusion: 'pass',
-      icon: Timer
-    },
-    repeatabilityTest: {
-      standard: 'CV < 1.5%',
-      result: '1.3%',
-      conclusion: 'pass',
-      icon: Activity
-    },
-    appearanceInspection: {
-      standard: '包装完整，无明显损坏',
-      result: '包装完好',
-      conclusion: 'pass',
-      icon: Package
-    }
-  },
-  finalConclusion: 'unqualified',
-  operationHistory: [{
-    time: '2025-01-04 12:40:00',
-    operator: '赵六',
-    action: '提交检测',
-    remark: '完成载量测试'
-  }]
 }];
 export default function BatchAuditPage(props) {
   const {
@@ -676,23 +570,22 @@ export default function BatchAuditPage(props) {
   } = useToast();
 
   // 状态管理
-  const [pendingColumns, setPendingColumns] = useState(mockPendingColumns);
-  const [filteredPendingColumns, setFilteredPendingColumns] = useState(mockPendingColumns);
+  const [pendingColumns, setPendingColumns] = useState([]);
+  const [filteredColumns, setFilteredColumns] = useState([]);
   const [selectedColumns, setSelectedColumns] = useState([]);
-  const [expandedColumns, setExpandedColumns] = useState(new Set());
+  const [expandedRows, setExpandedRows] = useState([]);
   const [showDetailModal, setShowDetailModal] = useState(false);
-  const [selectedColumn, setSelectedColumn] = useState(null);
-  const [showSignaturePad, setShowSignaturePad] = useState(false);
+  const [viewingColumn, setViewingColumn] = useState(null);
+  const [showSignatureModal, setShowSignatureModal] = useState(false);
   const [signing, setSigning] = useState(false);
-  const [auditComment, setAuditComment] = useState('');
-  const [auditAction, setAuditAction] = useState('approve');
+  const [loading, setLoading] = useState(false);
 
   // 分页状态
   const [currentPage, setCurrentPage] = useState(1);
   const pageSize = 10; // 每页显示10条记录
 
   // 搜索条件
-  const [auditSearchParams, setAuditSearchParams] = useState({
+  const [searchParams, setSearchParams] = useState({
     workOrder: '',
     columnSn: '',
     orderNumber: '',
@@ -708,63 +601,122 @@ export default function BatchAuditPage(props) {
   };
 
   // 计算分页数据
-  const totalPages = Math.ceil(filteredPendingColumns.length / pageSize);
+  const totalPages = Math.ceil(filteredColumns.length / pageSize);
   const startIndex = (currentPage - 1) * pageSize;
   const endIndex = startIndex + pageSize;
-  const currentColumns = filteredPendingColumns.slice(startIndex, endIndex);
+  const currentColumns = filteredColumns.slice(startIndex, endIndex);
 
-  // 获取优先级标签
-  const getPriorityBadge = priority => {
-    const priorityConfig = {
-      high: {
-        label: '高',
-        color: 'destructive'
-      },
-      medium: {
-        label: '中',
-        color: 'secondary'
-      },
-      low: {
-        label: '低',
-        color: 'outline'
-      }
-    };
-    const config = priorityConfig[priority] || priorityConfig.medium;
-    return <Badge variant={config.color}>{config.label}</Badge>;
+  // TODO: 从后端获取待审核层析柱列表
+  // 需要调用接口获取所有待审核的层析柱
+  const fetchPendingColumns = async () => {
+    setLoading(true);
+    try {
+      // TODO: 替换为实际的数据源调用
+      // const result = await $w.cloud.callDataSource({
+      //   dataSourceName: 'chromatography_columns',
+      //   methodName: 'wedaGetRecordsV2',
+      //   params: {
+      //     filter: {
+      //       where: {
+      //         $and: [
+      //           { auditStatus: { $eq: 'pending' } },
+      //           { createBy: { $eq-current-user: true } }
+      //         ]
+      //       }
+      //     },
+      //     orderBy: [{ submitTime: 'desc' }],
+      //     select: { $master: true },
+      //     getCount: true,
+      //     pageSize: 200
+      //   }
+      // });
+      // setPendingColumns(result.records);
+      // setFilteredColumns(result.records);
+
+      // 临时使用模拟数据
+      setPendingColumns(mockPendingColumns);
+      setFilteredColumns(mockPendingColumns);
+    } catch (error) {
+      console.error('获取待审核层析柱失败:', error);
+      toast({
+        title: "获取数据失败",
+        description: "无法加载待审核层析柱列表",
+        variant: "destructive"
+      });
+    } finally {
+      setLoading(false);
+    }
   };
 
-  // 获取状态标签
-  const getStatusBadge = status => {
-    const statusConfig = {
-      qualified: {
-        label: '合格',
-        color: 'default'
-      },
-      unqualified: {
-        label: '不合格',
-        color: 'destructive'
-      }
-    };
-    const config = statusConfig[status] || statusConfig.unqualified;
-    return <Badge variant={config.color}>{config.label}</Badge>;
-  };
+  // TODO: 根据搜索条件过滤层析柱
+  // 需要调用后端接口进行高级搜索
+  const handleSearch = async () => {
+    setLoading(true);
+    try {
+      // TODO: 替换为实际的数据源调用
+      // const filterConditions = {
+      //   $and: [
+      //     { auditStatus: { $eq: 'pending' } }
+      //   ]
+      // };
 
-  // 搜索功能
-  const handleAuditSearch = () => {
-    const filtered = pendingColumns.filter(column => {
-      return (!auditSearchParams.workOrder || column.workOrder.toLowerCase().includes(auditSearchParams.workOrder.toLowerCase())) && (!auditSearchParams.columnSn || column.columnSn.toLowerCase().includes(auditSearchParams.columnSn.toLowerCase())) && (!auditSearchParams.orderNumber || column.orderNumber.toLowerCase().includes(auditSearchParams.orderNumber.toLowerCase())) && (!auditSearchParams.instrumentSerial || column.instrumentSerial.toLowerCase().includes(auditSearchParams.instrumentSerial.toLowerCase())) && (auditSearchParams.testType === 'all' || column.testType === auditSearchParams.testType) && (auditSearchParams.priority === 'all' || column.priority === auditSearchParams.priority);
-    });
-    setFilteredPendingColumns(filtered);
-    setCurrentPage(1); // 重置到第一页
-    toast({
-      title: "查询完成",
-      description: `找到 ${filtered.length} 条待审核记录`
-    });
+      // if (searchParams.workOrder) {
+      //   filterConditions.$and.push({ workOrder: { $eq: searchParams.workOrder } });
+      // }
+      // if (searchParams.columnSn) {
+      //   filterConditions.$and.push({ columnSn: { $eq: searchParams.columnSn } });
+      // }
+      // if (searchParams.orderNumber) {
+      //   filterConditions.$and.push({ orderNumber: { $eq: searchParams.orderNumber } });
+      // }
+      // if (searchParams.instrumentSerial) {
+      //   filterConditions.$and.push({ instrumentSerial: { $eq: searchParams.instrumentSerial } });
+      // }
+      // if (searchParams.testType !== 'all') {
+      //   filterConditions.$and.push({ testType: { $eq: searchParams.testType } });
+      // }
+      // if (searchParams.priority !== 'all') {
+      //   filterConditions.$and.push({ priority: { $eq: searchParams.priority } });
+      // }
+
+      // const result = await $w.cloud.callDataSource({
+      //   dataSourceName: 'chromatography_columns',
+      //   methodName: 'wedaGetRecordsV2',
+      //   params: {
+      //     filter: { where: filterConditions },
+      //     orderBy: [{ submitTime: 'desc' }],
+      //     select: { $master: true },
+      //     getCount: true,
+      //     pageSize: 200
+      //   }
+      // });
+      // setFilteredColumns(result.records);
+
+      // 临时使用前端过滤
+      const filtered = pendingColumns.filter(column => {
+        return (!searchParams.workOrder || column.workOrder.toLowerCase().includes(searchParams.workOrder.toLowerCase())) && (!searchParams.columnSn || column.columnSn.toLowerCase().includes(searchParams.columnSn.toLowerCase())) && (!searchParams.orderNumber || column.orderNumber.toLowerCase().includes(searchParams.orderNumber.toLowerCase())) && (!searchParams.instrumentSerial || column.instrumentSerial.toLowerCase().includes(searchParams.instrumentSerial.toLowerCase())) && (searchParams.testType === 'all' || column.testType === searchParams.testType) && (searchParams.priority === 'all' || column.priority === searchParams.priority);
+      });
+      setFilteredColumns(filtered);
+      setCurrentPage(1); // 重置到第一页
+      toast({
+        title: "查询完成",
+        description: `找到 ${filtered.length} 条待审核层析柱`
+      });
+    } catch (error) {
+      console.error('搜索失败:', error);
+      toast({
+        title: "搜索失败",
+        description: "无法执行搜索操作",
+        variant: "destructive"
+      });
+    } finally {
+      setLoading(false);
+    }
   };
 
   // 重置搜索
-  const handleAuditReset = () => {
-    setAuditSearchParams({
+  const handleReset = () => {
+    setSearchParams({
       workOrder: '',
       columnSn: '',
       orderNumber: '',
@@ -772,20 +724,138 @@ export default function BatchAuditPage(props) {
       testType: 'all',
       priority: 'all'
     });
-    setFilteredPendingColumns(pendingColumns);
+    setFilteredColumns(pendingColumns);
     setCurrentPage(1); // 重置到第一页
   };
 
-  // 批量选择
-  const handleSelectAll = checked => {
-    if (checked) {
-      setSelectedColumns([...selectedColumns, ...currentColumns.map(column => column.id)]);
-    } else {
-      setSelectedColumns(selectedColumns.filter(id => !currentColumns.some(column => column.id === id)));
+  // TODO: 批量审核通过
+  // 需要调用后端接口批量更新审核状态
+  const handleBatchApprove = async () => {
+    if (selectedColumns.length === 0) {
+      toast({
+        title: "请选择层析柱",
+        description: "请先选择要审核的层析柱",
+        variant: "destructive"
+      });
+      return;
+    }
+    setShowSignatureModal(true);
+  };
+
+  // TODO: 确认批量审核
+  // 需要调用后端接口更新审核状态并记录签名
+  const handleConfirmBatchApprove = async signatureData => {
+    setSigning(true);
+    try {
+      // TODO: 替换为实际的数据源调用
+      // const updatePromises = selectedColumns.map(columnId => 
+      //   $w.cloud.callDataSource({
+      //     dataSourceName: 'chromatography_columns',
+      //     methodName: 'wedaUpdateV2',
+      //     params: {
+      //       data: {
+      //         auditStatus: 'approved',
+      //         auditTime: new Date().toLocaleString('zh-CN'),
+      //         auditBy: currentUser.name,
+      //         auditSignature: signatureData,
+      //         updateTime: new Date().getTime()
+      //       },
+      //       filter: {
+      //         where: {
+      //           $and: [
+      //             { _id: { $eq: columnId } }
+      //           ]
+      //         }
+      //       }
+      //     }
+      //   })
+      // );
+
+      // // 记录审核历史
+      // const auditPromises = selectedColumns.map(columnId => 
+      //   $w.cloud.callDataSource({
+      //     dataSourceName: 'audit_records',
+      //     methodName: 'wedaCreateV2',
+      //     params: {
+      //       data: {
+      //         columnId: columnId,
+      //         auditType: 'batch_approve',
+      //         auditBy: currentUser.name,
+      //         auditTime: new Date().toLocaleString('zh-CN'),
+      //         auditSignature: signatureData,
+      //         createBy: currentUser.name,
+      //         createTime: new Date().getTime()
+      //       }
+      //     }
+      //   })
+      // );
+
+      // await Promise.all([...updatePromises, ...auditPromises]);
+
+      // 临时模拟审核过程
+      await new Promise(resolve => setTimeout(resolve, 2000));
+      const updatedColumns = pendingColumns.filter(column => !selectedColumns.includes(column.id));
+      setPendingColumns(updatedColumns);
+      setFilteredColumns(updatedColumns.filter(column => !selectedColumns.includes(column.id)));
+      setSelectedColumns([]);
+      setShowSignatureModal(false);
+      toast({
+        title: "批量审核成功",
+        description: `${selectedColumns.length} 个层析柱已审核通过`
+      });
+    } catch (error) {
+      console.error('批量审核失败:', error);
+      toast({
+        title: "批量审核失败",
+        description: error.message || "无法完成批量审核",
+        variant: "destructive"
+      });
+    } finally {
+      setSigning(false);
     }
   };
 
-  // 单个选择
+  // TODO: 预览层析柱详情
+  // 需要从后端获取完整的层析柱详情数据
+  const handlePreview = async columnId => {
+    try {
+      // TODO: 替换为实际的数据源调用
+      // const result = await $w.cloud.callDataSource({
+      //   dataSourceName: 'chromatography_columns',
+      //   methodName: 'wedaGetItemV2',
+      //   params: {
+      //     filter: {
+      //       where: {
+      //         $and: [
+      //           { _id: { $eq: columnId } }
+      //         ]
+      //       }
+      //     },
+      //     select: { $master: true }
+      //   }
+      // });
+
+      // const column = result;
+      // setViewingColumn(column);
+      // setShowDetailModal(true);
+
+      // 临时使用本地数据
+      const column = pendingColumns.find(c => c.id === columnId);
+      if (column) {
+        setViewingColumn(column);
+        setShowDetailModal(true);
+      }
+    } catch (error) {
+      console.error('获取层析柱详情失败:', error);
+      toast({
+        title: "获取详情失败",
+        description: "无法加载层析柱详情",
+        variant: "destructive"
+      });
+    }
+  };
+
+  // 选择/取消选择层析柱
   const handleSelectColumn = columnId => {
     if (selectedColumns.includes(columnId)) {
       setSelectedColumns(selectedColumns.filter(id => id !== columnId));
@@ -794,80 +864,55 @@ export default function BatchAuditPage(props) {
     }
   };
 
-  // 切换检测数据展开状态
-  const toggleExpanded = columnId => {
-    const newExpanded = new Set(expandedColumns);
-    if (newExpanded.has(columnId)) {
-      newExpanded.delete(columnId);
+  // 全选/取消全选（仅当前页）
+  const handleSelectAll = checked => {
+    if (checked) {
+      setSelectedColumns([...selectedColumns, ...currentColumns.map(column => column.id)]);
     } else {
-      newExpanded.add(columnId);
-    }
-    setExpandedColumns(newExpanded);
-  };
-
-  // 查看详情
-  const handleViewDetail = columnId => {
-    const column = pendingColumns.find(c => c.id === columnId);
-    if (column) {
-      setSelectedColumn(column);
-      setShowDetailModal(true);
+      setSelectedColumns(selectedColumns.filter(id => !currentColumns.some(column => column.id === id)));
     }
   };
 
-  // 关闭详情弹窗
-  const handleCloseDetailModal = () => {
-    setShowDetailModal(false);
-    setSelectedColumn(null);
-  };
-
-  // 批量审核
-  const handleBatchAudit = () => {
-    if (selectedColumns.length === 0) {
-      toast({
-        title: "请选择待审核项目",
-        description: "请先选择需要审核的层析柱",
-        variant: "destructive"
-      });
-      return;
-    }
-    setShowSignaturePad(true);
-  };
-
-  // 确认审核
-  const confirmAudit = async () => {
-    setSigning(true);
-    try {
-      await new Promise(resolve => setTimeout(resolve, 2000));
-      const updatedColumns = pendingColumns.filter(column => !selectedColumns.includes(column.id));
-      setPendingColumns(updatedColumns);
-      setFilteredPendingColumns(updatedColumns);
-      setSelectedColumns([]);
-      toast({
-        title: "审核完成",
-        description: `已${auditAction === 'approve' ? '通过' : '拒绝'} ${selectedColumns.length} 个层析柱的审核`
-      });
-      setShowSignaturePad(false);
-      setAuditComment('');
-    } catch (error) {
-      toast({
-        title: "审核失败",
-        description: error.message,
-        variant: "destructive"
-      });
-    } finally {
-      setSigning(false);
+  // 展开/收起行
+  const handleToggleExpand = columnId => {
+    if (expandedRows.includes(columnId)) {
+      setExpandedRows(expandedRows.filter(id => id !== columnId));
+    } else {
+      setExpandedRows([...expandedRows, columnId]);
     }
   };
 
-  // 下载COA报告
-  const handleDownloadCOA = columnId => {
-    const column = pendingColumns.find(c => c.id === columnId);
-    if (column) {
-      toast({
-        title: "下载COA报告",
-        description: `正在下载 ${column.columnSn} 的COA报告`
-      });
-    }
+  // 获取优先级标签
+  const getPriorityBadge = priority => {
+    const priorityConfig = {
+      high: {
+        label: '高',
+        color: 'red'
+      },
+      medium: {
+        label: '中',
+        color: 'yellow'
+      },
+      low: {
+        label: '低',
+        color: 'green'
+      }
+    };
+    const config = priorityConfig[priority] || priorityConfig.medium;
+    return <Badge variant="outline" className={`bg-${config.color}-50 text-${config.color}-700 border-${config.color}-200`}>
+        {config.label}
+      </Badge>;
+  };
+
+  // 获取结论标签
+  const getConclusionBadge = conclusion => {
+    return conclusion === 'qualified' ? <Badge variant="default" className="bg-green-100 text-green-800 border-green-200">
+        <CheckCircle className="w-3 h-3 mr-1" />
+        合格
+      </Badge> : <Badge variant="outline" className="bg-red-50 text-red-700 border-red-200">
+        <XCircle className="w-3 h-3 mr-1" />
+        不合格
+      </Badge>;
   };
 
   // 返回主页
@@ -883,7 +928,7 @@ export default function BatchAuditPage(props) {
     if (totalPages <= 1) return null;
     return <div className="flex items-center justify-between px-2">
         <div className="text-sm text-gray-500">
-          显示第 {startIndex + 1} - {Math.min(endIndex, filteredPendingColumns.length)} 条，共 {filteredPendingColumns.length} 条记录
+          显示第 {startIndex + 1} - {Math.min(endIndex, filteredColumns.length)} 条，共 {filteredColumns.length} 条记录
         </div>
         <Pagination>
           <PaginationContent>
@@ -917,6 +962,15 @@ export default function BatchAuditPage(props) {
         </Pagination>
       </div>;
   };
+
+  // 组件挂载时获取数据
+  useEffect(() => {
+    fetchPendingColumns();
+  }, []);
+
+  // 计算统计数据
+  const highPriorityCount = pendingColumns.filter(c => c.priority === 'high').length;
+  const qualifiedCount = pendingColumns.filter(c => c.finalConclusion === 'qualified').length;
   return <div style={style} className="min-h-screen bg-gray-50">
       {/* 顶部导航 */}
       <div className="bg-white border-b border-gray-200 px-6 py-4">
@@ -929,13 +983,13 @@ export default function BatchAuditPage(props) {
             <CheckCircle className="w-8 h-8 text-green-600" />
             <div>
               <h1 className="text-2xl font-bold text-gray-900">批量审核签字</h1>
-              <p className="text-sm text-gray-500">批量审核待审核的层析柱，支持电子签名和审核意见记录</p>
+              <p className="text-sm text-gray-500">批量审核待审核的层析柱</p>
             </div>
           </div>
           <div className="flex items-center space-x-2">
             <Badge variant="outline" className="bg-green-50 text-green-700 border-green-200">
               <User className="w-3 h-3 mr-1" />
-              管理员
+              {currentUser.type === 'admin' ? '管理员' : '客户'}
             </Badge>
           </div>
         </div>
@@ -943,251 +997,79 @@ export default function BatchAuditPage(props) {
 
       <div className="p-6">
         {/* 统计概览 */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
-          <Card>
-            <CardContent className="p-4">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm text-gray-500">待审核总数</p>
-                  <p className="text-2xl font-bold">{pendingColumns.length}</p>
-                </div>
-                <CheckCircle className="w-8 h-8 text-gray-400" />
-              </div>
-            </CardContent>
-          </Card>
-          
-          <Card>
-            <CardContent className="p-4">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm text-gray-500">高优先级</p>
-                  <p className="text-2xl font-bold text-red-600">
-                    {pendingColumns.filter(c => c.priority === 'high').length}
-                  </p>
-                </div>
-                <AlertTriangle className="w-8 h-8 text-red-400" />
-              </div>
-            </CardContent>
-          </Card>
-          
-          <Card>
-            <CardContent className="p-4">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm text-gray-500">已选择</p>
-                  <p className="text-2xl font-bold text-blue-600">{selectedColumns.length}</p>
-                </div>
-                <Activity className="w-8 h-8 text-blue-400" />
-              </div>
-            </CardContent>
-          </Card>
-          
-          <Card>
-            <CardContent className="p-4">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm text-gray-500">今日提交</p>
-                  <p className="text-2xl font-bold text-green-600">3</p>
-                </div>
-                <Calendar className="w-8 h-8 text-green-400" />
-              </div>
-            </CardContent>
-          </Card>
-        </div>
+        <BatchAuditStats totalColumns={pendingColumns.length} pendingCount={pendingColumns.length} highPriorityCount={highPriorityCount} qualifiedCount={qualifiedCount} />
 
         {/* 搜索区域 */}
-        <Card className="mb-6">
+        <BatchSearchFilters searchParams={searchParams} setSearchParams={setSearchParams} onSearch={handleSearch} onReset={handleReset} loading={loading} />
+
+        {/* 批量操作 */}
+        {selectedColumns.length > 0 && <Card className="mb-6 bg-green-50 border-green-200">
+            <CardContent className="pt-6">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center space-x-2">
+                  <FileCheck className="w-5 h-5 text-green-600" />
+                  <span className="text-sm font-medium text-green-900">
+                    已选择 {selectedColumns.length} 个层析柱
+                  </span>
+                </div>
+                <div className="flex space-x-2">
+                  <Button variant="outline" size="sm" onClick={() => setSelectedColumns([])}>
+                    取消选择
+                  </Button>
+                  <Button size="sm" onClick={handleBatchApprove} className="bg-green-600 hover:bg-green-700">
+                    <PenTool className="w-4 h-4 mr-2" />
+                    批量审核通过
+                  </Button>
+                </div>
+              </div>
+            </CardContent>
+          </Card>}
+
+        {/* 层析柱列表 */}
+        <Card>
           <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Search className="w-5 h-5" />
-              查询条件
+            <CardTitle className="flex items-center justify-between">
+              <span className="flex items-center gap-2">
+                <CheckCircle className="w-5 h-5" />
+                待审核层析柱列表
+              </span>
+              <div className="text-sm text-gray-500">
+                当前页显示 {currentColumns.length} 条，共 {filteredColumns.length} 个层析柱
+              </div>
             </CardTitle>
           </CardHeader>
-          <CardContent>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">工单号</label>
-                <Input placeholder="请输入工单号" value={auditSearchParams.workOrder} onChange={e => setAuditSearchParams({
-                ...auditSearchParams,
-                workOrder: e.target.value
-              })} />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">层析柱序列号</label>
-                <Input placeholder="请输入层析柱序列号" value={auditSearchParams.columnSn} onChange={e => setAuditSearchParams({
-                ...auditSearchParams,
-                columnSn: e.target.value
-              })} />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">订单号</label>
-                <Input placeholder="请输入订单号" value={auditSearchParams.orderNumber} onChange={e => setAuditSearchParams({
-                ...auditSearchParams,
-                orderNumber: e.target.value
-              })} />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">仪器序列号</label>
-                <Input placeholder="请输入仪器序列号" value={auditSearchParams.instrumentSerial} onChange={e => setAuditSearchParams({
-                ...auditSearchParams,
-                instrumentSerial: e.target.value
-              })} />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">检测类型</label>
-                <Select value={auditSearchParams.testType} onValueChange={value => setAuditSearchParams({
-                ...auditSearchParams,
-                testType: value
-              })}>
-                  <SelectTrigger>
-                    <SelectValue placeholder="选择检测类型" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="all">全部类型</SelectItem>
-                    <SelectItem value="糖化模式">糖化模式</SelectItem>
-                    <SelectItem value="地貧模式">地貧模式</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">优先级</label>
-                <Select value={auditSearchParams.priority} onValueChange={value => setAuditSearchParams({
-                ...auditSearchParams,
-                priority: value
-              })}>
-                  <SelectTrigger>
-                    <SelectValue placeholder="选择优先级" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="all">全部优先级</SelectItem>
-                    <SelectItem value="high">高</SelectItem>
-                    <SelectItem value="medium">中</SelectItem>
-                    <SelectItem value="low">低</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-            </div>
-            <div className="flex space-x-2">
-              <Button onClick={handleAuditSearch} className="bg-blue-600 hover:bg-blue-700">
-                <Search className="w-4 h-4 mr-2" />
-                查询
-              </Button>
-              <Button variant="outline" onClick={handleAuditReset}>
-                重置
-              </Button>
-            </div>
-          </CardContent>
-        </Card>
-
-        {/* 操作区域 */}
-        <div className="flex items-center justify-between mb-4">
-          <div className="flex items-center space-x-2">
-            <Button onClick={handleBatchAudit} disabled={selectedColumns.length === 0} className="bg-green-600 hover:bg-green-700">
-              <CheckCircle className="w-4 h-4 mr-2" />
-              批量审核 ({selectedColumns.length})
-            </Button>
-            <Button variant="outline" onClick={() => setSelectedColumns([])} disabled={selectedColumns.length === 0}>
-              清除选择
-            </Button>
-          </div>
-          <div className="text-sm text-gray-500">
-            当前页显示 {currentColumns.length} 条，共 {filteredPendingColumns.length} 条待审核记录
-          </div>
-        </div>
-
-        {/* 待审核列表 */}
-        <Card>
           <CardContent className="p-0">
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead className="w-12">
-                    <input type="checkbox" checked={currentColumns.length > 0 && currentColumns.every(column => selectedColumns.includes(column.id))} onChange={e => handleSelectAll(e.target.checked)} className="rounded border-gray-300" />
-                  </TableHead>
-                  <TableHead>层析柱序列号</TableHead>
-                  <TableHead>层析柱名称</TableHead>
-                  <TableHead>工单号</TableHead>
-                  <TableHead>检测类型</TableHead>
-                  <TableHead>检测日期</TableHead>
-                  <TableHead>操作员</TableHead>
-                  <TableHead>优先级</TableHead>
-                  <TableHead>检测结果</TableHead>
-                  <TableHead>提交时间</TableHead>
-                  <TableHead>操作</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {currentColumns.map(column => <React.Fragment key={column.id}>
-                    <TableRow className="hover:bg-gray-50">
-                      <TableCell>
-                        <input type="checkbox" checked={selectedColumns.includes(column.id)} onChange={() => handleSelectColumn(column.id)} className="rounded border-gray-300" />
-                      </TableCell>
-                      <TableCell className="font-medium">{column.columnSn}</TableCell>
-                      <TableCell>
-                        <div className="max-w-32">
-                          <div className="truncate" title={column.columnName}>
-                            {column.columnName}
-                          </div>
-                        </div>
-                      </TableCell>
-                      <TableCell>{column.workOrder}</TableCell>
-                      <TableCell>{column.testType}</TableCell>
-                      <TableCell>{column.testDate}</TableCell>
-                      <TableCell>{column.operator}</TableCell>
-                      <TableCell>{getPriorityBadge(column.priority)}</TableCell>
-                      <TableCell>{getStatusBadge(column.finalConclusion)}</TableCell>
-                      <TableCell>
-                        <div className="flex items-center gap-1">
-                          <Clock className="w-4 h-4 text-gray-400" />
-                          {column.submitTime}
-                        </div>
-                      </TableCell>
-                      <TableCell>
-                        <div className="flex space-x-1">
-                          <Button size="sm" variant="outline" onClick={() => toggleExpanded(column.id)} className="h-8 w-8 p-0">
-                            {expandedColumns.has(column.id) ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
-                          </Button>
-                          <Button size="sm" variant="outline" onClick={() => handleViewDetail(column.id)} className="h-8 w-8 p-0">
-                            <Eye className="w-4 h-4" />
-                          </Button>
-                          <Button size="sm" variant="outline" onClick={() => handleDownloadCOA(column.id)} className="h-8 w-8 p-0">
-                            <Download className="w-4 h-4" />
-                          </Button>
-                        </div>
-                      </TableCell>
-                    </TableRow>
-                    {expandedColumns.has(column.id) && <TableRow>
-                        <TableCell colSpan={11} className="p-0">
-                          <div className="p-4 bg-gray-50">
-                            <DetectionDataCard detectionData={column.detectionData} finalConclusion={column.finalConclusion} />
-                          </div>
-                        </TableCell>
-                      </TableRow>}
-                  </React.Fragment>)}
-              </TableBody>
-            </Table>
+            {loading ? <div className="flex items-center justify-center py-12">
+                <Loader2 className="w-8 h-8 animate-spin text-gray-400" />
+                <span className="ml-2 text-gray-500">加载中...</span>
+              </div> : <BatchAuditTable columns={currentColumns} selectedColumns={selectedColumns} expandedRows={expandedRows} onSelectColumn={handleSelectColumn} onSelectAll={handleSelectAll} onToggleExpand={handleToggleExpand} onPreview={handlePreview} getPriorityBadge={getPriorityBadge} getConclusionBadge={getConclusionBadge} />}
           </CardContent>
         </Card>
 
         {/* 分页组件 */}
-        {filteredPendingColumns.length > 0 && <div className="mt-4">
+        {filteredColumns.length > 0 && <div className="mt-4">
             {renderPagination()}
           </div>}
 
         {/* 空状态 */}
-        {filteredPendingColumns.length === 0 && <Card className="text-center py-12">
+        {!loading && filteredColumns.length === 0 && <Card className="text-center py-12">
             <CardContent>
               <CheckCircle className="w-16 h-16 text-gray-300 mx-auto mb-4" />
-              <h3 className="text-lg font-medium text-gray-900 mb-2">暂无待审核记录</h3>
+              <h3 className="text-lg font-medium text-gray-900 mb-2">暂无待审核层析柱</h3>
               <p className="text-gray-500 mb-4">所有层析柱都已审核完成</p>
             </CardContent>
           </Card>}
       </div>
 
-      {/* 详情弹窗 */}
-      <DetailModal column={selectedColumn} isOpen={showDetailModal} onClose={handleCloseDetailModal} />
+      {/* 详情模态框 */}
+      {showDetailModal && viewingColumn && <DetailModal report={viewingColumn} isOpen={showDetailModal} onClose={() => {
+      setShowDetailModal(false);
+      setViewingColumn(null);
+    }} />}
 
-      {/* 签名板 */}
-      <SignaturePad showSignaturePad={showSignaturePad} setShowSignaturePad={setShowSignaturePad} signing={signing} setSigning={setSigning} auditComment={auditComment} setAuditComment={setAuditComment} auditAction={auditAction} setAuditAction={setAuditAction} onConfirmAudit={confirmAudit} selectedColumns={selectedColumns} />
+      {/* 签名模态框 */}
+      {showSignatureModal && <SignaturePad isOpen={showSignatureModal} onClose={() => {
+      setShowSignatureModal(false);
+    }} onConfirm={handleConfirmBatchApprove} signing={signing} />}
     </div>;
 }

@@ -1,5 +1,5 @@
 // @ts-ignore;
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 // @ts-ignore;
 import { Button, Input, Card, CardContent, CardHeader, CardTitle, Badge, Table, TableBody, TableCell, TableHead, TableHeader, TableRow, Select, SelectContent, SelectItem, SelectTrigger, SelectValue, useToast, Pagination, PaginationContent, PaginationEllipsis, PaginationItem, PaginationLink, PaginationNext, PaginationPrevious } from '@/components/ui';
 // @ts-ignore;
@@ -20,14 +20,15 @@ export default function UnqualifiedReportsPage(props) {
   } = useToast();
 
   // 状态管理
-  const [unqualifiedReports, setUnqualifiedReports] = useState(mockUnqualifiedReports);
-  const [filteredReports, setFilteredReports] = useState(mockUnqualifiedReports);
+  const [unqualifiedReports, setUnqualifiedReports] = useState([]);
+  const [filteredReports, setFilteredReports] = useState([]);
   const [selectedReports, setSelectedReports] = useState([]);
   const [showEditModal, setShowEditModal] = useState(false);
   const [editingReport, setEditingReport] = useState(null);
   const [saving, setSaving] = useState(false);
   const [showDetailModal, setShowDetailModal] = useState(false);
   const [viewingReport, setViewingReport] = useState(null);
+  const [loading, setLoading] = useState(false);
 
   // 分页状态
   const [currentPage, setCurrentPage] = useState(1);
@@ -55,17 +56,109 @@ export default function UnqualifiedReportsPage(props) {
   const endIndex = startIndex + pageSize;
   const currentReports = filteredReports.slice(startIndex, endIndex);
 
-  // 搜索功能
-  const handleSearch = () => {
-    const filtered = unqualifiedReports.filter(report => {
-      return (!searchParams.workOrder || report.workOrder.toLowerCase().includes(searchParams.workOrder.toLowerCase())) && (!searchParams.columnSn || report.columnSn.toLowerCase().includes(searchParams.columnSn.toLowerCase())) && (!searchParams.orderNumber || report.orderNumber.toLowerCase().includes(searchParams.orderNumber.toLowerCase())) && (!searchParams.instrumentSerial || report.instrumentSerial.toLowerCase().includes(searchParams.instrumentSerial.toLowerCase())) && (searchParams.reportType === 'all' || report.reportType === searchParams.reportType);
-    });
-    setFilteredReports(filtered);
-    setCurrentPage(1); // 重置到第一页
-    toast({
-      title: "查询完成",
-      description: `找到 ${filtered.length} 条不合格报告`
-    });
+  // TODO: 从后端获取不合格报告列表
+  // 需要调用接口获取所有不合格的检测报告
+  const fetchUnqualifiedReports = async () => {
+    setLoading(true);
+    try {
+      // TODO: 替换为实际的数据源调用
+      // const result = await $w.cloud.callDataSource({
+      //   dataSourceName: 'chromatography_reports',
+      //   methodName: 'wedaGetRecordsV2',
+      //   params: {
+      //     filter: {
+      //       where: {
+      //         $and: [
+      //           { testResult: { $eq: '不合格' } },
+      //           { createBy: { $eq-current-user: true } }
+      //         ]
+      //       }
+      //     },
+      //     orderBy: [{ createdAt: 'desc' }],
+      //     select: { $master: true },
+      //     getCount: true,
+      //     pageSize: 200
+      //   }
+      // });
+      // setUnqualifiedReports(result.records);
+      // setFilteredReports(result.records);
+
+      // 临时使用模拟数据
+      setUnqualifiedReports(mockUnqualifiedReports);
+      setFilteredReports(mockUnqualifiedReports);
+    } catch (error) {
+      console.error('获取不合格报告失败:', error);
+      toast({
+        title: "获取数据失败",
+        description: "无法加载不合格报告列表",
+        variant: "destructive"
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // TODO: 根据搜索条件过滤报告
+  // 需要调用后端接口进行高级搜索
+  const handleSearch = async () => {
+    setLoading(true);
+    try {
+      // TODO: 替换为实际的数据源调用
+      // const filterConditions = {
+      //   $and: [
+      //     { testResult: { $eq: '不合格' } }
+      //   ]
+      // };
+
+      // if (searchParams.workOrder) {
+      //   filterConditions.$and.push({ workOrder: { $eq: searchParams.workOrder } });
+      // }
+      // if (searchParams.columnSn) {
+      //   filterConditions.$and.push({ columnSn: { $eq: searchParams.columnSn } });
+      // }
+      // if (searchParams.orderNumber) {
+      //   filterConditions.$and.push({ orderNumber: { $eq: searchParams.orderNumber } });
+      // }
+      // if (searchParams.instrumentSerial) {
+      //   filterConditions.$and.push({ instrumentSerial: { $eq: searchParams.instrumentSerial } });
+      // }
+      // if (searchParams.reportType !== 'all') {
+      //   filterConditions.$and.push({ reportType: { $eq: searchParams.reportType } });
+      // }
+
+      // const result = await $w.cloud.callDataSource({
+      //   dataSourceName: 'chromatography_reports',
+      //   methodName: 'wedaGetRecordsV2',
+      //   params: {
+      //     filter: { where: filterConditions },
+      //     orderBy: [{ createdAt: 'desc' }],
+      //     select: { $master: true },
+      //     getCount: true,
+      //     pageSize: 200
+      //   }
+      // });
+      // setFilteredReports(result.records);
+
+      // 临时使用前端过滤
+      const filtered = unqualifiedReports.filter(report => {
+        return (!searchParams.workOrder || report.workOrder.toLowerCase().includes(searchParams.workOrder.toLowerCase())) && (!searchParams.columnSn || report.columnSn.toLowerCase().includes(searchParams.columnSn.toLowerCase())) && (!searchParams.orderNumber || report.orderNumber.toLowerCase().includes(searchParams.orderNumber.toLowerCase())) && (!searchParams.instrumentSerial || report.instrumentSerial.toLowerCase().includes(searchParams.instrumentSerial.toLowerCase())) && (searchParams.reportType === 'all' || report.reportType === searchParams.reportType);
+      });
+      setFilteredReports(filtered);
+      setCurrentPage(1); // 重置到第一页
+      toast({
+        title: "查询完成",
+        description: `找到 ${filtered.length} 条不合格报告`
+      });
+    } catch (error) {
+      console.error('搜索失败:', error);
+      toast({
+        title: "搜索失败",
+        description: "无法执行搜索操作",
+        variant: "destructive"
+      });
+    } finally {
+      setLoading(false);
+    }
   };
 
   // 重置搜索
@@ -82,27 +175,61 @@ export default function UnqualifiedReportsPage(props) {
     setCurrentPage(1); // 重置到第一页
   };
 
-  // 编辑报告
-  const handleEditReport = reportId => {
-    const report = unqualifiedReports.find(r => r.id === reportId);
-    if (report) {
-      setEditingReport({
-        ...report,
-        // 深拷贝检测数据以避免直接修改原数据
-        detectionData: JSON.parse(JSON.stringify(report.detectionData))
-      });
-      setShowEditModal(true);
-    }
-  };
-
-  // 保存编辑
+  // TODO: 保存编辑后的报告
+  // 需要调用后端接口更新报告数据
   const handleSaveEdit = async updatedReport => {
     setSaving(true);
     try {
-      // 模拟保存过程
-      await new Promise(resolve => setTimeout(resolve, 2000));
+      // TODO: 替换为实际的数据源调用
+      // const result = await $w.cloud.callDataSource({
+      //   dataSourceName: 'chromatography_reports',
+      //   methodName: 'wedaUpdateV2',
+      //   params: {
+      //     data: {
+      //       workOrder: updatedReport.workOrder,
+      //       columnSn: updatedReport.columnSn,
+      //       orderNumber: updatedReport.orderNumber,
+      //       instrumentSerial: updatedReport.instrumentSerial,
+      //       检测项目: updatedReport.检测项目,
+      //       reportType: updatedReport.reportType,
+      //       负责人: updatedReport.负责人,
+      //       reportDate: updatedReport.reportDate,
+      //       检测结果: updatedReport.检测结果,
+      //       不合格原因: updatedReport.不合格原因,
+      //       审核状态: updatedReport.审核状态,
+      //       remarks: updatedReport.remarks,
+      //       detectionData: updatedReport.detectionData,
+      //       updateBy: currentUser.name,
+      //       updateTime: new Date().getTime()
+      //     },
+      //     filter: {
+      //       where: {
+      //         $and: [
+      //           { _id: { $eq: updatedReport.id } }
+      //         ]
+      //       }
+      //     }
+      //   }
+      // });
 
-      // 更新报告列表
+      // if (result.count > 0) {
+      //   // 更新本地状态
+      //   const updatedReports = unqualifiedReports.map(report => report.id === updatedReport.id ? updatedReport : report);
+      //   setUnqualifiedReports(updatedReports);
+      //   setFilteredReports(updatedReports.map(report => report.id === updatedReport.id ? updatedReport : report));
+
+      //   toast({
+      //     title: "保存成功",
+      //     description: `报告 ${updatedReport.id} 已更新`
+      //   });
+      //   setShowEditModal(false);
+      //   setEditingReport(null);
+      // } else {
+      //   throw new Error('更新失败');
+      // }
+
+      // 临时模拟保存过程
+      await new Promise(resolve => setTimeout(resolve, 2000));
       const updatedReports = unqualifiedReports.map(report => report.id === updatedReport.id ? updatedReport : report);
       setUnqualifiedReports(updatedReports);
       setFilteredReports(updatedReports.map(report => report.id === updatedReport.id ? updatedReport : report));
@@ -113,9 +240,10 @@ export default function UnqualifiedReportsPage(props) {
       setShowEditModal(false);
       setEditingReport(null);
     } catch (error) {
+      console.error('保存失败:', error);
       toast({
         title: "保存失败",
-        description: error.message,
+        description: error.message || "无法保存报告更改",
         variant: "destructive"
       });
     } finally {
@@ -123,35 +251,101 @@ export default function UnqualifiedReportsPage(props) {
     }
   };
 
-  // 预览报告
-  const handlePreview = reportId => {
-    const report = unqualifiedReports.find(r => r.id === reportId);
-    if (report) {
-      // 转换为详情模态框需要的格式
-      const detailReport = {
-        ...report,
-        columnSerial: report.columnSn,
-        columnName: `${report.检测项目}层析柱`,
-        testType: report.检测项目,
-        testDate: report.reportDate,
-        operator: report.负责人,
-        finalConclusion: 'unqualified',
-        operationHistory: [{
-          time: report.generateTime,
+  // TODO: 预览报告详情
+  // 需要从后端获取完整的报告详情数据
+  const handlePreview = async reportId => {
+    try {
+      // TODO: 替换为实际的数据源调用
+      // const result = await $w.cloud.callDataSource({
+      //   dataSourceName: 'chromatography_reports',
+      //   methodName: 'wedaGetItemV2',
+      //   params: {
+      //     filter: {
+      //       where: {
+      //         $and: [
+      //           { _id: { $eq: reportId } }
+      //         ]
+      //       }
+      //     },
+      //     select: { $master: true }
+      //   }
+      // });
+
+      // const report = result;
+      // const detailReport = {
+      //   ...report,
+      //   columnSerial: report.columnSn,
+      //   columnName: `${report.检测项目}层析柱`,
+      //   testType: report.检测项目,
+      //   testDate: report.reportDate,
+      //   operator: report.负责人,
+      //   finalConclusion: 'unqualified',
+      //   operationHistory: report.operationHistory || []
+      // };
+      // setViewingReport(detailReport);
+      // setShowDetailModal(true);
+
+      // 临时使用本地数据
+      const report = unqualifiedReports.find(r => r.id === reportId);
+      if (report) {
+        const detailReport = {
+          ...report,
+          columnSerial: report.columnSn,
+          columnName: `${report.检测项目}层析柱`,
+          testType: report.检测项目,
+          testDate: report.reportDate,
           operator: report.负责人,
-          action: '提交检测',
-          remark: `完成${report.检测项目}，发现${report.不合格原因}`
-        }]
-      };
-      setViewingReport(detailReport);
-      setShowDetailModal(true);
+          finalConclusion: 'unqualified',
+          operationHistory: [{
+            time: report.generateTime,
+            operator: report.负责人,
+            action: '提交检测',
+            remark: `完成${report.检测项目}，发现${report.不合格原因}`
+          }]
+        };
+        setViewingReport(detailReport);
+        setShowDetailModal(true);
+      }
+    } catch (error) {
+      console.error('获取报告详情失败:', error);
+      toast({
+        title: "获取详情失败",
+        description: "无法加载报告详情",
+        variant: "destructive"
+      });
     }
   };
 
-  // 下载报告
-  const handleDownload = reportId => {
-    const report = unqualifiedReports.find(r => r.id === reportId);
-    if (report) {
+  // TODO: 下载报告
+  // 需要调用后端接口生成并下载报告文件
+  const handleDownload = async reportId => {
+    try {
+      // TODO: 替换为实际的数据源调用
+      // const result = await $w.cloud.callDataSource({
+      //   dataSourceName: 'chromatography_reports',
+      //   methodName: 'wedaGetItemV2',
+      //   params: {
+      //     filter: {
+      //       where: {
+      //         $and: [
+      //           { _id: { $eq: reportId } }
+      //         ]
+      //       }
+      //     },
+      //     select: { $master: true }
+      //   }
+      // });
+
+      // // 调用报告生成服务
+      // const downloadResult = await $w.cloud.callFunction({
+      //   name: 'generateReport',
+      //   data: {
+      //     reportId: reportId,
+      //     reportType: 'unqualified',
+      //     format: 'pdf'
+      //   }
+      // });
+
       toast({
         title: "下载报告",
         description: `正在下载报告 ${reportId}，请稍候`
@@ -164,11 +358,19 @@ export default function UnqualifiedReportsPage(props) {
           description: `报告 ${reportId} 已下载到本地`
         });
       }, 2000);
+    } catch (error) {
+      console.error('下载失败:', error);
+      toast({
+        title: "下载失败",
+        description: "无法下载报告",
+        variant: "destructive"
+      });
     }
   };
 
-  // 批量下载
-  const handleBatchDownload = () => {
+  // TODO: 批量下载报告
+  // 需要调用后端接口批量生成并下载报告
+  const handleBatchDownload = async () => {
     if (selectedReports.length === 0) {
       toast({
         title: "请选择报告",
@@ -177,19 +379,38 @@ export default function UnqualifiedReportsPage(props) {
       });
       return;
     }
-    toast({
-      title: "批量下载",
-      description: `正在下载 ${selectedReports.length} 份报告，请稍候`
-    });
+    try {
+      // TODO: 替换为实际的数据源调用
+      // const downloadResult = await $w.cloud.callFunction({
+      //   name: 'batchGenerateReports',
+      //   data: {
+      //     reportIds: selectedReports,
+      //     reportType: 'unqualified',
+      //     format: 'pdf'
+      //   }
+      // });
 
-    // 模拟批量下载过程
-    setTimeout(() => {
       toast({
-        title: "批量下载完成",
-        description: `${selectedReports.length} 份报告已下载完成`
+        title: "批量下载",
+        description: `正在下载 ${selectedReports.length} 份报告，请稍候`
       });
-      setSelectedReports([]);
-    }, 3000);
+
+      // 模拟批量下载过程
+      setTimeout(() => {
+        toast({
+          title: "批量下载完成",
+          description: `${selectedReports.length} 份报告已下载完成`
+        });
+        setSelectedReports([]);
+      }, 3000);
+    } catch (error) {
+      console.error('批量下载失败:', error);
+      toast({
+        title: "批量下载失败",
+        description: "无法批量下载报告",
+        variant: "destructive"
+      });
+    }
   };
 
   // 选择/取消选择报告
@@ -286,6 +507,11 @@ export default function UnqualifiedReportsPage(props) {
         </Pagination>
       </div>;
   };
+
+  // 组件挂载时获取数据
+  useEffect(() => {
+    fetchUnqualifiedReports();
+  }, []);
   return <div style={style} className="min-h-screen bg-gray-50">
       {/* 顶部导航 */}
       <div className="bg-white border-b border-gray-200 px-6 py-4">
@@ -442,8 +668,8 @@ export default function UnqualifiedReportsPage(props) {
               </div>
             </div>
             <div className="flex space-x-2">
-              <Button variant="outline" onClick={handleSearch}>
-                <Search className="w-4 h-4 mr-2" />
+              <Button variant="outline" onClick={handleSearch} disabled={loading}>
+                {loading ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <Search className="w-4 h-4 mr-2" />}
                 查询
               </Button>
               <Button variant="outline" onClick={handleReset}>
@@ -490,7 +716,19 @@ export default function UnqualifiedReportsPage(props) {
             </CardTitle>
           </CardHeader>
           <CardContent className="p-0">
-            <UnqualifiedReportTable reports={currentReports} selectedReports={selectedReports} onSelectReport={handleSelectReport} onSelectAll={handleSelectAll} onEdit={handleEditReport} onPreview={handlePreview} onDownload={handleDownload} getReportTypeBadge={getReportTypeBadge} />
+            {loading ? <div className="flex items-center justify-center py-12">
+                <Loader2 className="w-8 h-8 animate-spin text-gray-400" />
+                <span className="ml-2 text-gray-500">加载中...</span>
+              </div> : <UnqualifiedReportTable reports={currentReports} selectedReports={selectedReports} onSelectReport={handleSelectReport} onSelectAll={handleSelectAll} onEdit={handleSaveEdit ? reportId => {
+            const report = unqualifiedReports.find(r => r.id === reportId);
+            if (report) {
+              setEditingReport({
+                ...report,
+                detectionData: JSON.parse(JSON.stringify(report.detectionData))
+              });
+              setShowEditModal(true);
+            }
+          } : null} onPreview={handlePreview} onDownload={handleDownload} getReportTypeBadge={getReportTypeBadge} />}
           </CardContent>
         </Card>
 
@@ -500,7 +738,7 @@ export default function UnqualifiedReportsPage(props) {
           </div>}
 
         {/* 空状态 */}
-        {filteredReports.length === 0 && <Card className="text-center py-12">
+        {!loading && filteredReports.length === 0 && <Card className="text-center py-12">
             <CardContent>
               <AlertTriangle className="w-16 h-16 text-gray-300 mx-auto mb-4" />
               <h3 className="text-lg font-medium text-gray-900 mb-2">暂无不合适报告</h3>
