@@ -48,15 +48,15 @@ const mockQualifiedReports = [{
   columnSn: 'COL-2025-003',
   orderNumber: 'ORD-202501003',
   instrumentSerial: 'INST-001',
-  reportType: 'purity',
+  reportType: 'glycation',
   status: 'qualified',
   reportDate: '2025-01-13',
-  检测项目: '纯度分析',
+  检测项目: '糖化模式',
   检测结果: '合格',
   负责人: '王五',
   审核状态: 'approved',
   fileSize: '2.1MB',
-  reportName: '纯度分析报告_20250113',
+  reportName: '糖化模式报告_20250113',
   generateTime: '2025-01-13 11:20:00',
   lastAccessTime: '2025-01-15 14:10:00',
   accessType: 'download'
@@ -120,15 +120,15 @@ const mockQualifiedReports = [{
   columnSn: 'COL-2025-007',
   orderNumber: 'ORD-202501007',
   instrumentSerial: 'INST-003',
-  reportType: 'purity',
+  reportType: 'glycation',
   status: 'qualified',
   reportDate: '2025-01-09',
-  检测项目: '纯度分析',
+  检测项目: '糖化模式',
   检测结果: '合格',
   负责人: '王五',
   审核状态: 'approved',
   fileSize: '1.7MB',
-  reportName: '纯度分析报告_20250109',
+  reportName: '糖化模式报告_20250109',
   generateTime: '2025-01-09 10:45:00',
   lastAccessTime: '2025-01-15 10:15:00',
   accessType: 'download'
@@ -174,15 +174,15 @@ const mockQualifiedReports = [{
   columnSn: 'COL-2025-010',
   orderNumber: 'ORD-202501010',
   instrumentSerial: 'INST-003',
-  reportType: 'purity',
+  reportType: 'glycation',
   status: 'qualified',
   reportDate: '2025-01-06',
-  检测项目: '纯度分析',
+  检测项目: '糖化模式',
   检测结果: '合格',
   负责人: '李四',
   审核状态: 'approved',
   fileSize: '1.9MB',
-  reportName: '纯度分析报告_20250106',
+  reportName: '糖化模式报告_20250106',
   generateTime: '2025-01-06 11:30:00',
   lastAccessTime: '2025-01-14 17:10:00',
   accessType: 'preview'
@@ -228,15 +228,15 @@ const mockQualifiedReports = [{
   columnSn: 'COL-2025-013',
   orderNumber: 'ORD-202501013',
   instrumentSerial: 'INST-003',
-  reportType: 'purity',
+  reportType: 'glycation',
   status: 'qualified',
   reportDate: '2025-01-03',
-  检测项目: '纯度分析',
+  检测项目: '糖化模式',
   检测结果: '合格',
   负责人: '张三',
   审核状态: 'approved',
   fileSize: '1.8MB',
-  reportName: '纯度分析报告_20250103',
+  reportName: '糖化模式报告_20250103',
   generateTime: '2025-01-03 09:25:00',
   lastAccessTime: '2025-01-14 14:20:00',
   accessType: 'download'
@@ -282,15 +282,15 @@ const mockQualifiedReports = [{
   columnSn: 'COL-2025-016',
   orderNumber: 'ORD-202501016',
   instrumentSerial: 'INST-003',
-  reportType: 'purity',
+  reportType: 'glycation',
   status: 'qualified',
   reportDate: '2024-12-31',
-  检测项目: '纯度分析',
+  检测项目: '糖化模式',
   检测结果: '合格',
   负责人: '赵六',
   审核状态: 'approved',
   fileSize: '1.9MB',
-  reportName: '纯度分析报告_20241231',
+  reportName: '糖化模式报告_20241231',
   generateTime: '2024-12-31 16:35:00',
   lastAccessTime: '2025-01-14 11:25:00',
   accessType: 'preview'
@@ -336,15 +336,15 @@ const mockQualifiedReports = [{
   columnSn: 'COL-2025-019',
   orderNumber: 'ORD-202501019',
   instrumentSerial: 'INST-003',
-  reportType: 'purity',
+  reportType: 'glycation',
   status: 'qualified',
   reportDate: '2024-12-28',
-  检测项目: '纯度分析',
+  检测项目: '糖化模式',
   检测结果: '合格',
   负责人: '王五',
   审核状态: 'approved',
   fileSize: '1.7MB',
-  reportName: '纯度分析报告_20241228',
+  reportName: '糖化模式报告_20241228',
   generateTime: '2024-12-28 15:25:00',
   lastAccessTime: '2025-01-13 18:15:00',
   accessType: 'download'
@@ -589,7 +589,6 @@ export default function QueryReportsPage(props) {
     const typeMap = {
       glycation: '糖化模式',
       thalassemia: '地贫模式',
-      purity: '纯度分析',
       all: '综合'
     };
     return typeMap[type] || '糖化模式';
@@ -604,10 +603,6 @@ export default function QueryReportsPage(props) {
       },
       thalassemia: {
         label: '地贫模式',
-        color: 'green'
-      },
-      purity: {
-        label: '纯度分析',
         color: 'purple'
       }
     };
@@ -740,19 +735,6 @@ export default function QueryReportsPage(props) {
             </CardContent>
           </Card>
           
-          <Card>
-            <CardContent className="p-4">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm text-gray-500">已预览</p>
-                  <p className="text-2xl font-bold text-purple-600">
-                    {qualifiedReports.filter(r => r.accessType === 'preview').length}
-                  </p>
-                </div>
-                <Eye className="w-8 h-8 text-purple-400" />
-              </div>
-            </CardContent>
-          </Card>
         </div>
 
         {/* 搜索区域 */}
@@ -806,7 +788,7 @@ export default function QueryReportsPage(props) {
                     <SelectItem value="all">全部类型</SelectItem>
                     <SelectItem value="glycation">糖化模式报告</SelectItem>
                     <SelectItem value="thalassemia">地贫模式报告</SelectItem>
-                    <SelectItem value="purity">纯度分析报告</SelectItem>
+                    <SelectItem value="glycation">糖化模式报告</SelectItem>
                   </SelectContent>
                 </Select>
               </div>

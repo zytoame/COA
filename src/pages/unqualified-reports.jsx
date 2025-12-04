@@ -230,10 +230,6 @@ export default function UnqualifiedReportsPage(props) {
       },
       thalassemia: {
         label: '地贫模式',
-        color: 'green'
-      },
-      purity: {
-        label: '纯度分析',
         color: 'purple'
       }
     };

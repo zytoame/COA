@@ -15,7 +15,7 @@ const currentUser = {
 const functionModules = [{
   id: 'unqualified-reports',
   title: '不合格报告管理',
-  description: '管理和编辑不合格的层析柱检测报告，支持修改检测数据并重新计算CV值',
+  description: '管理和编辑不合格的层析柱检测报告',
   icon: AlertTriangle,
   color: 'red',
   stats: {
@@ -27,7 +27,7 @@ const functionModules = [{
 }, {
   id: 'query-reports',
   title: '查询报告',
-  description: '查询和生成各类检测报告，支持多条件筛选和报告预览',
+  description: '查询和生成各类检测报告',
   icon: Search,
   color: 'blue',
   stats: {
@@ -39,7 +39,7 @@ const functionModules = [{
 }, {
   id: 'batch-audit',
   title: '批量审核签字',
-  description: '批量审核待审核的层析柱，支持电子签名和审核意见记录',
+  description: '批量审核待审核的层析柱',
   icon: CheckCircle,
   color: 'green',
   stats: {

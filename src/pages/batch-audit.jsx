@@ -27,19 +27,19 @@ const mockPendingColumns = [{
   priority: 'high',
   // 详细检测数据
   detectionData: {
-    moduleTemperature: {
+    setTemperature: {
       standard: '25-40°C',
       result: '38.5°C',
       conclusion: 'pass',
       icon: Thermometer
     },
-    systemPressure: {
+    pressure: {
       standard: '5.0-8.0 MPa',
       result: '7.2 MPa',
       conclusion: 'pass',
       icon: Gauge
     },
-    hbA1cAppearanceTime: {
+    peakTime: {
       standard: '36-40 秒',
       result: '42.3 秒',
       conclusion: 'fail',
@@ -87,19 +87,19 @@ const mockPendingColumns = [{
   priority: 'medium',
   // 详细检测数据
   detectionData: {
-    moduleTemperature: {
+    setTemperature: {
       standard: '25-40°C',
       result: '35.2°C',
       conclusion: 'pass',
       icon: Thermometer
     },
-    systemPressure: {
+    pressure: {
       standard: '5.0-8.0 MPa',
       result: '6.8 MPa',
       conclusion: 'pass',
       icon: Gauge
     },
-    hbA1cAppearanceTime: {
+    peakTime: {
       standard: '36-40 秒',
       result: '38.1 秒',
       conclusion: 'pass',
@@ -141,19 +141,19 @@ const mockPendingColumns = [{
   priority: 'low',
   // 详细检测数据
   detectionData: {
-    moduleTemperature: {
+    setTemperature: {
       standard: '25-40°C',
       result: '32.1°C',
       conclusion: 'pass',
       icon: Thermometer
     },
-    systemPressure: {
+    pressure: {
       standard: '5.0-8.0 MPa',
       result: '5.5 MPa',
       conclusion: 'pass',
       icon: Gauge
     },
-    hbA1cAppearanceTime: {
+    peakTime: {
       standard: '36-40 秒',
       result: '39.8 秒',
       conclusion: 'pass',
@@ -195,19 +195,19 @@ const mockPendingColumns = [{
   priority: 'high',
   // 详细检测数据
   detectionData: {
-    moduleTemperature: {
+    setTemperature: {
       standard: '25-40°C',
       result: '29.7°C',
       conclusion: 'pass',
       icon: Thermometer
     },
-    systemPressure: {
+    pressure: {
       standard: '5.0-8.0 MPa',
       result: '7.8 MPa',
       conclusion: 'pass',
       icon: Gauge
     },
-    hbA1cAppearanceTime: {
+    peakTime: {
       standard: '36-40 秒',
       result: '35.2 秒',
       conclusion: 'fail',
@@ -249,19 +249,19 @@ const mockPendingColumns = [{
   priority: 'high',
   // 详细检测数据
   detectionData: {
-    moduleTemperature: {
+    setTemperature: {
       standard: '25-40°C',
       result: '37.8°C',
       conclusion: 'pass',
       icon: Thermometer
     },
-    systemPressure: {
+    pressure: {
       standard: '5.0-8.0 MPa',
       result: '8.2 MPa',
       conclusion: 'fail',
       icon: Gauge
     },
-    hbA1cAppearanceTime: {
+    peakTime: {
       standard: '36-40 秒',
       result: '41.5 秒',
       conclusion: 'fail',
@@ -303,19 +303,19 @@ const mockPendingColumns = [{
   priority: 'medium',
   // 详细检测数据
   detectionData: {
-    moduleTemperature: {
+    setTemperature: {
       standard: '25-40°C',
       result: '33.4°C',
       conclusion: 'pass',
       icon: Thermometer
     },
-    systemPressure: {
+    pressure: {
       standard: '5.0-8.0 MPa',
       result: '6.1 MPa',
       conclusion: 'pass',
       icon: Gauge
     },
-    hbA1cAppearanceTime: {
+    peakTime: {
       standard: '36-40 秒',
       result: '37.9 秒',
       conclusion: 'pass',
@@ -357,19 +357,19 @@ const mockPendingColumns = [{
   priority: 'medium',
   // 详细检测数据
   detectionData: {
-    moduleTemperature: {
+    setTemperature: {
       standard: '25-40°C',
       result: '36.2°C',
       conclusion: 'pass',
       icon: Thermometer
     },
-    systemPressure: {
+    pressure: {
       standard: '5.0-8.0 MPa',
       result: '7.5 MPa',
       conclusion: 'pass',
       icon: Gauge
     },
-    hbA1cAppearanceTime: {
+    peakTime: {
       standard: '36-40 秒',
       result: '43.8 秒',
       conclusion: 'fail',
@@ -411,19 +411,19 @@ const mockPendingColumns = [{
   priority: 'low',
   // 详细检测数据
   detectionData: {
-    moduleTemperature: {
+    setTemperature: {
       standard: '25-40°C',
       result: '31.9°C',
       conclusion: 'pass',
       icon: Thermometer
     },
-    systemPressure: {
+    pressure: {
       standard: '5.0-8.0 MPa',
       result: '5.8 MPa',
       conclusion: 'pass',
       icon: Gauge
     },
-    hbA1cAppearanceTime: {
+    peakTime: {
       standard: '36-40 秒',
       result: '36.7 秒',
       conclusion: 'pass',
@@ -465,19 +465,19 @@ const mockPendingColumns = [{
   priority: 'medium',
   // 详细检测数据
   detectionData: {
-    moduleTemperature: {
+    setTemperature: {
       standard: '25-40°C',
       result: '34.6°C',
       conclusion: 'pass',
       icon: Thermometer
     },
-    systemPressure: {
+    pressure: {
       standard: '5.0-8.0 MPa',
       result: '6.9 MPa',
       conclusion: 'pass',
       icon: Gauge
     },
-    hbA1cAppearanceTime: {
+    peakTime: {
       standard: '36-40 秒',
       result: '38.3 秒',
       conclusion: 'pass',
@@ -519,19 +519,19 @@ const mockPendingColumns = [{
   priority: 'low',
   // 详细检测数据
   detectionData: {
-    moduleTemperature: {
+    setTemperature: {
       standard: '25-40°C',
       result: '37.1°C',
       conclusion: 'pass',
       icon: Thermometer
     },
-    systemPressure: {
+    pressure: {
       standard: '5.0-8.0 MPa',
       result: '7.3 MPa',
       conclusion: 'pass',
       icon: Gauge
     },
-    hbA1cAppearanceTime: {
+    peakTime: {
       standard: '36-40 秒',
       result: '40.2 秒',
       conclusion: 'fail',
@@ -573,19 +573,19 @@ const mockPendingColumns = [{
   priority: 'medium',
   // 详细检测数据
   detectionData: {
-    moduleTemperature: {
+    setTemperature: {
       standard: '25-40°C',
       result: '32.8°C',
       conclusion: 'pass',
       icon: Thermometer
     },
-    systemPressure: {
+    pressure: {
       standard: '5.0-8.0 MPa',
       result: '6.4 MPa',
       conclusion: 'pass',
       icon: Gauge
     },
-    hbA1cAppearanceTime: {
+    peakTime: {
       standard: '36-40 秒',
       result: '39.1 秒',
       conclusion: 'pass',
@@ -627,19 +627,19 @@ const mockPendingColumns = [{
   priority: 'low',
   // 详细检测数据
   detectionData: {
-    moduleTemperature: {
+    setTemperature: {
       standard: '25-40°C',
       result: '35.7°C',
       conclusion: 'pass',
       icon: Thermometer
     },
-    systemPressure: {
+    pressure: {
       standard: '5.0-8.0 MPa',
       result: '7.1 MPa',
       conclusion: 'pass',
       icon: Gauge
     },
-    hbA1cAppearanceTime: {
+    peakTime: {
       standard: '36-40 秒',
       result: '37.6 秒',
       conclusion: 'pass',
