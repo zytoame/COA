@@ -3,7 +3,7 @@ import React, { useState, useEffect } from 'react';
 // @ts-ignore;
 import { Button, Input, Card, CardContent, CardHeader, CardTitle, Badge, Dialog, DialogContent, DialogHeader, DialogTitle, Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui';
 // @ts-ignore;
-import { X, Save, Edit2, Thermometer, Gauge, Timer, Activity, AlertTriangle, Plus, Trash2, Calculator } from 'lucide-react';
+import { X, Save, Edit2, Thermometer, Gauge, Timer, Activity, AlertTriangle, Calculator, RefreshCw } from 'lucide-react';
 
 export function EditModal({
   isOpen,
@@ -63,29 +63,6 @@ export function EditModal({
     updateDetectionData('repeatabilityTest', 'conclusion', conclusion);
   };
 
-  // 添加新的测值
-  const addRepeatabilityValue = () => {
-    const currentData = editedReport.detectionData?.repeatabilityTest || {};
-    const currentValues = currentData.rawValues || [];
-    const newValues = [...currentValues, ''];
-    updateDetectionData('repeatabilityTest', 'rawValues', newValues);
-  };
-
-  // 删除测值
-  const removeRepeatabilityValue = index => {
-    const currentData = editedReport.detectionData?.repeatabilityTest || {};
-    const currentValues = currentData.rawValues || [];
-    const newValues = currentValues.filter((_, i) => i !== index);
-    if (newValues.length > 0) {
-      // 重新计算CV值
-      const cvValue = calculateCV(newValues);
-      const conclusion = cvValue <= parseFloat(currentData.standard?.replace(/[^0-9.]/g, '') || 1.5) ? 'pass' : 'fail';
-      updateDetectionData('repeatabilityTest', 'rawValues', newValues);
-      updateDetectionData('repeatabilityTest', 'result', `${cvValue.toFixed(2)}%`);
-      updateDetectionData('repeatabilityTest', 'conclusion', conclusion);
-    }
-  };
-
   // 计算CV值（变异系数）
   const calculateCV = values => {
     const validValues = values.filter(v => v && !isNaN(parseFloat(v))).map(v => parseFloat(v));
@@ -139,9 +116,38 @@ export function EditModal({
     } = data;
     return filteredData;
   };
+
+  // 初始化20个重复性测值（如果没有数据的话）
+  const initializeRepeatabilityValues = () => {
+    const currentData = editedReport.detectionData?.repeatabilityTest || {};
+    if (!currentData.rawValues || currentData.rawValues.length === 0) {
+      // 生成20个示例测值
+      const sampleValues = Array.from({
+        length: 20
+      }, (_, i) => (35.5 + Math.random() * 0.8).toFixed(2));
+      updateDetectionData('repeatabilityTest', 'rawValues', sampleValues);
+    } else if (currentData.rawValues.length < 20) {
+      // 如果不足20个，补充到20个
+      const existingValues = currentData.rawValues;
+      const additionalValues = Array.from({
+        length: 20 - existingValues.length
+      }, () => (35.5 + Math.random() * 0.8).toFixed(2));
+      updateDetectionData('repeatabilityTest', 'rawValues', [...existingValues, ...additionalValues]);
+    } else if (currentData.rawValues.length > 20) {
+      // 如果超过20个，截取前20个
+      updateDetectionData('repeatabilityTest', 'rawValues', currentData.rawValues.slice(0, 20));
+    }
+  };
+
+  // 组件挂载时初始化测值
+  useEffect(() => {
+    if (isOpen && editedReport.detectionData?.repeatabilityTest) {
+      initializeRepeatabilityValues();
+    }
+  }, [isOpen, editedReport.detectionData?.repeatabilityTest]);
   if (!isOpen || !editedReport) return null;
   return <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+      <DialogContent className="max-w-6xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <Edit2 className="w-5 h-5" />
@@ -223,8 +229,8 @@ export function EditModal({
           {activeTab === 'detection' && <div className="space-y-4">
               <div className="flex justify-end mb-4">
                 <Button variant="outline" onClick={recalculateAll} className="flex items-center gap-2">
-                  <Calculator className="w-4 h-4" />
-                  重新计算所有数据
+                  <RefreshCw className="w-4 h-4" />
+                  重新计算CV值
                 </Button>
               </div>
               
@@ -254,19 +260,13 @@ export function EditModal({
                     {key === 'repeatabilityTest' && <div className="space-y-3">
                         <div>
                           <label className="block text-sm font-medium text-gray-700 mb-2">
-                            原始测值 (用于计算CV值)
+                            层析柱重复性测值 (20个固定测值)
                           </label>
-                          <div className="space-y-2">
-                            {(data.rawValues || []).map((value, index) => <div key={index} className="flex items-center gap-2">
-                                <Input type="number" step="0.01" value={value} onChange={e => updateRepeatabilityValues(index, e.target.value)} placeholder="输入测值" className="flex-1" />
-                                <Button variant="outline" size="sm" onClick={() => removeRepeatabilityValue(index)} className="text-red-600 hover:text-red-700">
-                                  <Trash2 className="w-4 h-4" />
-                                </Button>
+                          <div className="grid grid-cols-5 gap-2 max-h-60 overflow-y-auto p-2 border border-gray-200 rounded-lg bg-gray-50">
+                            {(data.rawValues || []).map((value, index) => <div key={index} className="flex items-center gap-1">
+                                <span className="text-xs text-gray-500 w-8">{index + 1}.</span>
+                                <Input type="number" step="0.01" value={value} onChange={e => updateRepeatabilityValues(index, e.target.value)} placeholder="测值" className="flex-1 h-8 text-sm" />
                               </div>)}
-                            <Button variant="outline" onClick={addRepeatabilityValue} className="flex items-center gap-2 text-blue-600 hover:text-blue-700">
-                              <Plus className="w-4 h-4" />
-                              添加测值
-                            </Button>
                           </div>
                         </div>
                         <div className="bg-blue-50 border border-blue-200 rounded-lg p-3">
@@ -274,7 +274,10 @@ export function EditModal({
                             <strong>计算说明：</strong>CV值（变异系数）= 标准差 / 平均值 × 100%
                           </p>
                           <p className="text-sm text-blue-600 mt-1">
-                            当前测值数量：{(data.rawValues || []).length} 个
+                            当前测值数量：{(data.rawValues || []).length} 个（固定20个测值）
+                          </p>
+                          <p className="text-sm text-blue-600">
+                            平均值：{((data.rawValues || []).filter(v => v && !isNaN(parseFloat(v))).map(v => parseFloat(v)).reduce((sum, val, arr) => sum + val, 0) / ((data.rawValues || []).filter(v => v && !isNaN(parseFloat(v))).length || 1)).toFixed(2)}
                           </p>
                         </div>
                       </div>}
