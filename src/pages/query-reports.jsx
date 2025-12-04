@@ -279,70 +279,6 @@ const mockQualifiedReports = [{
   reportName: '地贫模式报告_20241230',
   generateTime: '2024-12-30 13:05:00'
 }, {
-  id: 'RPT-Q018',
-  workOrder: 'WO202501018',
-  columnSn: 'COL-2025-018',
-  orderNumber: 'ORD-202501018',
-  instrumentSerial: 'INST-001',
-  reportType: 'glycation',
-  status: 'qualified',
-  reportDate: '2024-12-29',
-  检测项目: '糖化模式',
-  检测结果: '合格',
-  负责人: '李四',
-  审核状态: 'approved',
-  fileSize: '2.1MB',
-  reportName: '糖化模式报告_20241229',
-  generateTime: '2024-12-29 11:40:00'
-}, {
-  id: 'RPT-Q019',
-  workOrder: 'WO202501019',
-  columnSn: 'COL-2025-019',
-  orderNumber: 'ORD-202501019',
-  instrumentSerial: 'INST-003',
-  reportType: 'purity',
-  status: 'qualified',
-  reportDate: '2024-12-28',
-  检测项目: '纯度分析',
-  检测结果: '合格',
-  负责人: '王五',
-  审核状态: 'approved',
-  fileSize: '1.7MB',
-  reportName: '纯度分析报告_20241228',
-  generateTime: '2024-12-28 15:25:00'
-}, {
-  id: 'RPT-Q020',
-  workOrder: 'WO202501020',
-  columnSn: 'COL-2025-020',
-  orderNumber: 'ORD-202501020',
-  instrumentSerial: 'INST-002',
-  reportType: 'thalassemia',
-  status: 'qualified',
-  reportDate: '2024-12-27',
-  检测项目: '地贫模式',
-  检测结果: '合格',
-  负责人: '赵六',
-  审核状态: 'approved',
-  fileSize: '2.0MB',
-  reportName: '地贫模式报告_20241227',
-  generateTime: '2024-12-27 12:10:00'
-}, {
-  id: 'RPT-Q021',
-  workOrder: 'WO202501021',
-  columnSn: 'COL-2025-021',
-  orderNumber: 'ORD-202501021',
-  instrumentSerial: 'INST-001',
-  reportType: 'glycation',
-  status: 'qualified',
-  reportDate: '2024-12-26',
-  检测项目: '糖化模式',
-  检测结果: '合格',
-  负责人: '张三',
-  审核状态: 'approved',
-  fileSize: '2.3MB',
-  reportName: '糖化模式报告_20241226',
-  generateTime: '2024-12-26 14:45:00'
-}, {
   id: 'RPT-Q022',
   workOrder: 'WO202501022',
   columnSn: 'COL-2025-022',
@@ -424,7 +360,7 @@ export default function QueryReportsPage(props) {
 
   // 分页状态
   const [currentPage, setCurrentPage] = useState(1);
-  const pageSize = 20; // 每页显示20条记录
+  const pageSize = 10; // 每页显示10条记录
 
   // 搜索条件
   const [searchParams, setSearchParams] = useState({
