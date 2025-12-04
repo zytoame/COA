@@ -1,7 +1,7 @@
 // @ts-ignore;
 import React, { useState } from 'react';
 // @ts-ignore;
-import { Button, Input, Card, CardContent, CardHeader, CardTitle, Badge, Table, TableBody, TableCell, TableHead, TableHeader, TableRow, Select, SelectContent, SelectItem, SelectTrigger, SelectValue, useToast, Pagination, PaginationContent, PaginationEllipsis, PaginationItem, PaginationLink, PaginationNext, PaginationPrevious } from '@/components/ui';
+import { Button, Input, Card, CardContent, CardHeader, CardTitle, Badge, Table, TableBody, TableCell, TableHead, TableHeader, TableRow, Select, SelectContent, SelectItem, SelectTrigger, SelectValue, useToast } from '@/components/ui';
 // @ts-ignore;
 import { Search, Download, Eye, FileText, Calendar, User, ArrowLeft, Filter, Plus, BarChart3, CheckCircle, Clock, Loader2, FileCheck } from 'lucide-react';
 
@@ -354,13 +354,9 @@ export default function QueryReportsPage(props) {
 
   // 状态管理
   const [qualifiedReports, setQualifiedReports] = useState(mockQualifiedReports);
-  const [filteredReports, setFilteredReports] = useState(mockQualifiedReports);
+  const [filteredReports, setFilteredReports] = useState(mockQualifiedReports.slice(0, 20)); // 只显示最新20条
   const [generating, setGenerating] = useState(false);
   const [selectedReports, setSelectedReports] = useState([]);
-
-  // 分页状态
-  const [currentPage, setCurrentPage] = useState(1);
-  const pageSize = 10; // 每页显示10条记录
 
   // 搜索条件
   const [searchParams, setSearchParams] = useState({
@@ -378,22 +374,18 @@ export default function QueryReportsPage(props) {
     type: 'admin'
   };
 
-  // 计算分页数据
-  const totalPages = Math.ceil(filteredReports.length / pageSize);
-  const startIndex = (currentPage - 1) * pageSize;
-  const endIndex = startIndex + pageSize;
-  const currentReports = filteredReports.slice(startIndex, endIndex);
+  // 获取显示的报告数据（最多20条）
+  const displayReports = filteredReports.slice(0, 20);
 
   // 搜索功能
   const handleSearch = () => {
     const filtered = qualifiedReports.filter(report => {
       return (!searchParams.workOrder || report.workOrder.toLowerCase().includes(searchParams.workOrder.toLowerCase())) && (!searchParams.columnSn || report.columnSn.toLowerCase().includes(searchParams.columnSn.toLowerCase())) && (!searchParams.orderNumber || report.orderNumber.toLowerCase().includes(searchParams.orderNumber.toLowerCase())) && (!searchParams.instrumentSerial || report.instrumentSerial.toLowerCase().includes(searchParams.instrumentSerial.toLowerCase())) && (searchParams.reportType === 'all' || report.reportType === searchParams.reportType);
     });
-    setFilteredReports(filtered);
-    setCurrentPage(1); // 重置到第一页
+    setFilteredReports(filtered.slice(0, 20)); // 只显示最新20条
     toast({
       title: "查询完成",
-      description: `找到 ${filtered.length} 条合格报告`
+      description: `找到 ${filtered.length} 条合格报告，显示最新20条`
     });
   };
 
@@ -407,8 +399,7 @@ export default function QueryReportsPage(props) {
       reportType: 'all',
       dateRange: 'all'
     });
-    setFilteredReports(qualifiedReports);
-    setCurrentPage(1); // 重置到第一页
+    setFilteredReports(qualifiedReports.slice(0, 20)); // 只显示最新20条
   };
 
   // 生成报告
@@ -443,8 +434,7 @@ export default function QueryReportsPage(props) {
         generateTime: new Date().toLocaleString('zh-CN')
       };
       setQualifiedReports([newReport, ...qualifiedReports]);
-      setFilteredReports([newReport, ...filteredReports]);
-      setCurrentPage(1); // 新报告生成后跳转到第一页
+      setFilteredReports([newReport, ...qualifiedReports].slice(0, 20)); // 保持最新20条
       toast({
         title: "报告生成成功",
         description: `报告 ${newReport.id} 已生成，请查看报告列表`
@@ -524,12 +514,12 @@ export default function QueryReportsPage(props) {
     }
   };
 
-  // 全选/取消全选（仅当前页）
+  // 全选/取消全选
   const handleSelectAll = checked => {
     if (checked) {
-      setSelectedReports([...selectedReports, ...currentReports.map(report => report.id)]);
+      setSelectedReports(displayReports.map(report => report.id));
     } else {
-      setSelectedReports(selectedReports.filter(id => !currentReports.some(report => report.id === id)));
+      setSelectedReports([]);
     }
   };
 
@@ -573,46 +563,6 @@ export default function QueryReportsPage(props) {
       params: {}
     });
   };
-
-  // 分页组件
-  const renderPagination = () => {
-    if (totalPages <= 1) return null;
-    return <div className="flex items-center justify-between px-2">
-        <div className="text-sm text-gray-500">
-          显示第 {startIndex + 1} - {Math.min(endIndex, filteredReports.length)} 条，共 {filteredReports.length} 条记录
-        </div>
-        <Pagination>
-          <PaginationContent>
-            <PaginationItem>
-              <PaginationPrevious onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))} className={currentPage === 1 ? 'pointer-events-none opacity-50' : 'cursor-pointer'} />
-            </PaginationItem>
-            
-            {/* 页码显示逻辑 */}
-            {Array.from({
-            length: totalPages
-          }, (_, i) => i + 1).map(page => {
-            // 显示逻辑：当前页前后各显示2页，超出范围显示省略号
-            if (page === 1 || page === totalPages || page >= currentPage - 2 && page <= currentPage + 2) {
-              return <PaginationItem key={page}>
-                    <PaginationLink onClick={() => setCurrentPage(page)} isActive={currentPage === page} className="cursor-pointer">
-                      {page}
-                    </PaginationLink>
-                  </PaginationItem>;
-            } else if (page === currentPage - 3 || page === currentPage + 3) {
-              return <PaginationItem key={page}>
-                    <PaginationEllipsis />
-                  </PaginationItem>;
-            }
-            return null;
-          })}
-            
-            <PaginationItem>
-              <PaginationNext onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))} className={currentPage === totalPages ? 'pointer-events-none opacity-50' : 'cursor-pointer'} />
-            </PaginationItem>
-          </PaginationContent>
-        </Pagination>
-      </div>;
-  };
   return <div style={style} className="min-h-screen bg-gray-50">
       {/* 顶部导航 */}
       <div className="bg-white border-b border-gray-200 px-6 py-4">
@@ -625,7 +575,7 @@ export default function QueryReportsPage(props) {
             <Search className="w-8 h-8 text-blue-600" />
             <div>
               <h1 className="text-2xl font-bold text-gray-900">查询报告</h1>
-              <p className="text-sm text-gray-500">查询和生成各类检测报告</p>
+              <p className="text-sm text-gray-500">查询和生成各类检测报告（显示最新20条记录）</p>
             </div>
           </div>
           <div className="flex items-center space-x-2">
@@ -815,7 +765,7 @@ export default function QueryReportsPage(props) {
                 合格报告列表
               </span>
               <div className="text-sm text-gray-500">
-                当前页显示 {currentReports.length} 条，共 {filteredReports.length} 份报告
+                显示最新 {displayReports.length} 条记录，共 {filteredReports.length} 份报告
               </div>
             </CardTitle>
           </CardHeader>
@@ -824,7 +774,7 @@ export default function QueryReportsPage(props) {
               <TableHeader>
                 <TableRow>
                   <TableHead className="w-12">
-                    <input type="checkbox" checked={currentReports.length > 0 && currentReports.every(report => selectedReports.includes(report.id))} onChange={e => handleSelectAll(e.target.checked)} className="rounded border-gray-300" />
+                    <input type="checkbox" checked={displayReports.length > 0 && displayReports.every(report => selectedReports.includes(report.id))} onChange={e => handleSelectAll(e.target.checked)} className="rounded border-gray-300" />
                   </TableHead>
                   <TableHead>报告编号</TableHead>
                   <TableHead>报告名称</TableHead>
@@ -840,7 +790,7 @@ export default function QueryReportsPage(props) {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {currentReports.map(report => <TableRow key={report.id} className="hover:bg-gray-50">
+                {displayReports.map(report => <TableRow key={report.id} className="hover:bg-gray-50">
                     <TableCell>
                       <input type="checkbox" checked={selectedReports.includes(report.id)} onChange={() => handleSelectReport(report.id)} className="rounded border-gray-300" />
                     </TableCell>
@@ -885,13 +835,8 @@ export default function QueryReportsPage(props) {
           </CardContent>
         </Card>
 
-        {/* 分页组件 */}
-        {filteredReports.length > 0 && <div className="mt-4">
-            {renderPagination()}
-          </div>}
-
         {/* 空状态 */}
-        {filteredReports.length === 0 && <Card className="text-center py-12">
+        {displayReports.length === 0 && <Card className="text-center py-12">
             <CardContent>
               <FileText className="w-16 h-16 text-gray-300 mx-auto mb-4" />
               <h3 className="text-lg font-medium text-gray-900 mb-2">暂无报告</h3>

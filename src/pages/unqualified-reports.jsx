@@ -7,6 +7,7 @@ import { Search, Download, Eye, FileText, Calendar, User, ArrowLeft, Filter, Plu
 
 // 引入子组件
 import { EditModal } from '@/components/EditModal';
+import { DetailModal } from '@/components/DetailModal';
 
 // 模拟不合格报告数据
 const mockUnqualifiedReports = [{
@@ -58,7 +59,20 @@ const mockUnqualifiedReports = [{
       conclusion: 'fail',
       icon: 'Package'
     }
-  }
+  },
+  finalConclusion: 'unqualified',
+  // 操作历史
+  operationHistory: [{
+    time: '2025-01-15 14:30:00',
+    operator: '张三',
+    action: '提交检测',
+    remark: '完成所有检测项目'
+  }, {
+    time: '2025-01-15 15:00:00',
+    operator: '系统',
+    action: '自动判定',
+    remark: '检测结果显示不合格'
+  }]
 }, {
   id: 'RPT-U002',
   workOrder: 'WO202501002',
@@ -70,7 +84,7 @@ const mockUnqualifiedReports = [{
   reportDate: '2025-01-14',
   检测项目: '地贫模式',
   检测结果: '不合格',
-  不合格原因: 'pH值超出��围',
+  不合格原因: 'pH值超出范围',
   负责人: '李四',
   审核状态: 'pending',
   fileSize: '1.8MB',
@@ -107,7 +121,14 @@ const mockUnqualifiedReports = [{
       conclusion: 'pass',
       icon: 'Package'
     }
-  }
+  },
+  finalConclusion: 'qualified',
+  operationHistory: [{
+    time: '2025-01-14 16:45:00',
+    operator: '李四',
+    action: '提交检测',
+    remark: '完成pH值检测'
+  }]
 }, {
   id: 'RPT-U003',
   workOrder: 'WO202501003',
@@ -156,7 +177,14 @@ const mockUnqualifiedReports = [{
       conclusion: 'fail',
       icon: 'Package'
     }
-  }
+  },
+  finalConclusion: 'unqualified',
+  operationHistory: [{
+    time: '2025-01-13 11:20:00',
+    operator: '王五',
+    action: '提交检测',
+    remark: '完成杂质含量检测'
+  }]
 }, {
   id: 'RPT-U004',
   workOrder: 'WO202501004',
@@ -205,7 +233,14 @@ const mockUnqualifiedReports = [{
       conclusion: 'pass',
       icon: 'Package'
     }
-  }
+  },
+  finalConclusion: 'unqualified',
+  operationHistory: [{
+    time: '2025-01-12 09:15:00',
+    operator: '赵六',
+    action: '提交检测',
+    remark: '完成溶解度测试'
+  }]
 }, {
   id: 'RPT-U005',
   workOrder: 'WO202501005',
@@ -254,7 +289,14 @@ const mockUnqualifiedReports = [{
       conclusion: 'fail',
       icon: 'Package'
     }
-  }
+  },
+  finalConclusion: 'unqualified',
+  operationHistory: [{
+    time: '2025-01-11 15:30:00',
+    operator: '张三',
+    action: '提交检测',
+    remark: '完成稳定性测试'
+  }]
 }, {
   id: 'RPT-U006',
   workOrder: 'WO202501006',
@@ -303,7 +345,14 @@ const mockUnqualifiedReports = [{
       conclusion: 'pass',
       icon: 'Package'
     }
-  }
+  },
+  finalConclusion: 'unqualified',
+  operationHistory: [{
+    time: '2025-01-10 13:20:00',
+    operator: '李四',
+    action: '提交检测',
+    remark: '完成回收率测试'
+  }]
 }, {
   id: 'RPT-U007',
   workOrder: 'WO202501007',
@@ -352,7 +401,14 @@ const mockUnqualifiedReports = [{
       conclusion: 'pass',
       icon: 'Package'
     }
-  }
+  },
+  finalConclusion: 'unqualified',
+  operationHistory: [{
+    time: '2025-01-09 10:45:00',
+    operator: '王五',
+    action: '提交检测',
+    remark: '完成响应时间测试'
+  }]
 }, {
   id: 'RPT-U008',
   workOrder: 'WO202501008',
@@ -401,7 +457,14 @@ const mockUnqualifiedReports = [{
       conclusion: 'fail',
       icon: 'Package'
     }
-  }
+  },
+  finalConclusion: 'unqualified',
+  operationHistory: [{
+    time: '2025-01-08 16:10:00',
+    operator: '赵六',
+    action: '提交检测',
+    remark: '完成线性范围测试'
+  }]
 }, {
   id: 'RPT-U009',
   workOrder: 'WO202501009',
@@ -450,7 +513,14 @@ const mockUnqualifiedReports = [{
       conclusion: 'pass',
       icon: 'Package'
     }
-  }
+  },
+  finalConclusion: 'unqualified',
+  operationHistory: [{
+    time: '2025-01-07 14:55:00',
+    operator: '张三',
+    action: '提交检测',
+    remark: '完成检测限测试'
+  }]
 }, {
   id: 'RPT-U010',
   workOrder: 'WO202501010',
@@ -499,7 +569,14 @@ const mockUnqualifiedReports = [{
       conclusion: 'pass',
       icon: 'Package'
     }
-  }
+  },
+  finalConclusion: 'unqualified',
+  operationHistory: [{
+    time: '2025-01-06 11:30:00',
+    operator: '李四',
+    action: '提交检测',
+    remark: '完成特异性测试'
+  }]
 }, {
   id: 'RPT-U011',
   workOrder: 'WO202501011',
@@ -548,7 +625,14 @@ const mockUnqualifiedReports = [{
       conclusion: 'pass',
       icon: 'Package'
     }
-  }
+  },
+  finalConclusion: 'unqualified',
+  operationHistory: [{
+    time: '2025-01-05 15:20:00',
+    operator: '王五',
+    action: '提交检测',
+    remark: '完成批间差异测试'
+  }]
 }, {
   id: 'RPT-U012',
   workOrder: 'WO202501012',
@@ -597,7 +681,14 @@ const mockUnqualifiedReports = [{
       conclusion: 'pass',
       icon: 'Package'
     }
-  }
+  },
+  finalConclusion: 'unqualified',
+  operationHistory: [{
+    time: '2025-01-04 12:40:00',
+    operator: '赵六',
+    action: '提交检测',
+    remark: '完成载量测试'
+  }]
 }];
 export default function UnqualifiedReportsPage(props) {
   const {
@@ -615,6 +706,8 @@ export default function UnqualifiedReportsPage(props) {
   const [showEditModal, setShowEditModal] = useState(false);
   const [editingReport, setEditingReport] = useState(null);
   const [saving, setSaving] = useState(false);
+  const [showDetailModal, setShowDetailModal] = useState(false);
+  const [selectedReport, setSelectedReport] = useState(null);
 
   // 分页状态
   const [currentPage, setCurrentPage] = useState(1);
@@ -710,15 +803,43 @@ export default function UnqualifiedReportsPage(props) {
     }
   };
 
-  // 预览报告
+  // 预览报告 - 与批量审核列表保持一致
   const handlePreview = reportId => {
     const report = unqualifiedReports.find(r => r.id === reportId);
     if (report) {
-      toast({
-        title: "预览报告",
-        description: `正在预览报告 ${reportId}，请查看详细信息`
-      });
+      // 转换为与批量审核列表兼容的数据格式
+      const columnData = {
+        id: report.id,
+        workOrder: report.workOrder,
+        columnSn: report.columnSn,
+        orderNumber: report.orderNumber,
+        instrumentSerial: report.instrumentSerial,
+        columnName: `${report.检测项目}层析柱`,
+        testType: report.检测项目,
+        testDate: report.reportDate,
+        testResult: report.检测结果,
+        不合格原因: report.不合格原因,
+        operator: report.负责人,
+        submitTime: report.generateTime,
+        priority: 'medium',
+        detectionData: report.detectionData,
+        finalConclusion: report.finalConclusion,
+        operationHistory: report.operationHistory || [{
+          time: report.generateTime,
+          operator: report.负责人,
+          action: '提交检测',
+          remark: `完成${report.检测项目}检测`
+        }]
+      };
+      setSelectedReport(columnData);
+      setShowDetailModal(true);
     }
+  };
+
+  // 关闭详情弹窗
+  const handleCloseDetailModal = () => {
+    setShowDetailModal(false);
+    setSelectedReport(null);
   };
 
   // 下载报告
@@ -1157,5 +1278,8 @@ export default function UnqualifiedReportsPage(props) {
       setShowEditModal(false);
       setEditingReport(null);
     }} report={editingReport} onSave={handleSaveEdit} saving={saving} />
+
+      {/* 详情弹窗 - 与批量审核列表保持一致 */}
+      <DetailModal column={selectedReport} isOpen={showDetailModal} onClose={handleCloseDetailModal} />
     </div>;
 }
