@@ -1,11 +1,11 @@
 // @ts-ignore;
 import React, { useState } from 'react';
 // @ts-ignore;
-import { Button, Input, Card, CardContent, CardHeader, CardTitle, Badge, Table, TableBody, TableCell, TableHead, TableHeader, TableRow, Select, SelectContent, SelectItem, SelectTrigger, SelectValue, useToast } from '@/components/ui';
+import { Button, Input, Card, CardContent, CardHeader, CardTitle, Badge, Table, TableBody, TableCell, TableHead, TableHeader, TableRow, Select, SelectContent, SelectItem, SelectTrigger, SelectValue, useToast, Pagination, PaginationContent, PaginationEllipsis, PaginationItem, PaginationLink, PaginationNext, PaginationPrevious } from '@/components/ui';
 // @ts-ignore;
 import { Search, Download, Eye, FileText, Calendar, User, ArrowLeft, Filter, Plus, BarChart3, CheckCircle, Clock, Loader2, FileCheck } from 'lucide-react';
 
-// 模拟合格报告数据
+// 模拟合格报告数据 - 只显示最新下载或预览的20份报告
 const mockQualifiedReports = [{
   id: 'RPT-Q001',
   workOrder: 'WO202501001',
@@ -21,7 +21,9 @@ const mockQualifiedReports = [{
   审核状态: 'approved',
   fileSize: '2.3MB',
   reportName: '糖化模式报告_20250115',
-  generateTime: '2025-01-15 14:30:00'
+  generateTime: '2025-01-15 14:30:00',
+  lastAccessTime: '2025-01-15 16:45:00',
+  accessType: 'download'
 }, {
   id: 'RPT-Q002',
   workOrder: 'WO202501002',
@@ -37,7 +39,9 @@ const mockQualifiedReports = [{
   审核状态: 'approved',
   fileSize: '1.8MB',
   reportName: '地贫模式报告_20250114',
-  generateTime: '2025-01-14 16:45:00'
+  generateTime: '2025-01-14 16:45:00',
+  lastAccessTime: '2025-01-15 15:20:00',
+  accessType: 'preview'
 }, {
   id: 'RPT-Q003',
   workOrder: 'WO202501003',
@@ -53,7 +57,9 @@ const mockQualifiedReports = [{
   审核状态: 'approved',
   fileSize: '2.1MB',
   reportName: '纯度分析报告_20250113',
-  generateTime: '2025-01-13 11:20:00'
+  generateTime: '2025-01-13 11:20:00',
+  lastAccessTime: '2025-01-15 14:10:00',
+  accessType: 'download'
 }, {
   id: 'RPT-Q004',
   workOrder: 'WO202501004',
@@ -69,7 +75,9 @@ const mockQualifiedReports = [{
   审核状态: 'approved',
   fileSize: '1.9MB',
   reportName: '糖化模式报告_20250112',
-  generateTime: '2025-01-12 09:15:00'
+  generateTime: '2025-01-12 09:15:00',
+  lastAccessTime: '2025-01-15 13:30:00',
+  accessType: 'preview'
 }, {
   id: 'RPT-Q005',
   workOrder: 'WO202501005',
@@ -85,7 +93,9 @@ const mockQualifiedReports = [{
   审核状态: 'approved',
   fileSize: '2.5MB',
   reportName: '地贫模式报告_20250111',
-  generateTime: '2025-01-11 15:30:00'
+  generateTime: '2025-01-11 15:30:00',
+  lastAccessTime: '2025-01-15 12:45:00',
+  accessType: 'download'
 }, {
   id: 'RPT-Q006',
   workOrder: 'WO202501006',
@@ -101,7 +111,9 @@ const mockQualifiedReports = [{
   审核状态: 'approved',
   fileSize: '2.2MB',
   reportName: '糖化模式报告_20250110',
-  generateTime: '2025-01-10 13:20:00'
+  generateTime: '2025-01-10 13:20:00',
+  lastAccessTime: '2025-01-15 11:20:00',
+  accessType: 'preview'
 }, {
   id: 'RPT-Q007',
   workOrder: 'WO202501007',
@@ -117,7 +129,9 @@ const mockQualifiedReports = [{
   审核状态: 'approved',
   fileSize: '1.7MB',
   reportName: '纯度分析报告_20250109',
-  generateTime: '2025-01-09 10:45:00'
+  generateTime: '2025-01-09 10:45:00',
+  lastAccessTime: '2025-01-15 10:15:00',
+  accessType: 'download'
 }, {
   id: 'RPT-Q008',
   workOrder: 'WO202501008',
@@ -133,7 +147,9 @@ const mockQualifiedReports = [{
   审核状态: 'approved',
   fileSize: '2.0MB',
   reportName: '地贫模式报告_20250108',
-  generateTime: '2025-01-08 16:10:00'
+  generateTime: '2025-01-08 16:10:00',
+  lastAccessTime: '2025-01-15 09:30:00',
+  accessType: 'preview'
 }, {
   id: 'RPT-Q009',
   workOrder: 'WO202501009',
@@ -149,7 +165,9 @@ const mockQualifiedReports = [{
   审核状态: 'approved',
   fileSize: '2.4MB',
   reportName: '糖化模式报告_20250107',
-  generateTime: '2025-01-07 14:55:00'
+  generateTime: '2025-01-07 14:55:00',
+  lastAccessTime: '2025-01-14 18:20:00',
+  accessType: 'download'
 }, {
   id: 'RPT-Q010',
   workOrder: 'WO202501010',
@@ -165,7 +183,9 @@ const mockQualifiedReports = [{
   审核状态: 'approved',
   fileSize: '1.9MB',
   reportName: '纯度分析报告_20250106',
-  generateTime: '2025-01-06 11:30:00'
+  generateTime: '2025-01-06 11:30:00',
+  lastAccessTime: '2025-01-14 17:10:00',
+  accessType: 'preview'
 }, {
   id: 'RPT-Q011',
   workOrder: 'WO202501011',
@@ -181,7 +201,9 @@ const mockQualifiedReports = [{
   审核状态: 'approved',
   fileSize: '2.1MB',
   reportName: '地贫模式报告_20250105',
-  generateTime: '2025-01-05 15:20:00'
+  generateTime: '2025-01-05 15:20:00',
+  lastAccessTime: '2025-01-14 16:45:00',
+  accessType: 'download'
 }, {
   id: 'RPT-Q012',
   workOrder: 'WO202501012',
@@ -197,7 +219,9 @@ const mockQualifiedReports = [{
   审核状态: 'approved',
   fileSize: '2.3MB',
   reportName: '糖化模式报告_20250104',
-  generateTime: '2025-01-04 12:40:00'
+  generateTime: '2025-01-04 12:40:00',
+  lastAccessTime: '2025-01-14 15:30:00',
+  accessType: 'preview'
 }, {
   id: 'RPT-Q013',
   workOrder: 'WO202501013',
@@ -213,7 +237,9 @@ const mockQualifiedReports = [{
   审核状态: 'approved',
   fileSize: '1.8MB',
   reportName: '纯度分析报告_20250103',
-  generateTime: '2025-01-03 09:25:00'
+  generateTime: '2025-01-03 09:25:00',
+  lastAccessTime: '2025-01-14 14:20:00',
+  accessType: 'download'
 }, {
   id: 'RPT-Q014',
   workOrder: 'WO202501014',
@@ -229,7 +255,9 @@ const mockQualifiedReports = [{
   审核状态: 'approved',
   fileSize: '2.0MB',
   reportName: '地贫模式报告_20250102',
-  generateTime: '2025-01-02 14:15:00'
+  generateTime: '2025-01-02 14:15:00',
+  lastAccessTime: '2025-01-14 13:15:00',
+  accessType: 'preview'
 }, {
   id: 'RPT-Q015',
   workOrder: 'WO202501015',
@@ -245,7 +273,9 @@ const mockQualifiedReports = [{
   审核状态: 'approved',
   fileSize: '2.2MB',
   reportName: '糖化模式报告_20250101',
-  generateTime: '2025-01-01 10:50:00'
+  generateTime: '2025-01-01 10:50:00',
+  lastAccessTime: '2025-01-14 12:10:00',
+  accessType: 'download'
 }, {
   id: 'RPT-Q016',
   workOrder: 'WO202501016',
@@ -261,7 +291,9 @@ const mockQualifiedReports = [{
   审核状态: 'approved',
   fileSize: '1.9MB',
   reportName: '纯度分析报告_20241231',
-  generateTime: '2024-12-31 16:35:00'
+  generateTime: '2024-12-31 16:35:00',
+  lastAccessTime: '2025-01-14 11:25:00',
+  accessType: 'preview'
 }, {
   id: 'RPT-Q017',
   workOrder: 'WO202501017',
@@ -277,71 +309,63 @@ const mockQualifiedReports = [{
   审核状态: 'approved',
   fileSize: '2.4MB',
   reportName: '地贫模式报告_20241230',
-  generateTime: '2024-12-30 13:05:00'
+  generateTime: '2024-12-30 13:05:00',
+  lastAccessTime: '2025-01-14 10:30:00',
+  accessType: 'download'
 }, {
-  id: 'RPT-Q022',
-  workOrder: 'WO202501022',
-  columnSn: 'COL-2025-022',
-  orderNumber: 'ORD-202501022',
-  instrumentSerial: 'INST-003',
-  reportType: 'purity',
-  status: 'qualified',
-  reportDate: '2024-12-25',
-  检测项目: '纯度分析',
-  检测结果: '合格',
-  负责人: '李四',
-  审核状态: 'approved',
-  fileSize: '1.8MB',
-  reportName: '纯度分析报告_20241225',
-  generateTime: '2024-12-25 10:20:00'
-}, {
-  id: 'RPT-Q023',
-  workOrder: 'WO202501023',
-  columnSn: 'COL-2025-023',
-  orderNumber: 'ORD-202501023',
-  instrumentSerial: 'INST-002',
-  reportType: 'thalassemia',
-  status: 'qualified',
-  reportDate: '2024-12-24',
-  检测项目: '地贫模式',
-  检测结果: '合格',
-  负责人: '王五',
-  审核状态: 'approved',
-  fileSize: '2.2MB',
-  reportName: '地贫模式报告_20241224',
-  generateTime: '2024-12-24 16:00:00'
-}, {
-  id: 'RPT-Q024',
-  workOrder: 'WO202501024',
-  columnSn: 'COL-2025-024',
-  orderNumber: 'ORD-202501024',
+  id: 'RPT-Q018',
+  workOrder: 'WO202501018',
+  columnSn: 'COL-2025-018',
+  orderNumber: 'ORD-202501018',
   instrumentSerial: 'INST-001',
   reportType: 'glycation',
   status: 'qualified',
-  reportDate: '2024-12-23',
+  reportDate: '2024-12-29',
   检测项目: '糖化模式',
+  检测结果: '合格',
+  负责人: '李四',
+  审核状态: 'approved',
+  fileSize: '2.1MB',
+  reportName: '糖化模式报告_20241229',
+  generateTime: '2024-12-29 11:40:00',
+  lastAccessTime: '2025-01-14 09:40:00',
+  accessType: 'preview'
+}, {
+  id: 'RPT-Q019',
+  workOrder: 'WO202501019',
+  columnSn: 'COL-2025-019',
+  orderNumber: 'ORD-202501019',
+  instrumentSerial: 'INST-003',
+  reportType: 'purity',
+  status: 'qualified',
+  reportDate: '2024-12-28',
+  检测项目: '纯度分析',
+  检测结果: '合格',
+  负责人: '王五',
+  审核状态: 'approved',
+  fileSize: '1.7MB',
+  reportName: '纯度分析报告_20241228',
+  generateTime: '2024-12-28 15:25:00',
+  lastAccessTime: '2025-01-13 18:15:00',
+  accessType: 'download'
+}, {
+  id: 'RPT-Q020',
+  workOrder: 'WO202501020',
+  columnSn: 'COL-2025-020',
+  orderNumber: 'ORD-202501020',
+  instrumentSerial: 'INST-002',
+  reportType: 'thalassemia',
+  status: 'qualified',
+  reportDate: '2024-12-27',
+  检测项目: '地贫模式',
   检测结果: '合格',
   负责人: '赵六',
   审核状态: 'approved',
   fileSize: '2.0MB',
-  reportName: '糖化模式报告_20241223',
-  generateTime: '2024-12-23 13:35:00'
-}, {
-  id: 'RPT-Q025',
-  workOrder: 'WO202501025',
-  columnSn: 'COL-2025-025',
-  orderNumber: 'ORD-202501025',
-  instrumentSerial: 'INST-003',
-  reportType: 'purity',
-  status: 'qualified',
-  reportDate: '2024-12-22',
-  检测项目: '纯度分析',
-  检测结果: '合格',
-  负责人: '张三',
-  审核状态: 'approved',
-  fileSize: '1.9MB',
-  reportName: '纯度分析报告_20241222',
-  generateTime: '2024-12-22 11:15:00'
+  reportName: '地贫模式报告_20241227',
+  generateTime: '2024-12-27 12:10:00',
+  lastAccessTime: '2025-01-13 17:20:00',
+  accessType: 'preview'
 }];
 export default function QueryReportsPage(props) {
   const {
@@ -354,9 +378,13 @@ export default function QueryReportsPage(props) {
 
   // 状态管理
   const [qualifiedReports, setQualifiedReports] = useState(mockQualifiedReports);
-  const [filteredReports, setFilteredReports] = useState(mockQualifiedReports.slice(0, 20)); // 只显示最新20条
+  const [filteredReports, setFilteredReports] = useState(mockQualifiedReports);
   const [generating, setGenerating] = useState(false);
   const [selectedReports, setSelectedReports] = useState([]);
+
+  // 分页状态
+  const [currentPage, setCurrentPage] = useState(1);
+  const pageSize = 10; // 每页显示10条记录
 
   // 搜索条件
   const [searchParams, setSearchParams] = useState({
@@ -374,18 +402,22 @@ export default function QueryReportsPage(props) {
     type: 'admin'
   };
 
-  // 获取显示的报告数据（最多20条）
-  const displayReports = filteredReports.slice(0, 20);
+  // 计算分页数据
+  const totalPages = Math.ceil(filteredReports.length / pageSize);
+  const startIndex = (currentPage - 1) * pageSize;
+  const endIndex = startIndex + pageSize;
+  const currentReports = filteredReports.slice(startIndex, endIndex);
 
   // 搜索功能
   const handleSearch = () => {
     const filtered = qualifiedReports.filter(report => {
       return (!searchParams.workOrder || report.workOrder.toLowerCase().includes(searchParams.workOrder.toLowerCase())) && (!searchParams.columnSn || report.columnSn.toLowerCase().includes(searchParams.columnSn.toLowerCase())) && (!searchParams.orderNumber || report.orderNumber.toLowerCase().includes(searchParams.orderNumber.toLowerCase())) && (!searchParams.instrumentSerial || report.instrumentSerial.toLowerCase().includes(searchParams.instrumentSerial.toLowerCase())) && (searchParams.reportType === 'all' || report.reportType === searchParams.reportType);
     });
-    setFilteredReports(filtered.slice(0, 20)); // 只显示最新20条
+    setFilteredReports(filtered);
+    setCurrentPage(1); // 重置到第一页
     toast({
       title: "查询完成",
-      description: `找到 ${filtered.length} 条合格报告，显示最新20条`
+      description: `找到 ${filtered.length} 条合格报告`
     });
   };
 
@@ -399,7 +431,8 @@ export default function QueryReportsPage(props) {
       reportType: 'all',
       dateRange: 'all'
     });
-    setFilteredReports(qualifiedReports.slice(0, 20)); // 只显示最新20条
+    setFilteredReports(qualifiedReports);
+    setCurrentPage(1); // 重置到第一页
   };
 
   // 生成报告
@@ -431,10 +464,13 @@ export default function QueryReportsPage(props) {
         审核状态: 'approved',
         fileSize: (Math.random() * 3 + 0.5).toFixed(1) + 'MB',
         reportName: `${getReportTypeName(searchParams.reportType)}报告_${new Date().toISOString().slice(0, 10).replace(/-/g, '')}`,
-        generateTime: new Date().toLocaleString('zh-CN')
+        generateTime: new Date().toLocaleString('zh-CN'),
+        lastAccessTime: new Date().toLocaleString('zh-CN'),
+        accessType: 'preview'
       };
-      setQualifiedReports([newReport, ...qualifiedReports]);
-      setFilteredReports([newReport, ...qualifiedReports].slice(0, 20)); // 保持最新20条
+      setQualifiedReports([newReport, ...qualifiedReports.slice(0, 19)]); // 保持最新20份
+      setFilteredReports([newReport, ...filteredReports.slice(0, 19)]);
+      setCurrentPage(1); // 新报告生成后跳转到第一页
       toast({
         title: "报告生成成功",
         description: `报告 ${newReport.id} 已生成，请查看报告列表`
@@ -454,6 +490,14 @@ export default function QueryReportsPage(props) {
   const handlePreview = reportId => {
     const report = qualifiedReports.find(r => r.id === reportId);
     if (report) {
+      // 更新最后访问时间和类型
+      const updatedReports = qualifiedReports.map(r => r.id === reportId ? {
+        ...r,
+        lastAccessTime: new Date().toLocaleString('zh-CN'),
+        accessType: 'preview'
+      } : r);
+      setQualifiedReports(updatedReports);
+      setFilteredReports(updatedReports);
       toast({
         title: "预览报告",
         description: `正在预览报告 ${reportId}，请查看详细信息`
@@ -465,6 +509,14 @@ export default function QueryReportsPage(props) {
   const handleDownload = reportId => {
     const report = qualifiedReports.find(r => r.id === reportId);
     if (report) {
+      // 更新最后访问时间和类型
+      const updatedReports = qualifiedReports.map(r => r.id === reportId ? {
+        ...r,
+        lastAccessTime: new Date().toLocaleString('zh-CN'),
+        accessType: 'download'
+      } : r);
+      setQualifiedReports(updatedReports);
+      setFilteredReports(updatedReports);
       toast({
         title: "下载报告",
         description: `正在下载报告 ${reportId}，请稍候`
@@ -490,6 +542,15 @@ export default function QueryReportsPage(props) {
       });
       return;
     }
+
+    // 更新所有选中报告的最后访问时间
+    const updatedReports = qualifiedReports.map(r => selectedReports.includes(r.id) ? {
+      ...r,
+      lastAccessTime: new Date().toLocaleString('zh-CN'),
+      accessType: 'download'
+    } : r);
+    setQualifiedReports(updatedReports);
+    setFilteredReports(updatedReports);
     toast({
       title: "批量下载",
       description: `正在下载 ${selectedReports.length} 份报告，请稍候`
@@ -514,12 +575,12 @@ export default function QueryReportsPage(props) {
     }
   };
 
-  // 全选/取消全选
+  // 全选/取消全选（仅当前页）
   const handleSelectAll = checked => {
     if (checked) {
-      setSelectedReports(displayReports.map(report => report.id));
+      setSelectedReports([...selectedReports, ...currentReports.map(report => report.id)]);
     } else {
-      setSelectedReports([]);
+      setSelectedReports(selectedReports.filter(id => !currentReports.some(report => report.id === id)));
     }
   };
 
@@ -556,12 +617,63 @@ export default function QueryReportsPage(props) {
       </Badge>;
   };
 
+  // 获取访问类型标签
+  const getAccessTypeBadge = accessType => {
+    return accessType === 'download' ? <Badge variant="default" className="bg-blue-100 text-blue-800 border-blue-200">
+        <Download className="w-3 h-3 mr-1" />
+        已下载
+      </Badge> : <Badge variant="outline" className="bg-gray-100 text-gray-700 border-gray-200">
+        <Eye className="w-3 h-3 mr-1" />
+        已预览
+      </Badge>;
+  };
+
   // 返回主页
   const handleBackToMain = () => {
     $w.utils.navigateTo({
       pageId: 'main',
       params: {}
     });
+  };
+
+  // 分页组件
+  const renderPagination = () => {
+    if (totalPages <= 1) return null;
+    return <div className="flex items-center justify-between px-2">
+        <div className="text-sm text-gray-500">
+          显示第 {startIndex + 1} - {Math.min(endIndex, filteredReports.length)} 条，共 {filteredReports.length} 条记录
+        </div>
+        <Pagination>
+          <PaginationContent>
+            <PaginationItem>
+              <PaginationPrevious onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))} className={currentPage === 1 ? 'pointer-events-none opacity-50' : 'cursor-pointer'} />
+            </PaginationItem>
+            
+            {/* 页码显示逻辑 */}
+            {Array.from({
+            length: totalPages
+          }, (_, i) => i + 1).map(page => {
+            // 显示逻辑：当前页前后各显示2页，超出范围显示省略号
+            if (page === 1 || page === totalPages || page >= currentPage - 2 && page <= currentPage + 2) {
+              return <PaginationItem key={page}>
+                    <PaginationLink onClick={() => setCurrentPage(page)} isActive={currentPage === page} className="cursor-pointer">
+                      {page}
+                    </PaginationLink>
+                  </PaginationItem>;
+            } else if (page === currentPage - 3 || page === currentPage + 3) {
+              return <PaginationItem key={page}>
+                    <PaginationEllipsis />
+                  </PaginationItem>;
+            }
+            return null;
+          })}
+            
+            <PaginationItem>
+              <PaginationNext onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))} className={currentPage === totalPages ? 'pointer-events-none opacity-50' : 'cursor-pointer'} />
+            </PaginationItem>
+          </PaginationContent>
+        </Pagination>
+      </div>;
   };
   return <div style={style} className="min-h-screen bg-gray-50">
       {/* 顶部导航 */}
@@ -575,7 +687,7 @@ export default function QueryReportsPage(props) {
             <Search className="w-8 h-8 text-blue-600" />
             <div>
               <h1 className="text-2xl font-bold text-gray-900">查询报告</h1>
-              <p className="text-sm text-gray-500">查询和生成各类检测报告（显示最新20条记录）</p>
+              <p className="text-sm text-gray-500">查询和生成各类检测报告（显示最近访问的20份报告）</p>
             </div>
           </div>
           <div className="flex items-center space-x-2">
@@ -594,7 +706,7 @@ export default function QueryReportsPage(props) {
             <CardContent className="p-4">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm text-gray-500">总报告数</p>
+                  <p className="text-sm text-gray-500">最近报告数</p>
                   <p className="text-2xl font-bold">{qualifiedReports.length}</p>
                 </div>
                 <FileText className="w-8 h-8 text-gray-400" />
@@ -618,10 +730,12 @@ export default function QueryReportsPage(props) {
             <CardContent className="p-4">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm text-gray-500">本周生成</p>
-                  <p className="text-2xl font-bold text-blue-600">12</p>
+                  <p className="text-sm text-gray-500">已下载</p>
+                  <p className="text-2xl font-bold text-blue-600">
+                    {qualifiedReports.filter(r => r.accessType === 'download').length}
+                  </p>
                 </div>
-                <BarChart3 className="w-8 h-8 text-blue-400" />
+                <Download className="w-8 h-8 text-blue-400" />
               </div>
             </CardContent>
           </Card>
@@ -630,10 +744,12 @@ export default function QueryReportsPage(props) {
             <CardContent className="p-4">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm text-gray-500">已下载</p>
-                  <p className="text-2xl font-bold text-purple-600">28</p>
+                  <p className="text-sm text-gray-500">已预览</p>
+                  <p className="text-2xl font-bold text-purple-600">
+                    {qualifiedReports.filter(r => r.accessType === 'preview').length}
+                  </p>
                 </div>
-                <Download className="w-8 h-8 text-purple-400" />
+                <Eye className="w-8 h-8 text-purple-400" />
               </div>
             </CardContent>
           </Card>
@@ -762,10 +878,10 @@ export default function QueryReportsPage(props) {
             <CardTitle className="flex items-center justify-between">
               <span className="flex items-center gap-2">
                 <FileText className="w-5 h-5" />
-                合格报告列表
+                最近访问的合格报告
               </span>
               <div className="text-sm text-gray-500">
-                显示最新 {displayReports.length} 条记录，共 {filteredReports.length} 份报告
+                当前页显示 {currentReports.length} 条，共 {filteredReports.length} 份报告
               </div>
             </CardTitle>
           </CardHeader>
@@ -774,7 +890,7 @@ export default function QueryReportsPage(props) {
               <TableHeader>
                 <TableRow>
                   <TableHead className="w-12">
-                    <input type="checkbox" checked={displayReports.length > 0 && displayReports.every(report => selectedReports.includes(report.id))} onChange={e => handleSelectAll(e.target.checked)} className="rounded border-gray-300" />
+                    <input type="checkbox" checked={currentReports.length > 0 && currentReports.every(report => selectedReports.includes(report.id))} onChange={e => handleSelectAll(e.target.checked)} className="rounded border-gray-300" />
                   </TableHead>
                   <TableHead>报告编号</TableHead>
                   <TableHead>报告名称</TableHead>
@@ -784,13 +900,13 @@ export default function QueryReportsPage(props) {
                   <TableHead>报告类型</TableHead>
                   <TableHead>检测结果</TableHead>
                   <TableHead>负责人</TableHead>
-                  <TableHead>生成时间</TableHead>
-                  <TableHead>文件大小</TableHead>
+                  <TableHead>最后访问</TableHead>
+                  <TableHead>访问状态</TableHead>
                   <TableHead>操作</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {displayReports.map(report => <TableRow key={report.id} className="hover:bg-gray-50">
+                {currentReports.map(report => <TableRow key={report.id} className="hover:bg-gray-50">
                     <TableCell>
                       <input type="checkbox" checked={selectedReports.includes(report.id)} onChange={() => handleSelectReport(report.id)} className="rounded border-gray-300" />
                     </TableCell>
@@ -815,10 +931,12 @@ export default function QueryReportsPage(props) {
                     <TableCell>
                       <div className="flex items-center gap-1">
                         <Clock className="w-4 h-4 text-gray-400" />
-                        {report.generateTime}
+                        {report.lastAccessTime}
                       </div>
                     </TableCell>
-                    <TableCell>{report.fileSize}</TableCell>
+                    <TableCell>
+                      {getAccessTypeBadge(report.accessType)}
+                    </TableCell>
                     <TableCell>
                       <div className="flex space-x-1">
                         <Button size="sm" variant="outline" onClick={() => handlePreview(report.id)} className="h-8 w-8 p-0" title="预览报告">
@@ -835,8 +953,13 @@ export default function QueryReportsPage(props) {
           </CardContent>
         </Card>
 
+        {/* 分页组件 */}
+        {filteredReports.length > 0 && <div className="mt-4">
+            {renderPagination()}
+          </div>}
+
         {/* 空状态 */}
-        {displayReports.length === 0 && <Card className="text-center py-12">
+        {filteredReports.length === 0 && <Card className="text-center py-12">
             <CardContent>
               <FileText className="w-16 h-16 text-gray-300 mx-auto mb-4" />
               <h3 className="text-lg font-medium text-gray-900 mb-2">暂无报告</h3>
