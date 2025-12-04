@@ -9,39 +9,39 @@ import { Search, Download, Eye, FileText, Calendar, User, ArrowLeft, Filter, Plu
 const mockQualifiedReports = [{
   id: 'RPT-Q001',
   workOrder: 'WO202501001',
-  columnSerial: 'COL-2025-001',
+  columnSn: 'COL-2025-001',
   orderNumber: 'ORD-202501001',
   instrumentSerial: 'INST-001',
-  reportType: 'quality',
+  reportType: 'glycation',
   status: 'qualified',
   reportDate: '2025-01-15',
-  检测项目: '纯度检测',
+  检测项目: '糖化模式',
   检测结果: '合格',
   负责人: '张三',
   审核状态: 'approved',
   fileSize: '2.3MB',
-  reportName: '质量检测报告_20250115',
+  reportName: '糖化模式报告_20250115',
   generateTime: '2025-01-15 14:30:00'
 }, {
   id: 'RPT-Q002',
   workOrder: 'WO202501002',
-  columnSerial: 'COL-2025-002',
+  columnSn: 'COL-2025-002',
   orderNumber: 'ORD-202501002',
   instrumentSerial: 'INST-002',
-  reportType: 'stability',
+  reportType: 'thalassemia',
   status: 'qualified',
   reportDate: '2025-01-14',
-  检测项目: '稳定性测试',
+  检测项目: '地贫模式',
   检测结果: '合格',
   负责人: '李四',
   审核状态: 'approved',
   fileSize: '1.8MB',
-  reportName: '稳定性测试报告_20250114',
+  reportName: '地贫模式报告_20250114',
   generateTime: '2025-01-14 16:45:00'
 }, {
   id: 'RPT-Q003',
   workOrder: 'WO202501003',
-  columnSerial: 'COL-2025-003',
+  columnSn: 'COL-2025-003',
   orderNumber: 'ORD-202501003',
   instrumentSerial: 'INST-001',
   reportType: 'purity',
@@ -57,34 +57,34 @@ const mockQualifiedReports = [{
 }, {
   id: 'RPT-Q004',
   workOrder: 'WO202501004',
-  columnSerial: 'COL-2025-004',
+  columnSn: 'COL-2025-004',
   orderNumber: 'ORD-202501004',
   instrumentSerial: 'INST-003',
-  reportType: 'quality',
+  reportType: 'glycation',
   status: 'qualified',
   reportDate: '2025-01-12',
-  检测项目: '质量检测',
+  检测项目: '糖化模式',
   检测结果: '合格',
   负责人: '赵六',
   审核状态: 'approved',
   fileSize: '1.9MB',
-  reportName: '质量检测报告_20250112',
+  reportName: '糖化模式报告_20250112',
   generateTime: '2025-01-12 09:15:00'
 }, {
   id: 'RPT-Q005',
   workOrder: 'WO202501005',
-  columnSerial: 'COL-2025-005',
+  columnSn: 'COL-2025-005',
   orderNumber: 'ORD-202501005',
   instrumentSerial: 'INST-002',
-  reportType: 'stability',
+  reportType: 'thalassemia',
   status: 'qualified',
   reportDate: '2025-01-11',
-  检测项目: '稳定性测试',
+  检测项目: '地贫模式',
   检测结果: '合格',
   负责人: '张三',
   审核状态: 'approved',
   fileSize: '2.5MB',
-  reportName: '稳定性测试报告_20250111',
+  reportName: '地贫模式报告_20250111',
   generateTime: '2025-01-11 15:30:00'
 }];
 export default function QueryReportsPage(props) {
@@ -105,7 +105,7 @@ export default function QueryReportsPage(props) {
   // 搜索条件
   const [searchParams, setSearchParams] = useState({
     workOrder: '',
-    columnSerial: '',
+    columnSn: '',
     orderNumber: '',
     instrumentSerial: '',
     reportType: 'all',
@@ -121,7 +121,7 @@ export default function QueryReportsPage(props) {
   // 搜索功能
   const handleSearch = () => {
     const filtered = qualifiedReports.filter(report => {
-      return (!searchParams.workOrder || report.workOrder.toLowerCase().includes(searchParams.workOrder.toLowerCase())) && (!searchParams.columnSerial || report.columnSerial.toLowerCase().includes(searchParams.columnSerial.toLowerCase())) && (!searchParams.orderNumber || report.orderNumber.toLowerCase().includes(searchParams.orderNumber.toLowerCase())) && (!searchParams.instrumentSerial || report.instrumentSerial.toLowerCase().includes(searchParams.instrumentSerial.toLowerCase())) && (searchParams.reportType === 'all' || report.reportType === searchParams.reportType);
+      return (!searchParams.workOrder || report.workOrder.toLowerCase().includes(searchParams.workOrder.toLowerCase())) && (!searchParams.columnSn || report.columnSn.toLowerCase().includes(searchParams.columnSn.toLowerCase())) && (!searchParams.orderNumber || report.orderNumber.toLowerCase().includes(searchParams.orderNumber.toLowerCase())) && (!searchParams.instrumentSerial || report.instrumentSerial.toLowerCase().includes(searchParams.instrumentSerial.toLowerCase())) && (searchParams.reportType === 'all' || report.reportType === searchParams.reportType);
     });
     setFilteredReports(filtered);
     toast({
@@ -134,7 +134,7 @@ export default function QueryReportsPage(props) {
   const handleReset = () => {
     setSearchParams({
       workOrder: '',
-      columnSerial: '',
+      columnSn: '',
       orderNumber: '',
       instrumentSerial: '',
       reportType: 'all',
@@ -145,7 +145,7 @@ export default function QueryReportsPage(props) {
 
   // 生成报告
   const handleGenerateReport = async () => {
-    if (!searchParams.workOrder && !searchParams.columnSerial && !searchParams.orderNumber && !searchParams.instrumentSerial) {
+    if (!searchParams.workOrder && !searchParams.columnSn && !searchParams.orderNumber && !searchParams.instrumentSerial) {
       toast({
         title: "查询条件不足",
         description: "请至少输入一个查询条件",
@@ -160,10 +160,10 @@ export default function QueryReportsPage(props) {
       const newReport = {
         id: `RPT-Q-${Date.now()}`,
         workOrder: searchParams.workOrder || 'WO' + Date.now(),
-        columnSerial: searchParams.columnSerial || 'COL-' + Date.now(),
+        columnSn: searchParams.columnSn || 'COL-' + Date.now(),
         orderNumber: searchParams.orderNumber || 'ORD-' + Date.now(),
         instrumentSerial: searchParams.instrumentSerial || 'INST-' + Math.floor(Math.random() * 1000),
-        reportType: searchParams.reportType === 'all' ? 'quality' : searchParams.reportType,
+        reportType: searchParams.reportType === 'all' ? 'glycation' : searchParams.reportType,
         status: 'qualified',
         reportDate: new Date().toISOString().slice(0, 10),
         检测项目: getReportTypeName(searchParams.reportType),
@@ -267,23 +267,23 @@ export default function QueryReportsPage(props) {
   // 获取报告类型名称
   const getReportTypeName = type => {
     const typeMap = {
-      quality: '质量检测',
-      stability: '稳定性测试',
+      glycation: '糖化模式',
+      thalassemia: '地贫模式',
       purity: '纯度分析',
       all: '综合'
     };
-    return typeMap[type] || '质量检测';
+    return typeMap[type] || '糖化模式';
   };
 
   // 获取报告类型标签
   const getReportTypeBadge = type => {
     const typeConfig = {
-      quality: {
-        label: '质量检测',
+      glycation: {
+        label: '糖化模式',
         color: 'blue'
       },
-      stability: {
-        label: '稳定性测试',
+      thalassemia: {
+        label: '地贫模式',
         color: 'green'
       },
       purity: {
@@ -291,7 +291,7 @@ export default function QueryReportsPage(props) {
         color: 'purple'
       }
     };
-    const config = typeConfig[type] || typeConfig.quality;
+    const config = typeConfig[type] || typeConfig.glycation;
     return <Badge variant="outline" className={`bg-${config.color}-50 text-${config.color}-700 border-${config.color}-200`}>
         {config.label}
       </Badge>;
@@ -399,9 +399,9 @@ export default function QueryReportsPage(props) {
               </div>
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">层析柱序列号</label>
-                <Input placeholder="请输入层析柱序列号" value={searchParams.columnSerial} onChange={e => setSearchParams({
+                <Input placeholder="请输入层析柱序列号" value={searchParams.columnSn} onChange={e => setSearchParams({
                 ...searchParams,
-                columnSerial: e.target.value
+                columnSn: e.target.value
               })} />
               </div>
               <div>
@@ -429,8 +429,8 @@ export default function QueryReportsPage(props) {
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="all">全部类型</SelectItem>
-                    <SelectItem value="quality">质量检测报告</SelectItem>
-                    <SelectItem value="stability">稳定性测试报告</SelectItem>
+                    <SelectItem value="glycation">糖化模式报告</SelectItem>
+                    <SelectItem value="thalassemia">地贫模式报告</SelectItem>
                     <SelectItem value="purity">纯度分析报告</SelectItem>
                   </SelectContent>
                 </Select>
@@ -544,7 +544,7 @@ export default function QueryReportsPage(props) {
                       </div>
                     </TableCell>
                     <TableCell>{report.workOrder}</TableCell>
-                    <TableCell>{report.columnSerial}</TableCell>
+                    <TableCell>{report.columnSn}</TableCell>
                     <TableCell>{report.检测项目}</TableCell>
                     <TableCell>{getReportTypeBadge(report.reportType)}</TableCell>
                     <TableCell>
