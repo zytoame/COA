@@ -1,9 +1,9 @@
 // @ts-ignore;
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 // @ts-ignore;
 import { Button, Input, Card, CardContent, CardHeader, CardTitle, Badge, Dialog, DialogContent, DialogHeader, DialogTitle, Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui';
 // @ts-ignore;
-import { X, Save, Edit2, Thermometer, Gauge, Timer, Activity, Package, AlertTriangle } from 'lucide-react';
+import { X, Save, Edit2, Thermometer, Gauge, Timer, Activity, AlertTriangle, Plus, Trash2, Calculator } from 'lucide-react';
 
 export function EditModal({
   isOpen,
@@ -16,7 +16,7 @@ export function EditModal({
   const [activeTab, setActiveTab] = useState('basic');
 
   // 如果报告数据变化，更新编辑状态
-  React.useEffect(() => {
+  useEffect(() => {
     if (report) {
       setEditedReport({
         ...report,
@@ -48,14 +48,76 @@ export function EditModal({
     }));
   };
 
+  // 更新重复性测试的原始测值
+  const updateRepeatabilityValues = (index, value) => {
+    const currentData = editedReport.detectionData?.repeatabilityTest || {};
+    const currentValues = currentData.rawValues || [];
+    const newValues = [...currentValues];
+    newValues[index] = value;
+
+    // 重新计算CV值
+    const cvValue = calculateCV(newValues);
+    const conclusion = cvValue <= parseFloat(currentData.standard?.replace(/[^0-9.]/g, '') || 1.5) ? 'pass' : 'fail';
+    updateDetectionData('repeatabilityTest', 'rawValues', newValues);
+    updateDetectionData('repeatabilityTest', 'result', `${cvValue.toFixed(2)}%`);
+    updateDetectionData('repeatabilityTest', 'conclusion', conclusion);
+  };
+
+  // 添加新的测值
+  const addRepeatabilityValue = () => {
+    const currentData = editedReport.detectionData?.repeatabilityTest || {};
+    const currentValues = currentData.rawValues || [];
+    const newValues = [...currentValues, ''];
+    updateDetectionData('repeatabilityTest', 'rawValues', newValues);
+  };
+
+  // 删除测值
+  const removeRepeatabilityValue = index => {
+    const currentData = editedReport.detectionData?.repeatabilityTest || {};
+    const currentValues = currentData.rawValues || [];
+    const newValues = currentValues.filter((_, i) => i !== index);
+    if (newValues.length > 0) {
+      // 重新计算CV值
+      const cvValue = calculateCV(newValues);
+      const conclusion = cvValue <= parseFloat(currentData.standard?.replace(/[^0-9.]/g, '') || 1.5) ? 'pass' : 'fail';
+      updateDetectionData('repeatabilityTest', 'rawValues', newValues);
+      updateDetectionData('repeatabilityTest', 'result', `${cvValue.toFixed(2)}%`);
+      updateDetectionData('repeatabilityTest', 'conclusion', conclusion);
+    }
+  };
+
+  // 计算CV值（变异系数）
+  const calculateCV = values => {
+    const validValues = values.filter(v => v && !isNaN(parseFloat(v))).map(v => parseFloat(v));
+    if (validValues.length < 2) return 0;
+    const mean = validValues.reduce((sum, val) => sum + val, 0) / validValues.length;
+    const variance = validValues.reduce((sum, val) => sum + Math.pow(val - mean, 2), 0) / validValues.length;
+    const standardDeviation = Math.sqrt(variance);
+    const cv = standardDeviation / mean * 100;
+    return cv;
+  };
+
+  // 重新计算所有检测数据
+  const recalculateAll = () => {
+    const detectionData = editedReport.detectionData || {};
+
+    // 重新计算重复性测试
+    if (detectionData.repeatabilityTest?.rawValues) {
+      const cvValue = calculateCV(detectionData.repeatabilityTest.rawValues);
+      const standardValue = parseFloat(detectionData.repeatabilityTest.standard?.replace(/[^0-9.]/g, '') || 1.5);
+      const conclusion = cvValue <= standardValue ? 'pass' : 'fail';
+      updateDetectionData('repeatabilityTest', 'result', `${cvValue.toFixed(2)}%`);
+      updateDetectionData('repeatabilityTest', 'conclusion', conclusion);
+    }
+  };
+
   // 获取检测项目图标
   const getDetectionIcon = iconName => {
     const iconMap = {
       Thermometer,
       Gauge,
       Timer,
-      Activity,
-      Package
+      Activity
     };
     const IconComponent = iconMap[iconName] || AlertTriangle;
     return <IconComponent className="w-5 h-5" />;
@@ -66,6 +128,16 @@ export function EditModal({
     if (onSave) {
       onSave(editedReport);
     }
+  };
+
+  // 过滤掉外观检查
+  const getFilteredDetectionData = () => {
+    const data = editedReport.detectionData || {};
+    const {
+      appearanceInspection,
+      ...filteredData
+    } = data;
+    return filteredData;
   };
   if (!isOpen || !editedReport) return null;
   return <Dialog open={isOpen} onOpenChange={onClose}>
@@ -148,8 +220,15 @@ export function EditModal({
             </div>}
 
           {/* 检测数据标签页 */}
-          {activeTab === 'detection' && editedReport.detectionData && <div className="space-y-4">
-              {Object.entries(editedReport.detectionData).map(([key, data]) => <Card key={key}>
+          {activeTab === 'detection' && <div className="space-y-4">
+              <div className="flex justify-end mb-4">
+                <Button variant="outline" onClick={recalculateAll} className="flex items-center gap-2">
+                  <Calculator className="w-4 h-4" />
+                  重新计算所有数据
+                </Button>
+              </div>
+              
+              {Object.entries(getFilteredDetectionData()).map(([key, data]) => <Card key={key}>
                   <CardHeader className="pb-3">
                     <CardTitle className="text-base flex items-center gap-2">
                       {getDetectionIcon(data.icon)}
@@ -157,7 +236,6 @@ export function EditModal({
                       {key === 'systemPressure' && '系统压力'}
                       {key === 'hbA1cAppearanceTime' && 'HbA1c出现时间'}
                       {key === 'repeatabilityTest' && '重复性测试'}
-                      {key === 'appearanceInspection' && '外观检查'}
                     </CardTitle>
                   </CardHeader>
                   <CardContent className="space-y-3">
@@ -171,6 +249,36 @@ export function EditModal({
                         <Input value={data.result || ''} onChange={e => updateDetectionData(key, 'result', e.target.value)} placeholder="请输入检测结果" />
                       </div>
                     </div>
+                    
+                    {/* 重复性测试的特殊处理 */}
+                    {key === 'repeatabilityTest' && <div className="space-y-3">
+                        <div>
+                          <label className="block text-sm font-medium text-gray-700 mb-2">
+                            原始测值 (用于计算CV值)
+                          </label>
+                          <div className="space-y-2">
+                            {(data.rawValues || []).map((value, index) => <div key={index} className="flex items-center gap-2">
+                                <Input type="number" step="0.01" value={value} onChange={e => updateRepeatabilityValues(index, e.target.value)} placeholder="输入测值" className="flex-1" />
+                                <Button variant="outline" size="sm" onClick={() => removeRepeatabilityValue(index)} className="text-red-600 hover:text-red-700">
+                                  <Trash2 className="w-4 h-4" />
+                                </Button>
+                              </div>)}
+                            <Button variant="outline" onClick={addRepeatabilityValue} className="flex items-center gap-2 text-blue-600 hover:text-blue-700">
+                              <Plus className="w-4 h-4" />
+                              添加测值
+                            </Button>
+                          </div>
+                        </div>
+                        <div className="bg-blue-50 border border-blue-200 rounded-lg p-3">
+                          <p className="text-sm text-blue-800">
+                            <strong>计算说明：</strong>CV值（变异系数）= 标准差 / 平均值 × 100%
+                          </p>
+                          <p className="text-sm text-blue-600 mt-1">
+                            当前测值数量：{(data.rawValues || []).length} 个
+                          </p>
+                        </div>
+                      </div>}
+                    
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-1">结论</label>
                       <Select value={data.conclusion || ''} onValueChange={value => updateDetectionData(key, 'conclusion', value)}>
