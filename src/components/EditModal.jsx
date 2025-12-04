@@ -63,6 +63,28 @@ export function EditModal({
     updateDetectionData('repeatabilityTest', 'conclusion', conclusion);
   };
 
+  // 添加新的测值
+  const addRepeatabilityValue = () => {
+    const currentData = editedReport.detectionData?.repeatabilityTest || {};
+    const currentValues = currentData.rawValues || [];
+    const newValues = [...currentValues, ''];
+    updateDetectionData('repeatabilityTest', 'rawValues', newValues);
+  };
+
+  // 删除测值
+  const removeRepeatabilityValue = index => {
+    const currentData = editedReport.detectionData?.repeatabilityTest || {};
+    const currentValues = currentData.rawValues || [];
+    const newValues = currentValues.filter((_, i) => i !== index);
+    if (newValues.length > 0) {
+      // 重新计算CV值
+      const cvValue = calculateCV(newValues);
+      const conclusion = cvValue <= parseFloat(currentData.standard?.replace(/[^0-9.]/g, '') || 1.5) ? 'pass' : 'fail';
+      updateDetectionData('repeatabilityTest', 'rawValues', newValues);
+      updateDetectionData('repeatabilityTest', 'result', `${cvValue.toFixed(2)}%`);
+      updateDetectionData('repeatabilityTest', 'conclusion', conclusion);
+    }
+  };
 
   // 计算CV值（变异系数）
   const calculateCV = values => {
