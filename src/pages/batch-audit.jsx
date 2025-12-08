@@ -22,8 +22,7 @@ const mockPendingColumns = [{
   columnName: 'Protein A Column',
   testType: '纯度检测',
   testDate: '2025-01-15',
-  testResult: '不合格',
-  不合格原因: '纯度低于标准值',
+  testResult: '合格',
   operator: '张三',
   submitTime: '2025-01-15 14:30:00',
   priority: 'high',
@@ -82,8 +81,7 @@ const mockPendingColumns = [{
   columnName: 'Ion Exchange Column',
   testType: 'pH值检测',
   testDate: '2025-01-14',
-  testResult: '不合格',
-  不合格原因: 'pH值超出范围',
+  testResult: '合格',
   operator: '李四',
   submitTime: '2025-01-14 16:45:00',
   priority: 'medium',
@@ -136,8 +134,7 @@ const mockPendingColumns = [{
   columnName: 'Gel Filtration Column',
   testType: '杂质含量',
   testDate: '2025-01-13',
-  testResult: '不合格',
-  不合格原因: '杂质含量超标',
+  testResult: '合格',
   operator: '王五',
   submitTime: '2025-01-13 11:20:00',
   priority: 'low',
@@ -504,27 +501,6 @@ export default function BatchAuditPage(props) {
     }
   };
 
-  // 获取优先级标签
-  const getPriorityBadge = priority => {
-    const priorityConfig = {
-      high: {
-        label: '高',
-        color: 'red'
-      },
-      medium: {
-        label: '中',
-        color: 'yellow'
-      },
-      low: {
-        label: '低',
-        color: 'green'
-      }
-    };
-    const config = priorityConfig[priority] || priorityConfig.medium;
-    return <Badge variant="outline" className={`bg-${config.color}-50 text-${config.color}-700 border-${config.color}-200`}>
-        {config.label}
-      </Badge>;
-  };
 
   // 获取结论标签
   const getConclusionBadge = conclusion => {
@@ -664,7 +640,7 @@ export default function BatchAuditPage(props) {
             {loading ? <div className="flex items-center justify-center py-12">
                 <Loader2 className="w-8 h-8 animate-spin text-gray-400" />
                 <span className="ml-2 text-gray-500">加载中...</span>
-              </div> : <BatchAuditTable columns={currentColumns} selectedColumns={selectedColumns} expandedRows={expandedRows} onSelectColumn={handleSelectColumn} onSelectAll={handleSelectAll} onToggleExpand={handleToggleExpand} onPreview={handlePreview} getPriorityBadge={getPriorityBadge} getConclusionBadge={getConclusionBadge} />}
+              </div> : <BatchAuditTable columns={currentColumns} selectedColumns={selectedColumns} expandedRows={expandedRows} onSelectColumn={handleSelectColumn} onSelectAll={handleSelectAll} onToggleExpand={handleToggleExpand} onPreview={handlePreview} getConclusionBadge={getConclusionBadge} />}
           </CardContent>
         </Card>
 

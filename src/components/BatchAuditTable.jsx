@@ -12,9 +12,7 @@ export function BatchAuditTable({
   onSelectColumn,
   onSelectAll,
   onToggleExpand,
-  onPreview,
-  getPriorityBadge,
-  getConclusionBadge
+  onPreview
 }) {
   return <Table>
       <TableHeader>
@@ -26,11 +24,8 @@ export function BatchAuditTable({
           <TableHead>工单号</TableHead>
           <TableHead>层析柱名称</TableHead>
           <TableHead>检测类型</TableHead>
-          <TableHead>检测结果</TableHead>
-          <TableHead>不合格原因</TableHead>
           <TableHead>负责人</TableHead>
           <TableHead>提交时间</TableHead>
-          <TableHead>优先级</TableHead>
           <TableHead>操作</TableHead>
         </TableRow>
       </TableHeader>
@@ -50,21 +45,8 @@ export function BatchAuditTable({
                 </div>
               </TableCell>
               <TableCell>{column.testType}</TableCell>
-              <TableCell>
-                {getConclusionBadge(column.finalConclusion)}
-              </TableCell>
-              <TableCell>
-                <div className="max-w-32">
-                  <div className="truncate text-red-600" title={column.不合格原因}>
-                    {column.不合格原因}
-                  </div>
-                </div>
-              </TableCell>
               <TableCell>{column.operator}</TableCell>
               <TableCell>{column.submitTime}</TableCell>
-              <TableCell>
-                {getPriorityBadge(column.priority)}
-              </TableCell>
               <TableCell>
                 <div className="flex space-x-1">
                   <Button size="sm" variant="outline" onClick={() => onToggleExpand(column.id)} className="h-8 w-8 p-0" title="展开详情">

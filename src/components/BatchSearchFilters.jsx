@@ -62,14 +62,6 @@ export function BatchSearchFilters({
                 <SelectItem value="all">全部类型</SelectItem>
                 <SelectItem value="纯度检测">纯度检测</SelectItem>
                 <SelectItem value="pH值检测">pH值检测</SelectItem>
-                <SelectItem value="杂质含量">杂质含量</SelectItem>
-                <SelectItem value="溶解度测试">溶解度测试</SelectItem>
-                <SelectItem value="稳定性测试">稳定性测试</SelectItem>
-                <SelectItem value="回收率测试">回收率测试</SelectItem>
-                <SelectItem value="响应时间测试">响应时间测试</SelectItem>
-                <SelectItem value="线性范围测试">线性范围测试</SelectItem>
-                <SelectItem value="检测限测试">检测限测试</SelectItem>
-                <SelectItem value="特异性测试">特异性测试</SelectItem>
               </SelectContent>
             </Select>
           </div>

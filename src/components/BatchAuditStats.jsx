@@ -8,7 +8,6 @@ import { CheckCircle, AlertTriangle, Clock, Package } from 'lucide-react';
 export function BatchAuditStats({
   totalColumns,
   pendingCount,
-  highPriorityCount,
   qualifiedCount
 }) {
   return <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
@@ -36,17 +35,6 @@ export function BatchAuditStats({
         </CardContent>
       </Card>
       
-      <Card>
-        <CardContent className="p-4">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-sm text-gray-500">高优先级</p>
-              <p className="text-2xl font-bold text-red-600">{highPriorityCount}</p>
-            </div>
-            <AlertTriangle className="w-8 h-8 text-red-400" />
-          </div>
-        </CardContent>
-      </Card>
       
       <Card>
         <CardContent className="p-4">
