@@ -209,8 +209,8 @@ export function WorkOrderStats() {
                   <div className="flex items-center justify-center gap-1 text-green-600">
                     <CheckCircle className="w-4 h-4" />
                     <span className="text-xs font-medium">已完成</span>
+                    <span className="text-lg font-bold text-green-700 text-center">{workOrder.completedQuantity}</span>
                   </div>
-                  <p className="text-lg font-bold text-green-700 text-center">{workOrder.completedQuantity}</p>
                 </div>
                 <div className="bg-orange-50 rounded p-2">
                   <div className="flex items-center justify-center gap-1 text-orange-600">
