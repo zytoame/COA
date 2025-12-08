@@ -5,6 +5,9 @@ import { Button, Card, CardContent, CardHeader, CardTitle, Badge, useToast } fro
 // @ts-ignore;
 import { FileText, Search, CheckCircle, AlertTriangle, Shield, ArrowRight, Edit, Download, Eye, Filter, RefreshCw, User, Calendar, Clock, Package, Settings, BarChart3, FileCheck, ClipboardList } from 'lucide-react';
 
+// 引入工单统计组件
+import { WorkOrderStats } from '@/components/WorkOrderStats';
+
 // 当前用户信息
 const currentUser = {
   name: '管理员',
@@ -59,50 +62,7 @@ export default function MainPage(props) {
   } = useToast();
 
   // 状态管理
-  const [statsData, setStatsData] = useState({
-    totalReports: 196,
-    completedAudits: 168,
-    pendingCount: 5,
-    urgentCount: 1
-  });
   const [recentActivities, setRecentActivities] = useState([]);
-
-  // TODO: 从后端获取统计数据
-  // 需要调用接口获取：
-  // - 总报告数量
-  // - 已完成审核数量
-  // - 待处理数量
-  // - 紧急处理数量
-  const fetchStatsData = async () => {
-    try {
-      // TODO: 替换为实际的数据源调用
-      // const result = await $w.cloud.callDataSource({
-      //   dataSourceName: 'chromatography_reports',
-      //   methodName: 'wedaGetRecordsV2',
-      //   params: {
-      //     filter: {
-      //       where: {
-      //         $and: [
-      //           { createBy: { $eq-current-user: true } }
-      //         ]
-      //       }
-      //     },
-      //     select: {
-      //       $master: true
-      //     },
-      //     getCount: true
-      //   }
-      // });
-      // setStatsData({
-      //   totalReports: result.total,
-      //   completedAudits: result.records.filter(r => r.auditStatus === 'approved').length,
-      //   pendingCount: result.records.filter(r => r.auditStatus === 'pending').length,
-      //   urgentCount: result.records.filter(r => r.priority === 'high').length
-      // });
-    } catch (error) {
-      console.error('获取统计数据失败:', error);
-    }
-  };
 
   // TODO: 从后端获取最近活动记录
   // 需要调用接口获取用户的操作历史
@@ -133,7 +93,6 @@ export default function MainPage(props) {
 
   // 组件挂载时获取数据
   useEffect(() => {
-    fetchStatsData();
     fetchRecentActivities();
   }, []);
 
@@ -174,9 +133,6 @@ export default function MainPage(props) {
     };
     return colorMap[color] || colorMap.blue;
   };
-
-  // 计算待处理总数：不合格层析柱管理中的待审核数量 + 批量审核签字中的待处理数量
-  const totalPending = functionModules.find(m => m.id === 'unqualified-reports')?.stats.pending + functionModules.find(m => m.id === 'batch-audit')?.stats.pending;
   return <div style={style} className="min-h-screen bg-gray-50">
       {/* 顶部导航 */}
       <div className="bg-white border-b border-gray-200 px-6 py-4">
@@ -198,48 +154,6 @@ export default function MainPage(props) {
       </div>
 
       <div className="p-6">
-        {/* 系统概览 */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-          <Card className="bg-gradient-to-r from-blue-500 to-blue-600 text-white">
-            <CardContent className="p-6">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-blue-100">总报告数</p>
-                  <p className="text-3xl font-bold">{statsData.totalReports}</p>
-                  <p className="text-blue-100 text-sm">本月新增 45</p>
-                </div>
-                <BarChart3 className="w-12 h-12 text-blue-200" />
-              </div>
-            </CardContent>
-          </Card>
-          
-          <Card className="bg-gradient-to-r from-green-500 to-green-600 text-white">
-            <CardContent className="p-6">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-green-100">已完成审核</p>
-                  <p className="text-3xl font-bold">{statsData.completedAudits}</p>
-                  <p className="text-green-100 text-sm">完成率 {(statsData.completedAudits / statsData.totalReports * 100).toFixed(1)}%</p>
-                </div>
-                <FileCheck className="w-12 h-12 text-green-200" />
-              </div>
-            </CardContent>
-          </Card>
-          
-          <Card className="bg-gradient-to-r from-orange-500 to-orange-600 text-white">
-            <CardContent className="p-6">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-orange-100">待处理</p>
-                  <p className="text-3xl font-bold">{statsData.pendingCount}</p>
-                  <p className="text-orange-100 text-sm">紧急处理 {statsData.urgentCount}</p>
-                </div>
-                <ClipboardList className="w-12 h-12 text-orange-200" />
-              </div>
-            </CardContent>
-          </Card>
-        </div>
-
         {/* 功能模块 */}
         <div className="mb-8">
           <h2 className="text-xl font-semibold text-gray-900 mb-6">功能模块</h2>
@@ -277,6 +191,9 @@ export default function MainPage(props) {
           })}
           </div>
         </div>
+
+        {/* 工单完成量统计 */}
+        <WorkOrderStats />
 
         {/* 快速操作 */}
         <Card>
