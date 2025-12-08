@@ -20,12 +20,11 @@ const mockPendingColumns = [{
   orderNumber: 'ORD-202501001',
   instrumentSerial: 'INST-001',
   columnName: 'Protein A Column',
-  testType: '纯度检测',
+  testType: '糖化模式',
   testDate: '2025-01-15',
   testResult: '合格',
   operator: '张三',
   submitTime: '2025-01-15 14:30:00',
-  priority: 'high',
   // 详细检测数据
   detectionData: {
     setTemperature: {
@@ -79,12 +78,11 @@ const mockPendingColumns = [{
   orderNumber: 'ORD-202501002',
   instrumentSerial: 'INST-002',
   columnName: 'Ion Exchange Column',
-  testType: 'pH值检测',
+  testType: '地贫模式',
   testDate: '2025-01-14',
   testResult: '合格',
   operator: '李四',
   submitTime: '2025-01-14 16:45:00',
-  priority: 'medium',
   // 详细检测数据
   detectionData: {
     setTemperature: {
@@ -123,7 +121,7 @@ const mockPendingColumns = [{
     time: '2025-01-14 16:45:00',
     operator: '李四',
     action: '提交检测',
-    remark: '完成pH值检测'
+    remark: '完成地贫模式检测'
   }]
 }, {
   id: 'COL-003',
@@ -132,12 +130,11 @@ const mockPendingColumns = [{
   orderNumber: 'ORD-202501003',
   instrumentSerial: 'INST-001',
   columnName: 'Gel Filtration Column',
-  testType: '杂质含量',
+  testType: '糖化模式',
   testDate: '2025-01-13',
   testResult: '合格',
   operator: '王五',
   submitTime: '2025-01-13 11:20:00',
-  priority: 'low',
   // 详细检测数据
   detectionData: {
     setTemperature: {
@@ -176,7 +173,7 @@ const mockPendingColumns = [{
     time: '2025-01-13 11:20:00',
     operator: '王五',
     action: '提交检测',
-    remark: '完成杂质含量检测'
+    remark: '完成糖化模式检测'
   }]
 }];
 export default function BatchAuditPage(props) {
@@ -209,8 +206,7 @@ export default function BatchAuditPage(props) {
     columnSn: '',
     orderNumber: '',
     instrumentSerial: '',
-    testType: 'all',
-    priority: 'all'
+    testType: 'all'
   });
 
   // 当前用户信息
@@ -294,9 +290,6 @@ export default function BatchAuditPage(props) {
       // if (searchParams.testType !== 'all') {
       //   filterConditions.$and.push({ testType: { $eq: searchParams.testType } });
       // }
-      // if (searchParams.priority !== 'all') {
-      //   filterConditions.$and.push({ priority: { $eq: searchParams.priority } });
-      // }
 
       // const result = await $w.cloud.callDataSource({
       //   dataSourceName: 'chromatography_columns',
@@ -313,7 +306,7 @@ export default function BatchAuditPage(props) {
 
       // 临时使用前端过滤
       const filtered = pendingColumns.filter(column => {
-        return (!searchParams.workOrder || column.workOrder.toLowerCase().includes(searchParams.workOrder.toLowerCase())) && (!searchParams.columnSn || column.columnSn.toLowerCase().includes(searchParams.columnSn.toLowerCase())) && (!searchParams.orderNumber || column.orderNumber.toLowerCase().includes(searchParams.orderNumber.toLowerCase())) && (!searchParams.instrumentSerial || column.instrumentSerial.toLowerCase().includes(searchParams.instrumentSerial.toLowerCase())) && (searchParams.testType === 'all' || column.testType === searchParams.testType) && (searchParams.priority === 'all' || column.priority === searchParams.priority);
+        return (!searchParams.workOrder || column.workOrder.toLowerCase().includes(searchParams.workOrder.toLowerCase())) && (!searchParams.columnSn || column.columnSn.toLowerCase().includes(searchParams.columnSn.toLowerCase())) && (!searchParams.orderNumber || column.orderNumber.toLowerCase().includes(searchParams.orderNumber.toLowerCase())) && (!searchParams.instrumentSerial || column.instrumentSerial.toLowerCase().includes(searchParams.instrumentSerial.toLowerCase())) && (searchParams.testType === 'all' || column.testType === searchParams.testType);
       });
       setFilteredColumns(filtered);
       setCurrentPage(1); // 重置到第一页
@@ -340,8 +333,7 @@ export default function BatchAuditPage(props) {
       columnSn: '',
       orderNumber: '',
       instrumentSerial: '',
-      testType: 'all',
-      priority: 'all'
+      testType: 'all'
     });
     setFilteredColumns(pendingColumns);
     setCurrentPage(1); // 重置到第一页
@@ -501,7 +493,6 @@ export default function BatchAuditPage(props) {
     }
   };
 
-
   // 获取结论标签
   const getConclusionBadge = conclusion => {
     return conclusion === 'qualified' ? <Badge variant="default" className="bg-green-100 text-green-800 border-green-200">
@@ -567,7 +558,6 @@ export default function BatchAuditPage(props) {
   }, []);
 
   // 计算统计数据
-  const highPriorityCount = pendingColumns.filter(c => c.priority === 'high').length;
   const qualifiedCount = pendingColumns.filter(c => c.finalConclusion === 'qualified').length;
   return <div style={style} className="min-h-screen bg-gray-50">
       {/* 顶部导航 */}
@@ -595,7 +585,7 @@ export default function BatchAuditPage(props) {
 
       <div className="p-6">
         {/* 统计概览 */}
-        <BatchAuditStats totalColumns={pendingColumns.length} pendingCount={pendingColumns.length} highPriorityCount={highPriorityCount} qualifiedCount={qualifiedCount} />
+        <BatchAuditStats totalColumns={pendingColumns.length} pendingCount={pendingColumns.length} qualifiedCount={qualifiedCount} />
 
         {/* 搜索区域 */}
         <BatchSearchFilters searchParams={searchParams} setSearchParams={setSearchParams} onSearch={handleSearch} onReset={handleReset} loading={loading} />

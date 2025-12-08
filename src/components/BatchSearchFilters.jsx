@@ -60,25 +60,8 @@ export function BatchSearchFilters({
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="all">全部类型</SelectItem>
-                <SelectItem value="纯度检测">纯度检测</SelectItem>
-                <SelectItem value="pH值检测">pH值检测</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">优先级</label>
-            <Select value={searchParams.priority} onValueChange={value => setSearchParams({
-            ...searchParams,
-            priority: value
-          })}>
-              <SelectTrigger>
-                <SelectValue placeholder="选择优先级" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">全部优先级</SelectItem>
-                <SelectItem value="high">高优先级</SelectItem>
-                <SelectItem value="medium">中优先级</SelectItem>
-                <SelectItem value="low">低优先级</SelectItem>
+                <SelectItem value="糖化模式">糖化模式</SelectItem>
+                <SelectItem value="地贫模式">地贫模式</SelectItem>
               </SelectContent>
             </Select>
           </div>

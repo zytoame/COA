@@ -3,14 +3,14 @@ import React from 'react';
 // @ts-ignore;
 import { Card, CardContent } from '@/components/ui';
 // @ts-ignore;
-import { CheckCircle, AlertTriangle, Clock, Package } from 'lucide-react';
+import { CheckCircle, Clock, Package } from 'lucide-react';
 
 export function BatchAuditStats({
   totalColumns,
   pendingCount,
   qualifiedCount
 }) {
-  return <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+  return <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
       <Card>
         <CardContent className="p-4">
           <div className="flex items-center justify-between">
@@ -34,7 +34,6 @@ export function BatchAuditStats({
           </div>
         </CardContent>
       </Card>
-      
       
       <Card>
         <CardContent className="p-4">

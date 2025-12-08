@@ -3,7 +3,7 @@ import React from 'react';
 // @ts-ignore;
 import { Button, Badge, Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui';
 // @ts-ignore;
-import { Eye, ChevronDown, ChevronUp, AlertTriangle, CheckCircle, XCircle } from 'lucide-react';
+import { Eye, ChevronDown, ChevronUp, CheckCircle, XCircle } from 'lucide-react';
 
 export function BatchAuditTable({
   columns,
@@ -44,7 +44,11 @@ export function BatchAuditTable({
                   </div>
                 </div>
               </TableCell>
-              <TableCell>{column.testType}</TableCell>
+              <TableCell>
+                <Badge variant={column.testType === '糖化模式' ? 'default' : 'secondary'}>
+                  {column.testType}
+                </Badge>
+              </TableCell>
               <TableCell>{column.operator}</TableCell>
               <TableCell>{column.submitTime}</TableCell>
               <TableCell>
@@ -61,7 +65,7 @@ export function BatchAuditTable({
             
             {/* 展开的检测数据行 */}
             {expandedRows.includes(column.id) && <TableRow>
-              <TableCell colSpan={11} className="bg-gray-50 p-4">
+              <TableCell colSpan={8} className="bg-gray-50 p-4">
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                   {Object.entries(column.detectionData).map(([key, data]) => {
                 const Icon = data.icon;
