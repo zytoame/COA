@@ -102,7 +102,7 @@ export function WorkOrderStats() {
     if (progress >= 90) return 'bg-green-500';
     if (progress >= 70) return 'bg-blue-300';
     if (progress >= 50) return 'bg-yellow-300';
-    return 'bg-red-3400';
+    return 'bg-red-300';
   };
 
   // 计算总体统计
@@ -179,11 +179,11 @@ export function WorkOrderStats() {
                     <h3 className="font-semibold text-gray-900">{workOrder.workOrderNumber}</h3>
                     <span className="text-sm text-gray-600">{workOrder.workOrderName}</span>
                   </div>
-                  <div className="w-full bg-gray-200 rounded-full h-2">
-                      <div className={`h-2 rounded-full transition-all duration-300 ${getProgressColor(workOrder.progress)}`} style={{
-                    width: `${workOrder.progress}%`
-                  }}></div>
-                   </div>
+                </div>
+                <div className="w-full bg-gray-200 rounded-full h-2">
+                  <div className={`h-2 rounded-full transition-all duration-300 ${getProgressColor(workOrder.progress)}`} style={{
+                width: `${workOrder.progress}%`
+              }}></div>
                 </div>
               </div>
 
