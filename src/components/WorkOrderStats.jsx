@@ -202,8 +202,8 @@ export function WorkOrderStats() {
                   <div className="flex items-center justify-center gap-1 text-blue-600">
                     <Package className="w-4 h-4" />
                     <span className="text-xs font-medium">总数量</span>
+                    <span className="text-lg font-bold text-blue-700 text-center">{workOrder.totalQuantity}</span>
                   </div>
-                  <span className="text-lg font-bold text-blue-700 text-center">{workOrder.totalQuantity}</span>
                 </div>
                 <div className="bg-green-50 rounded p-2">
                   <div className="flex items-center justify-center gap-1 text-green-600">
@@ -216,15 +216,14 @@ export function WorkOrderStats() {
                   <div className="flex items-center justify-center gap-1 text-orange-600">
                     <Clock className="w-4 h-4" />
                     <span className="text-xs font-medium">剩余</span>
+                    <span className="text-lg font-bold text-orange-700 text-center">{workOrder.remainingQuantity}</span>
                   </div>
-                  <p className="text-lg font-bold text-orange-700 text-center">{workOrder.remainingQuantity}</p>
                 </div>
                 <div className="bg-purple-50 rounded p-2">
                   <div className="flex items-center justify-center gap-1 text-purple-600">
                     <TrendingUp className="w-4 h-4" />
-                    <span className="text-xs font-medium">日完成</span>
+                    <span className="text-lg font-bold text-purple-700 text-center">{workOrder.dailyCompleted}</span>
                   </div>
-                  <p className="text-lg font-bold text-purple-700 text-center">{workOrder.dailyCompleted}</p>
                 </div>
               </div>
             </div>)}
