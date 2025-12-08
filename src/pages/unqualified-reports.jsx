@@ -467,100 +467,100 @@ export default function UnqualifiedReportsPage(props) {
 
   // TODO: 下载层析柱报告
   // 需要调用后端接口生成并下载层析柱报告文件
-  const handleDownload = async columnId => {
-    try {
-      // TODO: 替换为实际的数据源调用
-      // const result = await $w.cloud.callDataSource({
-      //   dataSourceName: 'chromatography_columns',
-      //   methodName: 'wedaGetItemV2',
-      //   params: {
-      //     filter: {
-      //       where: {
-      //         $and: [
-      //           { _id: { $eq: columnId } }
-      //         ]
-      //       }
-      //     },
-      //     select: { $master: true }
-      //   }
-      // });
+  // const handleDownload = async columnId => {
+  //   try {
+  //     // TODO: 替换为实际的数据源调用
+  //     // const result = await $w.cloud.callDataSource({
+  //     //   dataSourceName: 'chromatography_columns',
+  //     //   methodName: 'wedaGetItemV2',
+  //     //   params: {
+  //     //     filter: {
+  //     //       where: {
+  //     //         $and: [
+  //     //           { _id: { $eq: columnId } }
+  //     //         ]
+  //     //       }
+  //     //     },
+  //     //     select: { $master: true }
+  //     //   }
+  //     // });
 
-      // // 调用报告生成服务
-      // const downloadResult = await $w.cloud.callFunction({
-      //   name: 'generateColumnReport',
-      //   data: {
-      //     columnId: columnId,
-      //     reportType: 'unqualified',
-      //     format: 'pdf'
-      //   }
-      // });
+  //     // // 调用报告生成服务
+  //     // const downloadResult = await $w.cloud.callFunction({
+  //     //   name: 'generateColumnReport',
+  //     //   data: {
+  //     //     columnId: columnId,
+  //     //     reportType: 'unqualified',
+  //     //     format: 'pdf'
+  //     //   }
+  //     // });
 
-      toast({
-        title: "下载报告",
-        description: `正在下载层析柱 ${columnId} 报告，请稍候`
-      });
+  //     toast({
+  //       title: "下载报告",
+  //       description: `正在下载层析柱 ${columnId} 报告，请稍候`
+  //     });
 
-      // 模拟下载过程
-      setTimeout(() => {
-        toast({
-          title: "下载完成",
-          description: `层析柱 ${columnId} 报告已下载到本地`
-        });
-      }, 2000);
-    } catch (error) {
-      console.error('下载失败:', error);
-      toast({
-        title: "下载失败",
-        description: "无法下载层析柱报告",
-        variant: "destructive"
-      });
-    }
-  };
+  //     // 模拟下载过程
+  //     setTimeout(() => {
+  //       toast({
+  //         title: "下载完成",
+  //         description: `层析柱 ${columnId} 报告已下载到本地`
+  //       });
+  //     }, 2000);
+  //   } catch (error) {
+  //     console.error('下载失败:', error);
+  //     toast({
+  //       title: "下载失败",
+  //       description: "无法下载层析柱报告",
+  //       variant: "destructive"
+  //     });
+  //   }
+  // };
 
   // TODO: 批量下载层析柱报告
   // 需要调用后端接口批量生成并下载报告
-  const handleBatchDownload = async () => {
-    if (selectedColumns.length === 0) {
-      toast({
-        title: "请选择层析柱",
-        description: "请先选择要下载报告的层析柱",
-        variant: "destructive"
-      });
-      return;
-    }
-    try {
-      // TODO: 替换为实际的数据源调用
-      // const downloadResult = await $w.cloud.callFunction({
-      //   name: 'batchGenerateColumnReports',
-      //   data: {
-      //     columnIds: selectedColumns,
-      //     reportType: 'unqualified',
-      //     format: 'pdf'
-      //   }
-      // });
+  // const handleBatchDownload = async () => {
+  //   if (selectedColumns.length === 0) {
+  //     toast({
+  //       title: "请选择层析柱",
+  //       description: "请先选择要下载报告的层析柱",
+  //       variant: "destructive"
+  //     });
+  //     return;
+  //   }
+  //   try {
+  //     // TODO: 替换为实际的数据源调用
+  //     // const downloadResult = await $w.cloud.callFunction({
+  //     //   name: 'batchGenerateColumnReports',
+  //     //   data: {
+  //     //     columnIds: selectedColumns,
+  //     //     reportType: 'unqualified',
+  //     //     format: 'pdf'
+  //     //   }
+  //     // });
 
-      toast({
-        title: "批量下载",
-        description: `正在下载 ${selectedColumns.length} 份层析柱报告，请稍候`
-      });
+  //     toast({
+  //       title: "批量下载",
+  //       description: `正在下载 ${selectedColumns.length} 份层析柱报告，请稍候`
+  //     });
 
-      // 模拟批量下载过程
-      setTimeout(() => {
-        toast({
-          title: "批量下载完成",
-          description: `${selectedColumns.length} 份层析柱报告已下载完成`
-        });
-        setSelectedColumns([]);
-      }, 3000);
-    } catch (error) {
-      console.error('批量下载失败:', error);
-      toast({
-        title: "批量下载失败",
-        description: "无法批量下载层析柱报告",
-        variant: "destructive"
-      });
-    }
-  };
+  //     // 模拟批量下载过程
+  //     setTimeout(() => {
+  //       toast({
+  //         title: "批量下载完成",
+  //         description: `${selectedColumns.length} 份层析柱报告已下载完成`
+  //       });
+  //       setSelectedColumns([]);
+  //     }, 3000);
+  //   } catch (error) {
+  //     console.error('批量下载失败:', error);
+  //     toast({
+  //       title: "批量下载失败",
+  //       description: "无法批量下载层析柱报告",
+  //       variant: "destructive"
+  //     });
+  //   }
+  // };
 
   // 选择/取消选择层析柱
   const handleSelectColumn = columnId => {
@@ -585,7 +585,6 @@ export default function UnqualifiedReportsPage(props) {
     const typeMap = {
       glycation: '糖化模式',
       thalassemia: '地贫模式',
-      purity: '纯度分析',
       all: '综合'
     };
     return typeMap[type] || '糖化模式';
@@ -794,7 +793,6 @@ export default function UnqualifiedReportsPage(props) {
                     <SelectItem value="all">全部类型</SelectItem>
                     <SelectItem value="glycation">糖化模式</SelectItem>
                     <SelectItem value="thalassemia">地贫模式</SelectItem>
-                    <SelectItem value="purity">纯度分析</SelectItem>
                   </SelectContent>
                 </Select>
               </div>

@@ -23,8 +23,7 @@ const functionModules = [{
   color: 'red',
   stats: {
     total: 3,
-    pending: 2,
-    urgent: 1
+    pending: 2
   },
   pageId: 'unqualified-reports'
 }, {
@@ -179,7 +178,6 @@ export default function MainPage(props) {
                         <p className="text-xs text-gray-500">
                           {key === 'total' && '总计'}
                           {key === 'pending' && '待处理'}
-                          {key === 'urgent' && '紧急'}
                           {key === 'today' && '今日'}
                           {key === 'thisWeek' && '本周'}
                           {key === 'completed' && '已完成'}
@@ -195,35 +193,6 @@ export default function MainPage(props) {
         {/* 工单完成量统计 */}
         <WorkOrderStats />
 
-        {/* 快速操作 */}
-        {/* <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Settings className="w-5 h-5" />
-              快速操作
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-              <Button variant="outline" className="h-auto p-4 flex flex-col items-center space-y-2" onClick={() => handleNavigateToPage('unqualified-reports', '不合格层析柱管理')}>
-                <Edit className="w-6 h-6" />
-                <span>编辑层析柱</span>
-              </Button>
-              <Button variant="outline" className="h-auto p-4 flex flex-col items-center space-y-2" onClick={() => handleNavigateToPage('query-reports', '查询报告')}>
-                <Eye className="w-6 h-6" />
-                <span>预览报告</span>
-              </Button>
-              <Button variant="outline" className="h-auto p-4 flex flex-col items-center space-y-2" onClick={() => handleNavigateToPage('query-reports', '查询报告')}>
-                <Download className="w-6 h-6" />
-                <span>下载报告</span>
-              </Button>
-              <Button variant="outline" className="h-auto p-4 flex flex-col items-center space-y-2" onClick={() => handleNavigateToPage('batch-audit', '批量审核签字')}>
-                <CheckCircle className="w-6 h-6" />
-                <span>批量审核</span>
-              </Button>
-            </div>
-          </CardContent>
-        </Card> */}
 
         {/* 最近活动 */}
         <Card className="mt-6">
