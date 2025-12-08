@@ -196,7 +196,7 @@ export default function MainPage(props) {
         <WorkOrderStats />
 
         {/* 快速操作 */}
-        <Card>
+        {/* <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <Settings className="w-5 h-5" />
@@ -223,7 +223,7 @@ export default function MainPage(props) {
               </Button>
             </div>
           </CardContent>
-        </Card>
+        </Card> */}
 
         {/* 最近活动 */}
         <Card className="mt-6">
