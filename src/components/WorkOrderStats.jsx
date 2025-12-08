@@ -101,7 +101,7 @@ export function WorkOrderStats() {
   const getProgressColor = progress => {
     if (progress >= 90) return 'bg-green-500';
     if (progress >= 70) return 'bg-blue-300';
-    if (progress >= 50) return 'bg-yellow-300';
+    if (progress >= 50) return 'bg-yellow-400';
     return 'bg-red-300';
   };
 
@@ -200,7 +200,7 @@ export function WorkOrderStats() {
                   </div>
                 </div>
                 <div className="flex items-center gap-4 flex-shrink-0 ml-4">
-                  <div className='w-32'>
+                  <div className='w-1/2'>
                     <div className="w-full bg-gray-200 rounded-full h-2">
                       <div 
                         className={`h-2 rounded-full transition-all duration-300 ${getProgressColor(workOrder.progress)}`} 
