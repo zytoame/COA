@@ -183,9 +183,9 @@ export function WorkOrderStats() {
                 <div className="w-full bg-gray-200 rounded-full h-2">
                   <div className={`h-2 rounded-full transition-all duration-300 ${getProgressColor(workOrder.progress)}`} style={{
                 width: `${workOrder.progress}%`
-              }}></div>
+               }}></div>
                 </div>
-              </div> */}
+               </div> */}
 
               <div className="flex items-center justify-between mb-3">
                 <div className="flex items-center gap-3 flex-1 min-w-0">
@@ -200,15 +200,14 @@ export function WorkOrderStats() {
                   </div>
                 </div>
                 <div className="flex items-center gap-4 flex-shrink-0 ml-4">
-                  <div className='w-70'>
+                  <div className='w-48'>
                     <div className="w-full bg-gray-200 rounded-full h-2">
-                      <div 
-                        className={`h-2 rounded-full transition-all duration-300 ${getProgressColor(workOrder.progress)}`} 
-                        style={{ width: `${workOrder.progress}%` }}
-                      ></div>
+                      <div className={`h-2 rounded-full transition-all duration-300 ${getProgressColor(workOrder.progress)}`} style={{
+                    width: `${workOrder.progress}%`
+                  }}></div>
                     </div>
                   </div>
-                  <span className="text-sm font-medium text-gray-900 whitespace-nowrap">{workOrder.progress}% ({workOrder.completedQuantity}/{workOrder.totalQuantity})</span>
+                  <span className="text-sm font-medium text-gray-900 whitespace-nowrap w-24 text-right">{workOrder.progress}% ({workOrder.completedQuantity}/{workOrder.totalQuantity})</span>
                 </div>
               </div>
 
@@ -221,9 +220,9 @@ export function WorkOrderStats() {
                 <div className="w-full bg-gray-200 rounded-full h-2">
                   <div className={`h-2 rounded-full transition-all duration-300 ${getProgressColor(workOrder.progress)}`} style={{
                 width: `${workOrder.progress}%`
-              }}></div>
+               }}></div>
                 </div>
-              </div>  */}
+               </div>  */}
 
               {/* 统计数据 */}
               <div className="grid grid-cols-4 gap-4">
