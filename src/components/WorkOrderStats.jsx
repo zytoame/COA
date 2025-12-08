@@ -203,7 +203,7 @@ export function WorkOrderStats() {
                     <Package className="w-4 h-4" />
                     <span className="text-xs font-medium">总数量</span>
                   </div>
-                  <p className="text-lg font-bold text-blue-700 text-center">{workOrder.totalQuantity}</p>
+                  <span className="text-lg font-bold text-blue-700 text-center">{workOrder.totalQuantity}</span>
                 </div>
                 <div className="bg-green-50 rounded p-2">
                   <div className="flex items-center justify-center gap-1 text-green-600">
