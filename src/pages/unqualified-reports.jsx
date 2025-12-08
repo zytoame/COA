@@ -875,7 +875,7 @@ export default function UnqualifiedReportsPage(props) {
               });
               setShowEditModal(true);
             }
-          }} onPreview={handlePreview} onDownload={handleDownload} getReportTypeBadge={getReportTypeBadge} />}
+          }} onPreview={handlePreview} getReportTypeBadge={getReportTypeBadge} />}
           </CardContent>
         </Card>
 
