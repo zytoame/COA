@@ -97,8 +97,6 @@ export function WorkOrderStats() {
     fetchWorkOrderStats();
   }, []);
 
-
-
   // 获取进度条颜色
   const getProgressColor = progress => {
     if (progress >= 90) return 'bg-green-500';
@@ -177,9 +175,9 @@ export function WorkOrderStats() {
                   <div className="flex items-center justify-center w-8 h-8 bg-blue-100 text-blue-600 rounded-full text-sm font-medium">
                     {index + 1}
                   </div>
-                  <div>
+                  <div className="flex items-center gap-4">
                     <h3 className="font-semibold text-gray-900">{workOrder.workOrderNumber}</h3>
-                    <p className="text-sm text-gray-600">{workOrder.workOrderName}</p>
+                    <span className="text-sm text-gray-600">{workOrder.workOrderName}</span>
                   </div>
                 </div>
                 
@@ -199,34 +197,34 @@ export function WorkOrderStats() {
               </div> 
 
               {/* 统计数据 */}
-              <div className="grid grid-cols-4 gap-4 text-center">
+              <div className="grid grid-cols-4 gap-4">
                 <div className="bg-blue-50 rounded p-2">
-                  <div className="flex items-center justify-center gap-1 text-blue-600 mb-1">
+                  <div className="flex items-center justify-center gap-1 text-blue-600">
                     <Package className="w-4 h-4" />
                     <span className="text-xs font-medium">总数量</span>
                   </div>
-                  <p className="text-lg font-bold text-blue-700">{workOrder.totalQuantity}</p>
+                  <p className="text-lg font-bold text-blue-700 text-center">{workOrder.totalQuantity}</p>
                 </div>
                 <div className="bg-green-50 rounded p-2">
-                  <div className="flex items-center justify-center gap-1 text-green-600 mb-1">
+                  <div className="flex items-center justify-center gap-1 text-green-600">
                     <CheckCircle className="w-4 h-4" />
                     <span className="text-xs font-medium">已完成</span>
                   </div>
-                  <p className="text-lg font-bold text-green-700">{workOrder.completedQuantity}</p>
+                  <p className="text-lg font-bold text-green-700 text-center">{workOrder.completedQuantity}</p>
                 </div>
                 <div className="bg-orange-50 rounded p-2">
-                  <div className="flex items-center justify-center gap-1 text-orange-600 mb-1">
+                  <div className="flex items-center justify-center gap-1 text-orange-600">
                     <Clock className="w-4 h-4" />
                     <span className="text-xs font-medium">剩余</span>
                   </div>
-                  <p className="text-lg font-bold text-orange-700">{workOrder.remainingQuantity}</p>
+                  <p className="text-lg font-bold text-orange-700 text-center">{workOrder.remainingQuantity}</p>
                 </div>
                 <div className="bg-purple-50 rounded p-2">
-                  <div className="flex items-center justify-center gap-1 text-purple-600 mb-1">
+                  <div className="flex items-center justify-center gap-1 text-purple-600">
                     <TrendingUp className="w-4 h-4" />
                     <span className="text-xs font-medium">日完成</span>
                   </div>
-                  <p className="text-lg font-bold text-purple-700">{workOrder.dailyCompleted}</p>
+                  <p className="text-lg font-bold text-purple-700 text-center">{workOrder.dailyCompleted}</p>
                 </div>
               </div>
             </div>)}
