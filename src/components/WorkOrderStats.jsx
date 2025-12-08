@@ -188,25 +188,27 @@ export function WorkOrderStats() {
               </div> */}
 
               <div className="flex items-center justify-between mb-3">
-                <div className="flex items-center gap-3 min-w-0 flex-1 mr-4">
+                <div className="flex items-center gap-3 min-w-0 flex-1 min-w-0">
                   <div className="flex-shrink-0 flex items-center justify-center w-8 h-8 bg-blue-100 text-blue-600 rounded-full text-sm font-medium">
                     {index + 1}
                   </div>
                   <div className="flex flex-col min-w-0 flex-1">
                     <div className="flex items-center gap-2 min-w-0">
-                      <h3 className="font-semibold text-gray-900 truncate">{workOrder.workOrderNumber}</h3>
-                      <span className="text-sm text-gray-600 truncate flex-shrink-0">{workOrder.workOrderName}</span>
+                      <h3 className="font-semibold text-gray-900 whitespace-nowrap">{workOrder.workOrderNumber}</h3>
+                      <span className="text-sm text-gray-600 truncate">{workOrder.workOrderName}</span>
                     </div>
                   </div>
                 </div>
-                <div className="flex items-center gap-3 flex-shrink-0">
-                  <div className="w-full bg-gray-200 rounded-full h-2">
-                    <div 
-                      className={`h-2 rounded-full transition-all duration-300 ${getProgressColor(workOrder.progress)}`} 
-                      style={{ width: `${workOrder.progress}%` }}
-                    ></div>
+                <div className="flex items-center gap-4 flex-shrink-0 ml-4">
+                  <div className='w-32'>
+                    <div className="w-full bg-gray-200 rounded-full h-2">
+                      <div 
+                        className={`h-2 rounded-full transition-all duration-300 ${getProgressColor(workOrder.progress)}`} 
+                        style={{ width: `${workOrder.progress}%` }}
+                      ></div>
+                    </div>
                   </div>
-                  <span className="text-sm font-medium text-gray-900">{workOrder.progress}% ({workOrder.completedQuantity}/{workOrder.totalQuantity})</span>
+                  <span className="text-sm font-medium text-gray-900 whitespace-nowrap">{workOrder.progress}% ({workOrder.completedQuantity}/{workOrder.totalQuantity})</span>
                 </div>
               </div>
 
