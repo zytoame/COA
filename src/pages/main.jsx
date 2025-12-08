@@ -14,14 +14,14 @@ const currentUser = {
 // 功能模块配置
 const functionModules = [{
   id: 'unqualified-reports',
-  title: '不合格报告管理',
-  description: '管理和编辑不合格的层析柱检测报告',
+  title: '不合格层析柱管理',
+  description: '管理和编辑不合格的层析柱检测数据',
   icon: AlertTriangle,
   color: 'red',
   stats: {
-    total: 12,
-    pending: 5,
-    urgent: 2
+    total: 3,
+    pending: 2,
+    urgent: 1
   },
   pageId: 'unqualified-reports'
 }, {
@@ -43,9 +43,9 @@ const functionModules = [{
   icon: CheckCircle,
   color: 'green',
   stats: {
-    total: 28,
-    pending: 15,
-    completed: 13
+    total: 3,
+    pending: 2,
+    completed: 1
   },
   pageId: 'batch-audit'
 }];
@@ -62,8 +62,8 @@ export default function MainPage(props) {
   const [statsData, setStatsData] = useState({
     totalReports: 196,
     completedAudits: 168,
-    pendingCount: 20,
-    urgentCount: 2
+    pendingCount: 5,
+    urgentCount: 1
   });
   const [recentActivities, setRecentActivities] = useState([]);
 
@@ -175,7 +175,7 @@ export default function MainPage(props) {
     return colorMap[color] || colorMap.blue;
   };
 
-  // 计算待处理总数：不合格报告管理中的待审核数量 + 批量审核签字中的待处理数量
+  // 计算待处理总数：不合格层析柱管理中的待审核数量 + 批量审核签字中的待处理数量
   const totalPending = functionModules.find(m => m.id === 'unqualified-reports')?.stats.pending + functionModules.find(m => m.id === 'batch-audit')?.stats.pending;
   return <div style={style} className="min-h-screen bg-gray-50">
       {/* 顶部导航 */}
@@ -288,9 +288,9 @@ export default function MainPage(props) {
           </CardHeader>
           <CardContent>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-              <Button variant="outline" className="h-auto p-4 flex flex-col items-center space-y-2" onClick={() => handleNavigateToPage('unqualified-reports', '不合格报告管理')}>
+              <Button variant="outline" className="h-auto p-4 flex flex-col items-center space-y-2" onClick={() => handleNavigateToPage('unqualified-reports', '不合格层析柱管理')}>
                 <Edit className="w-6 h-6" />
-                <span>编辑报告</span>
+                <span>编辑层析柱</span>
               </Button>
               <Button variant="outline" className="h-auto p-4 flex flex-col items-center space-y-2" onClick={() => handleNavigateToPage('query-reports', '查询报告')}>
                 <Eye className="w-6 h-6" />
