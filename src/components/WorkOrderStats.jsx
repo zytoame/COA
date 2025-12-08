@@ -199,18 +199,19 @@ export function WorkOrderStats() {
                     </div>
                   </div>
                 </div>
-                <div className="flex-shrink-0 w-1/3">
+                <div className="flex items-center gap-3 flex-shrink-0">
                   <div className="w-full bg-gray-200 rounded-full h-2">
                     <div 
                       className={`h-2 rounded-full transition-all duration-300 ${getProgressColor(workOrder.progress)}`} 
                       style={{ width: `${workOrder.progress}%` }}
                     ></div>
                   </div>
+                  <span className="text-sm font-medium text-gray-900">{workOrder.progress}% ({workOrder.completedQuantity}/{workOrder.totalQuantity})</span>
                 </div>
               </div>
 
               {/* 进度条 */}
-              <div className="mb-3">
+              {/* <div className="mb-3">
                 <div className="flex items-center justify-between mb-1">
                   <span className="text-sm text-gray-600">完成进度</span>
                   <span className="text-sm font-medium text-gray-900">{workOrder.progress}% ({workOrder.completedQuantity}/{workOrder.totalQuantity})</span>
@@ -220,7 +221,7 @@ export function WorkOrderStats() {
                 width: `${workOrder.progress}%`
               }}></div>
                 </div>
-              </div> 
+              </div>  */}
 
               {/* 统计数据 */}
               <div className="grid grid-cols-4 gap-4">
