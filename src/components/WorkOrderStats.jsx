@@ -99,9 +99,9 @@ export function WorkOrderStats() {
 
   // 获取进度条颜色
   const getProgressColor = progress => {
-    if (progress >= 90) return 'bg-green-500';
-    if (progress >= 70) return 'bg-blue-300';
-    if (progress >= 50) return 'bg-yellow-400';
+    if (progress >= 85) return 'bg-lime-500';
+    if (progress >= 60) return 'bg-blue-300';
+    if (progress >= 30) return 'bg-yellow-400';
     return 'bg-red-300';
   };
 
@@ -170,23 +170,6 @@ export function WorkOrderStats() {
         {/* 工单列表 */}
         <div className="space-y-4">
           {workOrderData.map((workOrder, index) => <div key={workOrder.workOrderNumber} className="border border-gray-200 rounded-lg p-4 hover:shadow-md transition-shadow">
-              {/* <div className="flex items-center justify-between mb-3">
-                <div className="flex items-center gap-3">
-                  <div className="flex items-center justify-center w-8 h-8 bg-blue-100 text-blue-600 rounded-full text-sm font-medium">
-                    {index + 1}
-                  </div>
-                  <div className="flex items-center gap-4">
-                    <h3 className="font-semibold text-gray-900">{workOrder.workOrderNumber}</h3>
-                    <span className="text-sm text-gray-600">{workOrder.workOrderName}</span>
-                  </div>
-                </div>
-                <div className="w-full bg-gray-200 rounded-full h-2">
-                  <div className={`h-2 rounded-full transition-all duration-300 ${getProgressColor(workOrder.progress)}`} style={{
-                width: `${workOrder.progress}%`
-               }}></div>
-                </div>
-               </div> */}
-
               <div className="flex items-center justify-between mb-3">
                 <div className="flex items-center gap-3 flex-1 min-w-0">
                   <div className="flex-shrink-0 flex items-center justify-center w-8 h-8 bg-blue-100 text-blue-600 rounded-full text-sm font-medium">
@@ -210,19 +193,6 @@ export function WorkOrderStats() {
                   <span className="text-sm font-medium text-gray-900 whitespace-nowrap w-24 text-right">{workOrder.progress}% ({workOrder.completedQuantity}/{workOrder.totalQuantity})</span>
                 </div>
               </div>
-
-              {/* 进度条 */}
-              {/* <div className="mb-3">
-                <div className="flex items-center justify-between mb-1">
-                  <span className="text-sm text-gray-600">完成进度</span>
-                  <span className="text-sm font-medium text-gray-900">{workOrder.progress}% ({workOrder.completedQuantity}/{workOrder.totalQuantity})</span>
-                </div>
-                <div className="w-full bg-gray-200 rounded-full h-2">
-                  <div className={`h-2 rounded-full transition-all duration-300 ${getProgressColor(workOrder.progress)}`} style={{
-                width: `${workOrder.progress}%`
-               }}></div>
-                </div>
-               </div>  */}
 
               {/* 统计数据 */}
               <div className="grid grid-cols-4 gap-4">
