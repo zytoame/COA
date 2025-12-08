@@ -99,10 +99,10 @@ export function WorkOrderStats() {
 
   // 获取进度条颜色
   const getProgressColor = progress => {
-    if (progress >= 90) return 'bg-green-500';
-    if (progress >= 70) return 'bg-blue-500';
-    if (progress >= 50) return 'bg-yellow-500';
-    return 'bg-red-500';
+    if (progress >= 90) return 'bg-green-300';
+    if (progress >= 70) return 'bg-blue-300';
+    if (progress >= 50) return 'bg-yellow-300';
+    return 'bg-red-300';
   };
 
   // 计算总体统计
@@ -178,6 +178,11 @@ export function WorkOrderStats() {
                   <div className="flex items-center gap-4">
                     <h3 className="font-semibold text-gray-900">{workOrder.workOrderNumber}</h3>
                     <span className="text-sm text-gray-600">{workOrder.workOrderName}</span>
+                    <div className="w-full bg-gray-200 rounded-full h-2">
+                      <div className={`h-2 rounded-full transition-all duration-300 ${getProgressColor(workOrder.progress)}`} style={{
+                    width: `${workOrder.progress}%`
+                  }}></div>
+                   </div>
                   </div>
                 </div>
                 
@@ -222,6 +227,7 @@ export function WorkOrderStats() {
                 <div className="bg-purple-50 rounded p-2">
                   <div className="flex items-center justify-center gap-1 text-purple-600">
                     <TrendingUp className="w-4 h-4" />
+                    <span className="text-xs font-medium">日完成</span>
                     <span className="text-lg font-bold text-purple-700 text-center">{workOrder.dailyCompleted}</span>
                   </div>
                 </div>
