@@ -200,7 +200,7 @@ export function WorkOrderStats() {
                   </div>
                 </div>
                 <div className="flex items-center gap-4 flex-shrink-0 ml-4">
-                  <div className='w-1/2'>
+                  <div className='w-70'>
                     <div className="w-full bg-gray-200 rounded-full h-2">
                       <div 
                         className={`h-2 rounded-full transition-all duration-300 ${getProgressColor(workOrder.progress)}`} 
