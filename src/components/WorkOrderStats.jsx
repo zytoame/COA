@@ -170,7 +170,7 @@ export function WorkOrderStats() {
         {/* 工单列表 */}
         <div className="space-y-4">
           {workOrderData.map((workOrder, index) => <div key={workOrder.workOrderNumber} className="border border-gray-200 rounded-lg p-4 hover:shadow-md transition-shadow">
-              <div className="flex items-center justify-between mb-3">
+              {/* <div className="flex items-center justify-between mb-3">
                 <div className="flex items-center gap-3">
                   <div className="flex items-center justify-center w-8 h-8 bg-blue-100 text-blue-600 rounded-full text-sm font-medium">
                     {index + 1}
@@ -184,6 +184,28 @@ export function WorkOrderStats() {
                   <div className={`h-2 rounded-full transition-all duration-300 ${getProgressColor(workOrder.progress)}`} style={{
                 width: `${workOrder.progress}%`
               }}></div>
+                </div>
+              </div> */}
+
+              <div className="flex items-center justify-between mb-3">
+                <div className="flex items-center gap-3 min-w-0 flex-1 mr-4">
+                  <div className="flex-shrink-0 flex items-center justify-center w-8 h-8 bg-blue-100 text-blue-600 rounded-full text-sm font-medium">
+                    {index + 1}
+                  </div>
+                  <div className="flex flex-col min-w-0 flex-1">
+                    <div className="flex items-center gap-2 min-w-0">
+                      <h3 className="font-semibold text-gray-900 truncate">{workOrder.workOrderNumber}</h3>
+                      <span className="text-sm text-gray-600 truncate flex-shrink-0">{workOrder.workOrderName}</span>
+                    </div>
+                  </div>
+                </div>
+                <div className="flex-shrink-0 w-1/3">
+                  <div className="w-full bg-gray-200 rounded-full h-2">
+                    <div 
+                      className={`h-2 rounded-full transition-all duration-300 ${getProgressColor(workOrder.progress)}`} 
+                      style={{ width: `${workOrder.progress}%` }}
+                    ></div>
+                  </div>
                 </div>
               </div>
 
