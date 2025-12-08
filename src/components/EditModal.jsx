@@ -13,7 +13,7 @@ export function EditModal({
   saving
 }) {
   const [editedReport, setEditedReport] = useState(report || {});
-  const [activeTab, setActiveTab] = useState('basic');
+  const [activeTab, setActiveTab] = useState('detection'); // 默认显示检测数据标签页
 
   // 如果报告数据变化，更新编辑状态
   useEffect(() => {
@@ -26,12 +26,10 @@ export function EditModal({
     }
   }, [report]);
 
-  // 更新基本信息
+  // 更新基本信息 - 禁用修改
   const updateBasicInfo = (field, value) => {
-    setEditedReport(prev => ({
-      ...prev,
-      [field]: value
-    }));
+    // 基本信息不允许修改，直接返回
+    return;
   };
 
   // 更新检测数据
@@ -203,63 +201,69 @@ export function EditModal({
             </button>
           </div>
 
-          {/* 基本信息标签页 */}
+          {/* 基本信息标签页 - 禁用修改 */}
           {activeTab === 'basic' && <div className="space-y-4">
+              <div className="bg-gray-50 p-4 rounded-lg border border-gray-200">
+                <div className="flex items-center gap-2 mb-3">
+                  <AlertTriangle className="w-4 h-4 text-amber-600" />
+                  <span className="text-sm font-medium text-amber-800">基本信息不可修改</span>
+                </div>
+                <p className="text-sm text-gray-600">层析柱的基本信息（工单号、序列号、检测模式等）为系统自动生成，不允许手动修改。如需修改，请联系系统管理员。</p>
+              </div>
+              
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">工单号</label>
-                  <Input value={editedReport.workOrder || ''} onChange={e => updateBasicInfo('workOrder', e.target.value)} placeholder="请输入工单号" />
+                  <Input value={editedReport.workOrder || ''} disabled className="bg-gray-100 text-gray-500 cursor-not-allowed" placeholder="请输入工单号" />
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">层析柱序列号</label>
-                  <Input value={editedReport.columnSn || ''} onChange={e => updateBasicInfo('columnSn', e.target.value)} placeholder="请输入层析柱序列号" />
+                  <Input value={editedReport.columnSn || ''} disabled className="bg-gray-100 text-gray-500 cursor-not-allowed" placeholder="请输入层析柱序列号" />
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">订单号</label>
-                  <Input value={editedReport.orderNumber || ''} onChange={e => updateBasicInfo('orderNumber', e.target.value)} placeholder="请输入订单号" />
+                  <Input value={editedReport.orderNumber || ''} disabled className="bg-gray-100 text-gray-500 cursor-not-allowed" placeholder="请输入订单号" />
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">仪器序列号</label>
-                  <Input value={editedReport.instrumentSerial || ''} onChange={e => updateBasicInfo('instrumentSerial', e.target.value)} placeholder="请输入仪器序列号" />
+                  <Input value={editedReport.instrumentSerial || ''} disabled className="bg-gray-100 text-gray-500 cursor-not-allowed" placeholder="请输入仪器序列号" />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">检测项目</label>
-                  <Select value={editedReport.检测项目 || ''} onValueChange={value => updateBasicInfo('检测项目', value)}>
-                    <SelectTrigger>
-                      <SelectValue placeholder="选择检测项目" />
+                  <label className="block text-sm font-medium text-gray-700 mb-1">检测模式</label>
+                  <Select value={editedReport.testType || ''} disabled>
+                    <SelectTrigger className="bg-gray-100 text-gray-500 cursor-not-allowed">
+                      <SelectValue placeholder="选择检测模式" />
                     </SelectTrigger>
                     <SelectContent>
                       <SelectItem value="糖化模式">糖化模式</SelectItem>
                       <SelectItem value="地贫模式">地贫模式</SelectItem>
-                      <SelectItem value="纯度分析">纯度分析</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">报告类型</label>
-                  <Select value={editedReport.reportType || ''} onValueChange={value => updateBasicInfo('reportType', value)}>
-                    <SelectTrigger>
+                  <Select value={editedReport.reportType || ''} disabled>
+                    <SelectTrigger className="bg-gray-100 text-gray-500 cursor-not-allowed">
                       <SelectValue placeholder="选择报告类型" />
                     </SelectTrigger>
                     <SelectContent>
                       <SelectItem value="glycation">糖化模式报告</SelectItem>
                       <SelectItem value="thalassemia">地贫模式报告</SelectItem>
-                      <SelectItem value="purity">纯度分析报告</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">负责人</label>
-                  <Input value={editedReport.负责人 || ''} onChange={e => updateBasicInfo('负责人', e.target.value)} placeholder="请输入负责人" />
+                  <Input value={editedReport.operator || ''} disabled className="bg-gray-100 text-gray-500 cursor-not-allowed" placeholder="请输入负责人" />
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">报告日期</label>
-                  <Input type="date" value={editedReport.reportDate || ''} onChange={e => updateBasicInfo('reportDate', e.target.value)} />
+                  <Input type="date" value={editedReport.testDate || ''} disabled className="bg-gray-100 text-gray-500 cursor-not-allowed" />
                 </div>
               </div>
             </div>}
 
-          {/* 检测数据标签页 */}
+          {/* 检测数据标签页 - 允许修改 */}
           {activeTab === 'detection' && <div className="space-y-4">
               <div className="flex justify-end mb-4">
                 <Button variant="outline" onClick={recalculateAll} className="flex items-center gap-2">
@@ -272,9 +276,9 @@ export function EditModal({
                   <CardHeader className="pb-3">
                     <CardTitle className="text-base flex items-center gap-2">
                       {getDetectionIcon(data.icon)}
-                      {key === 'moduleTemperature' && '模块温度'}
-                      {key === 'systemPressure' && '系统压力'}
-                      {key === 'hbA1cAppearanceTime' && 'HbA1c出现时间'}
+                      {key === 'setTemperature' && '设定温度'}
+                      {key === 'pressure' && '压力'}
+                      {key === 'peakTime' && '出峰时间'}
                       {key === 'repeatabilityTest' && '重复性测试'}
                     </CardTitle>
                   </CardHeader>
@@ -345,27 +349,27 @@ export function EditModal({
                 </Card>)}
             </div>}
 
-          {/* 结论与备注标签页 */}
+          {/* 结论与备注标签页 - 允许修改 */}
           {activeTab === 'conclusion' && <div className="space-y-4">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">检测结果</label>
-                <Select value={editedReport.检测结果 || ''} onValueChange={value => updateBasicInfo('检测结果', value)}>
+                <Select value={editedReport.testResult || ''} onValueChange={value => updateBasicInfo('testResult', value)}>
                   <SelectTrigger>
                     <SelectValue placeholder="选择检测结果" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="合格">合格</SelectItem>
-                    <SelectItem value="不合格">不合格</SelectItem>
+                    <SelectItem value="qualified">合格</SelectItem>
+                    <SelectItem value="unqualified">不合格</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">不合格原因</label>
-                <Input value={editedReport.不合格原因 || ''} onChange={e => updateBasicInfo('不合格原因', e.target.value)} placeholder="请输入不合格原因" />
+                <Input value={editedReport.unqualifiedReasons?.join(', ') || ''} onChange={e => updateBasicInfo('unqualifiedReasons', e.target.value.split(',').map(r => r.trim()))} placeholder="请输入不合格原因，多个原因用逗号分隔" />
               </div>
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">审核状态</label>
-                <Select value={editedReport.审核状态 || ''} onValueChange={value => updateBasicInfo('审核状态', value)}>
+                <Select value={editedReport.auditStatus || ''} onValueChange={value => updateBasicInfo('auditStatus', value)}>
                   <SelectTrigger>
                     <SelectValue placeholder="选择审核状态" />
                   </SelectTrigger>

@@ -5,7 +5,7 @@ import { Button, Input, Card, CardContent, CardHeader, CardTitle, Select, Select
 // @ts-ignore;
 import { Filter, Search, Loader2 } from 'lucide-react';
 
-export function SearchFilters({
+export function UnqualifiedSearchFilters({
   searchParams,
   setSearchParams,
   onSearch,
@@ -62,22 +62,6 @@ export function SearchFilters({
                 <SelectItem value="all">全部模式</SelectItem>
                 <SelectItem value="糖化模式">糖化模式</SelectItem>
                 <SelectItem value="地贫模式">地贫模式</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">检测结果</label>
-            <Select value={searchParams.testResult} onValueChange={value => setSearchParams({
-            ...searchParams,
-            testResult: value
-          })}>
-              <SelectTrigger>
-                <SelectValue placeholder="选择检测结果" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">全部结果</SelectItem>
-                <SelectItem value="qualified">合格</SelectItem>
-                <SelectItem value="unqualified">不合格</SelectItem>
               </SelectContent>
             </Select>
           </div>

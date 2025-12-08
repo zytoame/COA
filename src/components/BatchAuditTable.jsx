@@ -22,9 +22,9 @@ export function BatchAuditTable({
           </TableHead>
           <TableHead>层析柱序列号</TableHead>
           <TableHead>工单号</TableHead>
-          <TableHead>层析柱名称</TableHead>
-          <TableHead>检测类型</TableHead>
-          <TableHead>负责人</TableHead>
+          <TableHead>订单号</TableHead>
+          <TableHead>仪器序列号</TableHead>
+          <TableHead>检测模式</TableHead>
           <TableHead>提交时间</TableHead>
           <TableHead>操作</TableHead>
         </TableRow>
@@ -37,19 +37,13 @@ export function BatchAuditTable({
               </TableCell>
               <TableCell className="font-medium">{column.columnSn}</TableCell>
               <TableCell>{column.workOrder}</TableCell>
-              <TableCell>
-                <div className="max-w-32">
-                  <div className="truncate" title={column.columnName}>
-                    {column.columnName}
-                  </div>
-                </div>
-              </TableCell>
+              <TableCell>{column.orderNumber}</TableCell>
+              <TableCell>{column.instrumentSerial}</TableCell>
               <TableCell>
                 <Badge variant={column.testType === '糖化模式' ? 'default' : 'secondary'}>
                   {column.testType}
                 </Badge>
               </TableCell>
-              <TableCell>{column.operator}</TableCell>
               <TableCell>{column.submitTime}</TableCell>
               <TableCell>
                 <div className="flex space-x-1">

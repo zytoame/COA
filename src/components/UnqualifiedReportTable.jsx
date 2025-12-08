@@ -3,81 +3,88 @@ import React from 'react';
 // @ts-ignore;
 import { Button, Badge, Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui';
 // @ts-ignore;
-import { Download, Eye, Edit, Clock } from 'lucide-react';
+import { Eye, ChevronDown, ChevronUp, AlertTriangle, CheckCircle, XCircle } from 'lucide-react';
 
 export function UnqualifiedReportTable({
   reports,
-  selectedReports,
-  onSelectReport,
-  onSelectAll,
-  onEdit,
-  onPreview,
-  onDownload,
-  getReportTypeBadge
+  expandedRows,
+  onToggleExpand,
+  onPreview
 }) {
   return <Table>
       <TableHeader>
         <TableRow>
-          <TableHead className="w-12">
-            <input type="checkbox" checked={reports.length > 0 && reports.every(report => selectedReports.includes(report.id))} onChange={e => onSelectAll(e.target.checked)} className="rounded border-gray-300" />
-          </TableHead>
           <TableHead>层析柱序列号</TableHead>
           <TableHead>工单号</TableHead>
-          <TableHead>订单号</TableHead>
-          <TableHead>仪器序列号</TableHead>
-          <TableHead>检测项目</TableHead>
-          <TableHead>检测类型</TableHead>
-          <TableHead>检测结果</TableHead>
+          <TableHead>层析柱名称</TableHead>
+          <TableHead>检测模式</TableHead>
           <TableHead>负责人</TableHead>
-          <TableHead>不合格原因</TableHead>
           <TableHead>提交时间</TableHead>
           <TableHead>操作</TableHead>
         </TableRow>
       </TableHeader>
       <TableBody>
-        {reports.map(report => <TableRow key={report.id} className="hover:bg-gray-50">
-            <TableCell>
-              <input type="checkbox" checked={selectedReports.includes(report.id)} onChange={() => onSelectReport(report.id)} className="rounded border-gray-300" />
-            </TableCell>
-            <TableCell className="font-medium">{report.columnSn}</TableCell>
-            <TableCell>{report.workOrder}</TableCell>
-            <TableCell>{report.orderNumber}</TableCell>
-            <TableCell>{report.instrumentSerial}</TableCell>
-            <TableCell>{report.检测项目}</TableCell>
-            <TableCell>{getReportTypeBadge(report.reportType)}</TableCell>
-            <TableCell>
-              <Badge variant="destructive" className="bg-red-100 text-red-800 border-red-200">
-                {report.检测结果}
-              </Badge>
-            </TableCell>
-            <TableCell>{report.负责人}</TableCell>
-            <TableCell>
-              <div className="max-w-32">
-                <div className="truncate text-red-600" title={report.不合格原因}>
-                  {report.不合格原因}
+        {reports.map(report => <React.Fragment key={report.id}>
+            <TableRow className="hover:bg-gray-50">
+              <TableCell className="font-medium">{report.columnSn}</TableCell>
+              <TableCell>{report.workOrder}</TableCell>
+              <TableCell>
+                <div className="max-w-32">
+                  <div className="truncate" title={report.columnName}>
+                    {report.columnName}
+                  </div>
                 </div>
-              </div>
-            </TableCell>
-            <TableCell>
-              <div className="flex items-center gap-1">
-                <Clock className="w-4 h-4 text-gray-400" />
-                {report.generateTime}
-              </div>
-            </TableCell>
-            <TableCell>
-              <div className="flex space-x-1">
-                <Button size="sm" variant="outline" onClick={() => onEdit(report.id)} className="h-8 w-8 p-0" title="编辑">
-                  <Edit className="w-4 h-4" />
-                </Button>
-                <Button size="sm" variant="outline" onClick={() => onPreview(report.id)} className="h-8 w-8 p-0" title="预览详情">
-                  <Eye className="w-4 h-4" />
-                </Button>
-                <Button size="sm" variant="outline" onClick={() => onDownload(report.id)} className="h-8 w-8 p-0" title="下载报告">
-                  <Download className="w-4 h-4" />
-                </Button>
-              </div>
-            </TableCell>
-          </TableRow>)}
+              </TableCell>
+              <TableCell>
+                <Badge variant={report.testType === '糖化模式' ? 'default' : 'secondary'}>
+                  {report.testType}
+                </Badge>
+              </TableCell>
+              <TableCell>{report.operator}</TableCell>
+              <TableCell>{report.submitTime}</TableCell>
+              <TableCell>
+                <div className="flex space-x-1">
+                  <Button size="sm" variant="outline" onClick={() => onToggleExpand(report.id)} className="h-8 w-8 p-0" title="展开详情">
+                    {expandedRows.includes(report.id) ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
+                  </Button>
+                  <Button size="sm" variant="outline" onClick={() => onPreview(report.id)} className="h-8 w-8 p-0" title="预览详情">
+                    <Eye className="w-4 h-4" />
+                  </Button>
+                </div>
+              </TableCell>
+            </TableRow>
+            
+            {/* 展开的检测数据行 - 删除检测项目显示 */}
+            {expandedRows.includes(report.id) && <TableRow>
+              <TableCell colSpan={7} className="bg-gray-50 p-4">
+                <div className="space-y-4">
+                  <div className="bg-white p-4 rounded-lg border border-gray-200">
+                    <h4 className="text-sm font-medium text-gray-900 mb-3">不合格原因</h4>
+                    <div className="space-y-2">
+                      {report.unqualifiedReasons.map((reason, index) => <div key={index} className="flex items-center gap-2 text-sm">
+                          <XCircle className="w-4 h-4 text-red-500" />
+                          <span className="text-gray-700">{reason}</span>
+                        </div>)}
+                    </div>
+                  </div>
+                  
+                  <div className="bg-white p-4 rounded-lg border border-gray-200">
+                    <h4 className="text-sm font-medium text-gray-900 mb-3">操作历史</h4>
+                    <div className="space-y-2">
+                      {report.operationHistory.map((history, index) => <div key={index} className="flex items-center justify-between text-sm">
+                          <div className="flex items-center gap-2">
+                            <span className="text-gray-600">{history.time}</span>
+                            <span className="text-gray-900">{history.operator}</span>
+                            <span className="text-gray-700">{history.action}</span>
+                          </div>
+                          <span className="text-gray-500">{history.remark}</span>
+                        </div>)}
+                    </div>
+                  </div>
+                </div>
+              </TableCell>
+            </TableRow>}
+          </React.Fragment>)}
       </TableBody>
     </Table>;
 }
