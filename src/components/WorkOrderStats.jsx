@@ -42,7 +42,6 @@ export function WorkOrderStats() {
         completedQuantity: 85,
         remainingQuantity: 15,
         dailyCompleted: 12,
-        priority: 'high',
         startDate: '2025-01-01',
         expectedEndDate: '2025-01-20',
         progress: 85
@@ -53,7 +52,6 @@ export function WorkOrderStats() {
         completedQuantity: 60,
         remainingQuantity: 20,
         dailyCompleted: 8,
-        priority: 'medium',
         startDate: '2025-01-05',
         expectedEndDate: '2025-01-25',
         progress: 75
@@ -64,7 +62,6 @@ export function WorkOrderStats() {
         completedQuantity: 45,
         remainingQuantity: 75,
         dailyCompleted: 5,
-        priority: 'low',
         startDate: '2025-01-10',
         expectedEndDate: '2025-02-10',
         progress: 37.5
@@ -75,7 +72,6 @@ export function WorkOrderStats() {
         completedQuantity: 55,
         remainingQuantity: 5,
         dailyCompleted: 10,
-        priority: 'high',
         startDate: '2025-01-08',
         expectedEndDate: '2025-01-18',
         progress: 91.7
@@ -86,7 +82,6 @@ export function WorkOrderStats() {
         completedQuantity: 30,
         remainingQuantity: 60,
         dailyCompleted: 3,
-        priority: 'medium',
         startDate: '2025-01-12',
         expectedEndDate: '2025-02-05',
         progress: 33.3
@@ -102,27 +97,7 @@ export function WorkOrderStats() {
     fetchWorkOrderStats();
   }, []);
 
-  // 获取优先级标签
-  const getPriorityBadge = priority => {
-    const priorityConfig = {
-      high: {
-        label: '高',
-        color: 'red'
-      },
-      medium: {
-        label: '中',
-        color: 'yellow'
-      },
-      low: {
-        label: '低',
-        color: 'green'
-      }
-    };
-    const config = priorityConfig[priority] || priorityConfig.medium;
-    return <Badge variant="outline" className={`bg-${config.color}-50 text-${config.color}-700 border-${config.color}-200`}>
-        {config.label}
-      </Badge>;
-  };
+
 
   // 获取进度条颜色
   const getProgressColor = progress => {
@@ -207,16 +182,11 @@ export function WorkOrderStats() {
                     <p className="text-sm text-gray-600">{workOrder.workOrderName}</p>
                   </div>
                 </div>
-                <div className="flex items-center gap-2">
-                  {getPriorityBadge(workOrder.priority)}
-                  <Badge variant="outline" className="bg-gray-100 text-gray-700 border-gray-200">
-                    {workOrder.startDate} - {workOrder.expectedEndDate}
-                  </Badge>
-                </div>
+                
               </div>
 
               {/* 进度条 */}
-              <div className="mb-3">
+              {/* <div className="mb-3">
                 <div className="flex items-center justify-between mb-1">
                   <span className="text-sm text-gray-600">完成进度</span>
                   <span className="text-sm font-medium text-gray-900">{workOrder.progress}% ({workOrder.completedQuantity}/{workOrder.totalQuantity})</span>
@@ -226,7 +196,7 @@ export function WorkOrderStats() {
                 width: `${workOrder.progress}%`
               }}></div>
                 </div>
-              </div>
+              </div> */}
 
               {/* 统计数据 */}
               <div className="grid grid-cols-4 gap-4 text-center">
