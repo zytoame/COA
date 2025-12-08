@@ -25,6 +25,8 @@ export function ReportTable({
           <TableHead>报告名称</TableHead>
           <TableHead>工单号</TableHead>
           <TableHead>层析柱序列号</TableHead>
+          <TableHead>订单号</TableHead>
+          <TableHead>仪器序列号</TableHead>
           <TableHead>检测项目</TableHead>
           <TableHead>报告类型</TableHead>
           <TableHead>检测结果</TableHead>
@@ -49,6 +51,8 @@ export function ReportTable({
             </TableCell>
             <TableCell>{report.workOrder}</TableCell>
             <TableCell>{report.columnSn}</TableCell>
+            <TableCell>{report.orderNumber}</TableCell>
+            <TableCell>{report.instrumentSerial}</TableCell>
             <TableCell>{report.检测项目}</TableCell>
             <TableCell>{getReportTypeBadge(report.reportType)}</TableCell>
             <TableCell>

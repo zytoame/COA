@@ -10,7 +10,7 @@ import { ReportTable } from '@/components/ReportTable';
 import { ReportStats } from '@/components/ReportStats';
 import { SearchFilters } from '@/components/SearchFilters';
 
-// 模拟合格报告数据 - 只显示最新下载或预览的20份报告
+// 简化的模拟合格报告数据
 const mockQualifiedReports = [{
   id: 'RPT-Q001',
   workOrder: 'WO202501001',
@@ -65,312 +65,6 @@ const mockQualifiedReports = [{
   generateTime: '2025-01-13 11:20:00',
   lastAccessTime: '2025-01-15 14:10:00',
   accessType: 'download'
-}, {
-  id: 'RPT-Q004',
-  workOrder: 'WO202501004',
-  columnSn: 'COL-2025-004',
-  orderNumber: 'ORD-202501004',
-  instrumentSerial: 'INST-003',
-  reportType: 'glycation',
-  status: 'qualified',
-  reportDate: '2025-01-12',
-  检测项目: '糖化模式',
-  检测结果: '合格',
-  负责人: '赵六',
-  审核状态: 'approved',
-  fileSize: '1.9MB',
-  reportName: '糖化模式报告_20250112',
-  generateTime: '2025-01-12 09:15:00',
-  lastAccessTime: '2025-01-15 13:30:00',
-  accessType: 'preview'
-}, {
-  id: 'RPT-Q005',
-  workOrder: 'WO202501005',
-  columnSn: 'COL-2025-005',
-  orderNumber: 'ORD-202501005',
-  instrumentSerial: 'INST-002',
-  reportType: 'thalassemia',
-  status: 'qualified',
-  reportDate: '2025-01-11',
-  检测项目: '地贫模式',
-  检测结果: '合格',
-  负责人: '张三',
-  审核状态: 'approved',
-  fileSize: '2.5MB',
-  reportName: '地贫模式报告_20250111',
-  generateTime: '2025-01-11 15:30:00',
-  lastAccessTime: '2025-01-15 12:45:00',
-  accessType: 'download'
-}, {
-  id: 'RPT-Q006',
-  workOrder: 'WO202501006',
-  columnSn: 'COL-2025-006',
-  orderNumber: 'ORD-202501006',
-  instrumentSerial: 'INST-001',
-  reportType: 'glycation',
-  status: 'qualified',
-  reportDate: '2025-01-10',
-  检测项目: '糖化模式',
-  检测结果: '合格',
-  负责人: '李四',
-  审核状态: 'approved',
-  fileSize: '2.2MB',
-  reportName: '糖化模式报告_20250110',
-  generateTime: '2025-01-10 13:20:00',
-  lastAccessTime: '2025-01-15 11:20:00',
-  accessType: 'preview'
-}, {
-  id: 'RPT-Q007',
-  workOrder: 'WO202501007',
-  columnSn: 'COL-2025-007',
-  orderNumber: 'ORD-202501007',
-  instrumentSerial: 'INST-003',
-  reportType: 'glycation',
-  status: 'qualified',
-  reportDate: '2025-01-09',
-  检测项目: '糖化模式',
-  检测结果: '合格',
-  负责人: '王五',
-  审核状态: 'approved',
-  fileSize: '1.7MB',
-  reportName: '糖化模式报告_20250109',
-  generateTime: '2025-01-09 10:45:00',
-  lastAccessTime: '2025-01-15 10:15:00',
-  accessType: 'download'
-}, {
-  id: 'RPT-Q008',
-  workOrder: 'WO202501008',
-  columnSn: 'COL-2025-008',
-  orderNumber: 'ORD-202501008',
-  instrumentSerial: 'INST-002',
-  reportType: 'thalassemia',
-  status: 'qualified',
-  reportDate: '2025-01-08',
-  检测项目: '地贫模式',
-  检测结果: '合格',
-  负责人: '赵六',
-  审核状态: 'approved',
-  fileSize: '2.0MB',
-  reportName: '地贫模式报告_20250108',
-  generateTime: '2025-01-08 16:10:00',
-  lastAccessTime: '2025-01-15 09:30:00',
-  accessType: 'preview'
-}, {
-  id: 'RPT-Q009',
-  workOrder: 'WO202501009',
-  columnSn: 'COL-2025-009',
-  orderNumber: 'ORD-202501009',
-  instrumentSerial: 'INST-001',
-  reportType: 'glycation',
-  status: 'qualified',
-  reportDate: '2025-01-07',
-  检测项目: '糖化模式',
-  检测结果: '合格',
-  负责人: '张三',
-  审核状态: 'approved',
-  fileSize: '2.4MB',
-  reportName: '糖化模式报告_20250107',
-  generateTime: '2025-01-07 14:55:00',
-  lastAccessTime: '2025-01-14 18:20:00',
-  accessType: 'download'
-}, {
-  id: 'RPT-Q010',
-  workOrder: 'WO202501010',
-  columnSn: 'COL-2025-010',
-  orderNumber: 'ORD-202501010',
-  instrumentSerial: 'INST-003',
-  reportType: 'glycation',
-  status: 'qualified',
-  reportDate: '2025-01-06',
-  检测项目: '糖化模式',
-  检测结果: '合格',
-  负责人: '李四',
-  审核状态: 'approved',
-  fileSize: '1.9MB',
-  reportName: '糖化模式报告_20250106',
-  generateTime: '2025-01-06 11:30:00',
-  lastAccessTime: '2025-01-14 17:10:00',
-  accessType: 'preview'
-}, {
-  id: 'RPT-Q011',
-  workOrder: 'WO202501011',
-  columnSn: 'COL-2025-011',
-  orderNumber: 'ORD-202501011',
-  instrumentSerial: 'INST-002',
-  reportType: 'thalassemia',
-  status: 'qualified',
-  reportDate: '2025-01-05',
-  检测项目: '地贫模式',
-  检测结果: '合格',
-  负责人: '王五',
-  审核状态: 'approved',
-  fileSize: '2.1MB',
-  reportName: '地贫模式报告_20250105',
-  generateTime: '2025-01-05 15:20:00',
-  lastAccessTime: '2025-01-14 16:45:00',
-  accessType: 'download'
-}, {
-  id: 'RPT-Q012',
-  workOrder: 'WO202501012',
-  columnSn: 'COL-2025-012',
-  orderNumber: 'ORD-202501012',
-  instrumentSerial: 'INST-001',
-  reportType: 'glycation',
-  status: 'qualified',
-  reportDate: '2025-01-04',
-  检测项目: '糖化模式',
-  检测结果: '合格',
-  负责人: '赵六',
-  审核状态: 'approved',
-  fileSize: '2.3MB',
-  reportName: '糖化模式报告_20250104',
-  generateTime: '2025-01-04 12:40:00',
-  lastAccessTime: '2025-01-14 15:30:00',
-  accessType: 'preview'
-}, {
-  id: 'RPT-Q013',
-  workOrder: 'WO202501013',
-  columnSn: 'COL-2025-013',
-  orderNumber: 'ORD-202501013',
-  instrumentSerial: 'INST-003',
-  reportType: 'glycation',
-  status: 'qualified',
-  reportDate: '2025-01-03',
-  检测项目: '糖化模式',
-  检测结果: '合格',
-  负责人: '张三',
-  审核状态: 'approved',
-  fileSize: '1.8MB',
-  reportName: '糖化模式报告_20250103',
-  generateTime: '2025-01-03 09:25:00',
-  lastAccessTime: '2025-01-14 14:20:00',
-  accessType: 'download'
-}, {
-  id: 'RPT-Q014',
-  workOrder: 'WO202501014',
-  columnSn: 'COL-2025-014',
-  orderNumber: 'ORD-202501014',
-  instrumentSerial: 'INST-002',
-  reportType: 'thalassemia',
-  status: 'qualified',
-  reportDate: '2025-01-02',
-  检测项目: '地贫模式',
-  检测结果: '合格',
-  负责人: '李四',
-  审核状态: 'approved',
-  fileSize: '2.0MB',
-  reportName: '地贫模式报告_20250102',
-  generateTime: '2025-01-02 14:15:00',
-  lastAccessTime: '2025-01-14 13:15:00',
-  accessType: 'preview'
-}, {
-  id: 'RPT-Q015',
-  workOrder: 'WO202501015',
-  columnSn: 'COL-2025-015',
-  orderNumber: 'ORD-202501015',
-  instrumentSerial: 'INST-001',
-  reportType: 'glycation',
-  status: 'qualified',
-  reportDate: '2025-01-01',
-  检测项目: '糖化模式',
-  检测结果: '合格',
-  负责人: '王五',
-  审核状态: 'approved',
-  fileSize: '2.2MB',
-  reportName: '糖化模式报告_20250101',
-  generateTime: '2025-01-01 10:50:00',
-  lastAccessTime: '2025-01-14 12:10:00',
-  accessType: 'download'
-}, {
-  id: 'RPT-Q016',
-  workOrder: 'WO202501016',
-  columnSn: 'COL-2025-016',
-  orderNumber: 'ORD-202501016',
-  instrumentSerial: 'INST-003',
-  reportType: 'glycation',
-  status: 'qualified',
-  reportDate: '2024-12-31',
-  检测项目: '糖化模式',
-  检测结果: '合格',
-  负责人: '赵六',
-  审核状态: 'approved',
-  fileSize: '1.9MB',
-  reportName: '糖化模式报告_20241231',
-  generateTime: '2024-12-31 16:35:00',
-  lastAccessTime: '2025-01-14 11:25:00',
-  accessType: 'preview'
-}, {
-  id: 'RPT-Q017',
-  workOrder: 'WO202501017',
-  columnSn: 'COL-2025-017',
-  orderNumber: 'ORD-202501017',
-  instrumentSerial: 'INST-002',
-  reportType: 'thalassemia',
-  status: 'qualified',
-  reportDate: '2024-12-30',
-  检测项目: '地贫模式',
-  检测结果: '合格',
-  负责人: '张三',
-  审核状态: 'approved',
-  fileSize: '2.4MB',
-  reportName: '地贫模式报告_20241230',
-  generateTime: '2024-12-30 13:05:00',
-  lastAccessTime: '2025-01-14 10:30:00',
-  accessType: 'download'
-}, {
-  id: 'RPT-Q018',
-  workOrder: 'WO202501018',
-  columnSn: 'COL-2025-018',
-  orderNumber: 'ORD-202501018',
-  instrumentSerial: 'INST-001',
-  reportType: 'glycation',
-  status: 'qualified',
-  reportDate: '2024-12-29',
-  检测项目: '糖化模式',
-  检测结果: '合格',
-  负责人: '李四',
-  审核状态: 'approved',
-  fileSize: '2.1MB',
-  reportName: '糖化模式报告_20241229',
-  generateTime: '2024-12-29 11:40:00',
-  lastAccessTime: '2025-01-14 09:40:00',
-  accessType: 'preview'
-}, {
-  id: 'RPT-Q019',
-  workOrder: 'WO202501019',
-  columnSn: 'COL-2025-019',
-  orderNumber: 'ORD-202501019',
-  instrumentSerial: 'INST-003',
-  reportType: 'glycation',
-  status: 'qualified',
-  reportDate: '2024-12-28',
-  检测项目: '糖化模式',
-  检测结果: '合格',
-  负责人: '王五',
-  审核状态: 'approved',
-  fileSize: '1.7MB',
-  reportName: '糖化模式报告_20241228',
-  generateTime: '2024-12-28 15:25:00',
-  lastAccessTime: '2025-01-13 18:15:00',
-  accessType: 'download'
-}, {
-  id: 'RPT-Q020',
-  workOrder: 'WO202501020',
-  columnSn: 'COL-2025-020',
-  orderNumber: 'ORD-202501020',
-  instrumentSerial: 'INST-002',
-  reportType: 'thalassemia',
-  status: 'qualified',
-  reportDate: '2024-12-27',
-  检测项目: '地贫模式',
-  检测结果: '合格',
-  负责人: '赵六',
-  审核状态: 'approved',
-  fileSize: '2.0MB',
-  reportName: '地贫模式报告_20241227',
-  generateTime: '2024-12-27 12:10:00',
-  lastAccessTime: '2025-01-13 17:20:00',
-  accessType: 'preview'
 }];
 export default function QueryReportsPage(props) {
   const {
@@ -399,7 +93,9 @@ export default function QueryReportsPage(props) {
     orderNumber: '',
     instrumentSerial: '',
     reportType: 'all',
-    dateRange: 'all'
+    dateRange: 'all',
+    startDate: '',
+    endDate: ''
   });
 
   // 当前用户信息
@@ -484,6 +180,33 @@ export default function QueryReportsPage(props) {
       //   filterConditions.$and.push({ reportType: { $eq: searchParams.reportType } });
       // }
 
+      // // 时间范围过滤
+      // if (searchParams.dateRange !== 'all') {
+      //   let dateFilter = {};
+      //   if (searchParams.dateRange === 'today') {
+      //     const today = new Date().toISOString().slice(0, 10);
+      //     dateFilter = { reportDate: { $eq: today } };
+      //   } else if (searchParams.dateRange === 'week') {
+      //     const weekAgo = new Date();
+      //     weekAgo.setDate(weekAgo.getDate() - 7);
+      //     dateFilter = { reportDate: { $gte: weekAgo.toISOString().slice(0, 10) } };
+      //   } else if (searchParams.dateRange === 'month') {
+      //     const monthAgo = new Date();
+      //     monthAgo.setMonth(monthAgo.getMonth() - 1);
+      //     dateFilter = { reportDate: { $gte: monthAgo.toISOString().slice(0, 10) } };
+      //   } else if (searchParams.dateRange === 'custom' && searchParams.startDate && searchParams.endDate) {
+      //     dateFilter = { 
+      //       reportDate: { 
+      //         $gte: searchParams.startDate,
+      //         $lte: searchParams.endDate
+      //       } 
+      //     };
+      //   }
+      //   if (Object.keys(dateFilter).length > 0) {
+      //     filterConditions.$and.push(dateFilter);
+      //   }
+      // }
+
       // const result = await $w.cloud.callDataSource({
       //   dataSourceName: 'chromatography_reports',
       //   methodName: 'wedaGetRecordsV2',
@@ -499,7 +222,55 @@ export default function QueryReportsPage(props) {
 
       // 临时使用前端过滤
       const filtered = qualifiedReports.filter(report => {
-        return (!searchParams.workOrder || report.workOrder.toLowerCase().includes(searchParams.workOrder.toLowerCase())) && (!searchParams.columnSn || report.columnSn.toLowerCase().includes(searchParams.columnSn.toLowerCase())) && (!searchParams.orderNumber || report.orderNumber.toLowerCase().includes(searchParams.orderNumber.toLowerCase())) && (!searchParams.instrumentSerial || report.instrumentSerial.toLowerCase().includes(searchParams.instrumentSerial.toLowerCase())) && (searchParams.reportType === 'all' || report.reportType === searchParams.reportType);
+        let matchesSearch = true;
+
+        // 基本条件过滤
+        if (searchParams.workOrder && !report.workOrder.toLowerCase().includes(searchParams.workOrder.toLowerCase())) {
+          matchesSearch = false;
+        }
+        if (searchParams.columnSn && !report.columnSn.toLowerCase().includes(searchParams.columnSn.toLowerCase())) {
+          matchesSearch = false;
+        }
+        if (searchParams.orderNumber && !report.orderNumber.toLowerCase().includes(searchParams.orderNumber.toLowerCase())) {
+          matchesSearch = false;
+        }
+        if (searchParams.instrumentSerial && !report.instrumentSerial.toLowerCase().includes(searchParams.instrumentSerial.toLowerCase())) {
+          matchesSearch = false;
+        }
+        if (searchParams.reportType !== 'all' && report.reportType !== searchParams.reportType) {
+          matchesSearch = false;
+        }
+
+        // 时间范围过滤
+        if (searchParams.dateRange !== 'all') {
+          const reportDate = new Date(report.reportDate);
+          const today = new Date();
+          if (searchParams.dateRange === 'today') {
+            const todayStart = new Date(today.getFullYear(), today.getMonth(), today.getDate());
+            const todayEnd = new Date(today.getFullYear(), today.getMonth(), today.getDate() + 1);
+            if (reportDate < todayStart || reportDate >= todayEnd) {
+              matchesSearch = false;
+            }
+          } else if (searchParams.dateRange === 'week') {
+            const weekAgo = new Date(today.getTime() - 7 * 24 * 60 * 60 * 1000);
+            if (reportDate < weekAgo) {
+              matchesSearch = false;
+            }
+          } else if (searchParams.dateRange === 'month') {
+            const monthAgo = new Date(today.getFullYear(), today.getMonth() - 1, today.getDate());
+            if (reportDate < monthAgo) {
+              matchesSearch = false;
+            }
+          } else if (searchParams.dateRange === 'custom' && searchParams.startDate && searchParams.endDate) {
+            const startDate = new Date(searchParams.startDate);
+            const endDate = new Date(searchParams.endDate);
+            endDate.setHours(23, 59, 59, 999); // 包含结束日期的整天
+            if (reportDate < startDate || reportDate > endDate) {
+              matchesSearch = false;
+            }
+          }
+        }
+        return matchesSearch;
       });
       setFilteredReports(filtered);
       setCurrentPage(1); // 重置到第一页
@@ -527,7 +298,9 @@ export default function QueryReportsPage(props) {
       orderNumber: '',
       instrumentSerial: '',
       reportType: 'all',
-      dateRange: 'all'
+      dateRange: 'all',
+      startDate: '',
+      endDate: ''
     });
     setFilteredReports(qualifiedReports);
     setCurrentPage(1); // 重置到第一页

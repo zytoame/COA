@@ -3,7 +3,7 @@ import React from 'react';
 // @ts-ignore;
 import { Button, Input, Card, CardContent, CardHeader, CardTitle, Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui';
 // @ts-ignore;
-import { Filter, Search, Loader2 } from 'lucide-react';
+import { Filter, Search, Loader2, Calendar } from 'lucide-react';
 
 export function SearchFilters({
   searchParams,
@@ -80,10 +80,36 @@ export function SearchFilters({
                 <SelectItem value="today">今天</SelectItem>
                 <SelectItem value="week">本周</SelectItem>
                 <SelectItem value="month">本月</SelectItem>
+                <SelectItem value="custom">自定义时间段</SelectItem>
               </SelectContent>
             </Select>
           </div>
         </div>
+        
+        {/* 自定义时间段选择 */}
+        {searchParams.dateRange === 'custom' && <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4 p-4 bg-gray-50 rounded-lg">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                <Calendar className="w-4 h-4 inline mr-1" />
+                开始日期
+              </label>
+              <Input type="date" value={searchParams.startDate || ''} onChange={e => setSearchParams({
+            ...searchParams,
+            startDate: e.target.value
+          })} />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                <Calendar className="w-4 h-4 inline mr-1" />
+                结束日期
+              </label>
+              <Input type="date" value={searchParams.endDate || ''} onChange={e => setSearchParams({
+            ...searchParams,
+            endDate: e.target.value
+          })} />
+            </div>
+          </div>}
+        
         <div className="flex space-x-2">
           <Button variant="outline" onClick={onSearch} disabled={loading}>
             {loading ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <Search className="w-4 h-4 mr-2" />}
